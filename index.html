@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CUBE POP v2 — 굴리며 배우는 퍼즐</title>
+<link rel="stylesheet" href="improvements.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;}
+  body{
+    background:#12151d;color:#e8eaf0;
+    font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Segoe UI',sans-serif;
+    min-height:100vh;padding:16px;display:flex;justify-content:center;
+  }
+  .app{width:100%;max-width:460px;display:flex;flex-direction:column;gap:11px;}
+  .card{background:#1b1f2a;border:1px solid #2a3040;border-radius:14px;padding:12px;}
+/* ---------- top bar (stage + moves + gauge 통합) ---------- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ---------- goals (한 줄 칩) ---------- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ---------- star gauge (topbar 내장) ---------- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  /* ---------- board ---------- */
+  .boardWrap{align-self:center;}
+  #board{position:relative;background:#171b25;border:1px solid #2a3040;border-radius:16px;padding:10px;}
+  #boardInner{position:relative;}
+  .slot{position:absolute;width:64px;height:64px;border-radius:11px;background:#1f2431;}
+
+  .cube{
+    position:absolute;width:64px;height:64px;
+    transition:transform .26s cubic-bezier(.3,1.2,.4,1),opacity .24s ease;
+    cursor:grab;touch-action:none;
+  }
+  .cube:active{cursor:grabbing;}
+  /* 옆면(방향 미리보기): 큐브 조명 방향과 같은 단계 음영(위 밝음→아래 어두움) + 채도 보정 — 입체감 유지하며 색 판별 */
+  .ringBox{position:absolute;inset:0;border-radius:11px;overflow:hidden;filter:saturate(1.05);}
+  .ringPlate{position:absolute;inset:0;}
+  .hN{filter:brightness(.93);}
+  .hE,.hW{filter:brightness(.82);}
+  .hS{filter:brightness(.68) saturate(.95);}  /* 위 스커트(brightness .68)와 동일 톤 (ringBox saturate 1.05 상쇄) → 이음새 없는 연속면 */
+  .hN,.hS,.hE,.hW{position:absolute;inset:0;}
+  /* 4개 띠를 안쪽으로 넉넉히 확장해 서로 겹치게 타일링 — 윗면 둥근 모서리와 아래 변 사이에
+     배경이 비치는 틈이 생기지 않음. 겹친 부분은 윗면이 덮고, 마이터 이음은 2% 오버랩으로 서브픽셀 틈 차단.
+     밑판(hS)은 윗면 모서리(9%/91%, 79.8%)에서 45°로 셀 옆변(y89%)에 닿고 하단 밴드 전체를 차지(z-index 최상위),
+     내부의 원근 스커트는 동일 톤이라 하나의 면으로 녹아듦 */
+  .hN{clip-path:polygon(0 0,100% 0,56% 44%,44% 44%);}
+  .hE{clip-path:polygon(100% 0,100% 100%,54% 56%,54% 44%);}
+  .hW{clip-path:polygon(0 0,46% 44%,46% 56%,0 100%);}
+  .hS{clip-path:polygon(0 100%,0 89%,9% 79.8%,25% 73%,75% 73%,91% 79.8%,100% 89%,100% 100%);z-index:1;}
+  .hSym{position:absolute;font-size:9px;font-weight:800;color:rgba(0,0,0,.48);pointer-events:none;font-style:normal;}
+  .hS .hSym,.hE .hSym,.hW .hSym{display:none;}  /* 하단·좌우 면 심볼 숨김 (상단만 유지) */
+  .hN .hSym{top:0;left:50%;transform:translateX(-50%);}
+  .hS .hSym{bottom:0;left:50%;transform:translateX(-50%);}
+  .hE .hSym{right:1px;top:50%;transform:translateY(-50%);}
+  .hW .hSym{left:1px;top:50%;transform:translateY(-50%);}
+  .cubeBox{position:absolute;inset:8px;perspective:340px;}
+  .cubeW{
+    position:absolute;inset:0;transform-style:preserve-3d;
+    transform:rotateX(14deg);
+    transition:transform .26s cubic-bezier(.35,.9,.4,1);
+  }
+  .cf{
+    position:absolute;width:48px;height:48px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;font-size:19px;color:rgba(0,0,0,.5);
+    backface-visibility:hidden;box-shadow:inset 0 0 0 2px rgba(0,0,0,.22);
+  }
+  .cfF{transform:translateZ(24px);}
+  .cfB{transform:rotateY(180deg) translateZ(24px);}
+  .cfR{transform:rotateY(90deg) translateZ(24px);filter:brightness(.78);}
+  .cfL{transform:rotateY(-90deg) translateZ(24px);filter:brightness(.78);}
+  .cfT{transform:rotateX(90deg) translateZ(24px);filter:brightness(.85);}
+  .cfBo{transform:rotateX(-90deg) translateZ(24px);filter:brightness(.68);box-shadow:none;} /* 밑판과 한 면으로 녹아들도록 테두리 제거 */
+
+  /* ---------- bomb tokens ---------- */
+  .bomb{cursor:pointer;animation:bombPulse .85s infinite alternate;}
+  .bomb .bombFace{
+    position:absolute;inset:0;border-radius:11px;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:inset 0 0 0 3px rgba(255,255,255,.35),0 3px 7px rgba(0,0,0,.45);
+  }
+  .bomb .bsym{font-size:19px;font-weight:900;color:rgba(0,0,0,.62);z-index:2;position:relative;}
+  .bomb .stripe{position:absolute;background:rgba(255,255,255,.94);box-shadow:0 0 5px rgba(255,255,255,.55);}
+  .stripeH{left:-6%;right:-6%;height:33%;top:33.5%;border-top:2px solid rgba(0,0,0,.32);border-bottom:2px solid rgba(0,0,0,.32);}
+  .stripeV{top:-6%;bottom:-6%;width:33%;left:33.5%;border-left:2px solid rgba(0,0,0,.32);border-right:2px solid rgba(0,0,0,.32);}
+  /* outward arrowheads showing blast direction */
+  .stripeH::before,.stripeH::after{content:"";position:absolute;top:50%;transform:translateY(-50%);border:6px solid transparent;}
+  .stripeH::before{left:1px;border-right-color:rgba(0,0,0,.45);}
+  .stripeH::after{right:1px;border-left-color:rgba(0,0,0,.45);}
+  .stripeV::before,.stripeV::after{content:"";position:absolute;left:50%;transform:translateX(-50%);border:6px solid transparent;}
+  .stripeV::before{top:1px;border-bottom-color:rgba(0,0,0,.45);}
+  .stripeV::after{bottom:1px;border-top-color:rgba(0,0,0,.45);}
+  /* area bomb: circular radial burst (clears surrounding 9) */
+  .bomb .burst{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:74%;height:74%;border-radius:50%;
+    border:3px solid rgba(255,255,255,.92);
+    background:radial-gradient(circle,rgba(255,255,255,.6) 0 32%,rgba(255,255,255,.12) 40% 60%,transparent 63%);
+    box-shadow:0 0 7px rgba(255,255,255,.5),inset 0 0 6px rgba(255,255,255,.45);
+  }
+  /* wildcard color-bomb: rainbow prism */
+  .bomb.wild .prismFace{background:conic-gradient(from 0deg,#ef476f,#ffd166,#06d6a0,#4cc9f0,#b78bfa,#ff9448,#ef476f) !important;}
+  .bomb .prism{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:52%;height:52%;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,255,255,.95) 0 34%,rgba(255,255,255,.3) 50%,transparent 66%);
+    box-shadow:0 0 10px rgba(255,255,255,.7);
+  }
+  .bomb.wild .bsym{color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);z-index:3;font-size:17px;}
+  /* wildcard color-pick mode */
+  #board.picking{box-shadow:0 0 0 1px rgba(255,255,255,.12),0 0 16px rgba(76,201,240,.15);}
+  .cube.armed{z-index:12;animation:armedGlow 1.3s infinite alternate !important;}
+  .cube.armed .bombFace{box-shadow:0 0 0 1.5px rgba(255,255,255,.7),0 0 10px 2px rgba(255,255,255,.4) !important;}
+  @keyframes armedGlow{from{filter:brightness(1);}to{filter:brightness(1.15);}}
+  /* during pick mode: dim everything except the wildcard and its 4 pickable neighbors */
+  #board.picking .cube{opacity:.5;transition:opacity .15s;}
+  #board.picking .cube.armed,#board.picking .cube.pickable{opacity:1;}
+  .cube.pickable{z-index:11;cursor:pointer;animation:pickGlow 1.3s infinite alternate;}
+  .cube.pickable::after{
+    content:"";position:absolute;inset:-2px;border-radius:12px;border:1.5px solid rgba(255,255,255,.65);
+    pointer-events:none;box-shadow:0 0 7px rgba(255,255,255,.35);
+  }
+  @keyframes pickGlow{from{filter:brightness(1);}to{filter:brightness(1.12);}}
+  #pickHint{
+    position:absolute;left:50%;top:8px;transform:translateX(-50%);z-index:26;
+    background:rgba(18,21,29,.94);border:1px solid #3a4256;color:#e8eaf0;
+    padding:8px 14px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap;
+    display:none;box-shadow:0 4px 14px rgba(0,0,0,.5);pointer-events:none;
+  }
+  #board.picking #pickHint{display:block;}
+  @keyframes bombPulse{from{filter:brightness(1);}to{filter:brightness(1.2);}}
+  /* "뿅!" spawn pop — runs on the inner face so it won't fight the outer fall(translate) */
+  @keyframes bombPop{0%{transform:scale(.05);opacity:.15;}55%{transform:scale(1.32);opacity:1;}78%{transform:scale(.92);}100%{transform:scale(1);}}
+  .bomb.spawning{z-index:15;}
+  .bomb.spawning .bombFace{animation:bombPop .38s cubic-bezier(.3,1.5,.5,1);}
+  /* spawn flash ring */
+  .bomb.spawning::after{
+    content:"";position:absolute;inset:-6px;border-radius:15px;pointer-events:none;
+    border:3px solid rgba(255,255,255,.9);animation:bombRing .42s ease-out forwards;
+  }
+  @keyframes bombRing{0%{transform:scale(.4);opacity:.9;}100%{transform:scale(1.35);opacity:0;}}
+
+  /* combo merge burst — flat comic-pop: starburst + geometric rings + cube-chip debris (no blur/glow) */
+  .mergeBurst{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;z-index:23;--tint:#ffd166;
+    --burst:polygon(50% 0%,58% 20%,79% 9%,72% 32%,95% 32%,76% 47%,95% 63%,72% 63%,79% 88%,58% 74%,50% 100%,42% 74%,21% 88%,28% 63%,5% 63%,24% 47%,5% 32%,28% 32%,21% 9%,42% 20%);}
+  .mergeBurst>div{position:absolute;}
+  /* geometric shockwave rings — diamond + square, flat with dark keyline */
+  .mergeBurst .fbRing{left:-16px;top:-16px;width:32px;height:32px;border-radius:7px;
+    border:4px solid var(--tint);box-shadow:0 0 0 2px rgba(0,0,0,.4);transform:rotate(45deg) scale(.35);
+    /* expand + fade are separate so the two rings expand at different speeds but fade out together */
+    animation:fbRingScale .46s cubic-bezier(.2,.7,.3,1) both, fbRingFade .16s ease-in .34s both;}
+  .mergeBurst .fbRing.sq{animation:fbRingScaleSq .46s cubic-bezier(.2,.7,.3,1) both, fbRingFade .16s ease-in .34s both;}
+  @keyframes fbRingScale{0%{transform:rotate(45deg) scale(.35);}100%{transform:rotate(45deg) scale(4.6);}}
+  @keyframes fbRingScaleSq{0%{transform:rotate(0) scale(.35);}100%{transform:rotate(0) scale(4.1);}}
+  @keyframes fbRingFade{0%{opacity:1;}100%{opacity:0;}}
+  /* cube-chip debris: little colored keycaps flung out, spinning */
+  .mergeBurst .fbChip{left:-6px;top:-6px;width:12px;height:12px;border-radius:3px;
+    background:var(--tint);box-shadow:inset 0 0 0 2px rgba(0,0,0,.32);
+    animation:fbChip .5s cubic-bezier(.25,.6,.35,1) forwards;}
+  @keyframes fbChip{0%{transform:rotate(var(--ang)) translateX(5px) rotate(0) scale(1);opacity:1;}
+    70%{opacity:1;}100%{transform:rotate(var(--ang)) translateX(var(--dist)) rotate(var(--rot)) scale(.55);opacity:0;}}
+
+  /* line beams — sleek energy beam: thin, tinted, bright-center taper, drawn out from the epicenter */
+  .lineBeam{position:absolute;pointer-events:none;z-index:21;--beam:#fff;border-radius:5px;transform-origin:center;}
+  .lineBeamH{height:18px;background:var(--beam);animation:beamH .3s cubic-bezier(.2,.7,.3,1) forwards;}
+  .lineBeamV{width:18px;background:var(--beam);animation:beamV .3s cubic-bezier(.2,.7,.3,1) forwards;}
+  @keyframes beamH{0%{transform:scaleX(.15) scaleY(.5);opacity:0;}20%{opacity:1;}34%{transform:scaleX(1.03) scaleY(1.3);opacity:1;}52%{transform:scaleX(1) scaleY(.95);opacity:1;}100%{transform:scaleX(1) scaleY(.3);opacity:0;}}
+  @keyframes beamV{0%{transform:scaleY(.15) scaleX(.5);opacity:0;}20%{opacity:1;}34%{transform:scaleY(1.03) scaleX(1.3);opacity:1;}52%{transform:scaleY(1) scaleX(.95);opacity:1;}100%{transform:scaleY(1) scaleX(.3);opacity:0;}}
+  /* color-bomb conversion: cube turning into a bomb gets a quick charge ring */
+  .cube.converting::before{
+    content:"";position:absolute;inset:-3px;border-radius:13px;border:2px solid rgba(255,255,255,.9);
+    pointer-events:none;animation:convRing .42s ease-out forwards;z-index:14;
+  }
+  @keyframes convRing{0%{transform:scale(1.25);opacity:0;}40%{opacity:1;}100%{transform:scale(1);opacity:0;}}
+
+  .float{
+    position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
+    font-size:26px;font-weight:900;color:#ffd166;text-shadow:0 2px 8px rgba(0,0,0,.6);
+    pointer-events:none;animation:floatUp .9s ease forwards;z-index:20;white-space:nowrap;
+  }
+  @keyframes floatUp{0%{opacity:0;transform:translate(-50%,-30%) scale(.6);}25%{opacity:1;transform:translate(-50%,-50%) scale(1.1);}70%{opacity:1;}100%{opacity:0;transform:translate(-50%,-90%) scale(1);}}
+
+  #skipBtn{
+    position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:25;
+    padding:11px 24px;border-radius:24px;border:none;background:#06d6a0;color:#08382c;
+    font-weight:900;font-size:14px;cursor:pointer;display:none;font-family:inherit;
+    box-shadow:0 4px 16px rgba(0,0,0,.45);animation:skipPulse .7s infinite alternate;
+  }
+  #skipBtn.show{display:block;}
+  @keyframes skipPulse{from{transform:translateX(-50%) scale(1);}to{transform:translateX(-50%) scale(1.07);}}
+
+  #overlay{
+    position:absolute;inset:0;background:rgba(14,16,24,.86);border-radius:16px;z-index:30;
+    display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:16px;
+  }
+  #overlay.show{display:flex;}
+  #ovStars{font-size:34px;letter-spacing:6px;}
+  #ovStars .off{opacity:.22;}
+  #ovTitle{font-size:26px;font-weight:900;}
+  #ovSub{font-size:13px;color:#aab2c5;line-height:1.7;}
+  #ovBtns{margin-top:8px;display:flex;gap:8px;width:230px;}
+  #ovBtns button{flex:1;padding:10px 6px;border-radius:10px;border:none;background:#323a4d;color:#dfe3ee;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;}
+  #ovBtns .primary{background:#0e7c66;}
+/* ---------- controls ---------- */
+
+
+
+
+
+  /* ---------- screens: home & stage map ---------- */
+  body:not(.mPlay) .app{display:none;}
+  .screen{display:none;flex-direction:column;align-items:center;width:100%;max-width:460px;}
+  body.mHome #homeScr{display:flex;}
+  body.mMap #mapScr{display:flex;}
+  #homeScr{min-height:78vh;justify-content:center;}
+  .logoCubes{display:flex;gap:10px;margin-bottom:18px;justify-content:center;}
+  .logoCubes span{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;color:rgba(0,0,0,.45);box-shadow:inset 0 -6px 0 rgba(0,0,0,.25);}
+  .homeTitle{font-size:38px;font-weight:900;letter-spacing:2.5px;}
+  .homeSub{font-size:12.5px;color:#8b93a7;margin-top:6px;}
+  .bigBtn{
+    margin-top:30px;width:220px;padding:15px 0;border-radius:14px;border:none;cursor:pointer;font-family:inherit;
+    background:#06d6a0;color:#06251c;font-size:17px;font-weight:900;box-shadow:0 5px 0 #04966f;
+  }
+  .bigBtn:active{transform:translateY(3px);box-shadow:0 2px 0 #04966f;}
+  .ghostBtn{margin-top:12px;padding:9px 18px;border-radius:11px;border:1px solid #2a3040;background:#1b1f2a;color:#8b93a7;font-size:12.5px;cursor:pointer;font-family:inherit;}
+  .mapHead{display:flex;align-items:center;gap:6px;width:100%;padding:4px 2px 12px;}
+  .mapHead h2{font-size:17px;font-weight:900;letter-spacing:1px;}
+  .backBtn{background:none;border:none;color:#8b93a7;font-size:24px;cursor:pointer;line-height:1;padding:2px 10px 2px 4px;font-family:inherit;}
+  /* ---------- 큐브 길 맵 ---------- */
+  .mapView{position:relative;width:100%;}
+  .mapScroll{width:100%;height:calc(100dvh - 96px);overflow-y:auto;border-radius:14px;overscroll-behavior:contain;scrollbar-width:none;-ms-overflow-style:none;}
+  .mapScroll::-webkit-scrollbar{display:none;}
+  /* 스크롤 가장자리 딤: 길이 위/아래로 이어져 있음을 암시 */
+  .mapFade{position:absolute;left:0;right:0;height:76px;pointer-events:none;z-index:4;opacity:0;transition:opacity .25s;}
+  .mapFade.top{top:0;background:linear-gradient(#12151d 12%,rgba(18,21,29,0));}
+  .mapFade.bot{bottom:0;background:linear-gradient(rgba(18,21,29,0),#12151d 88%);}
+  .mapFade.show{opacity:1;}
+  .mapCanvas{position:relative;width:370px;margin:0 auto;}
+  .mapCanvas svg{position:absolute;inset:0;width:100%;height:100%;}
+  .pnode{position:absolute;width:62px;height:62px;transform:translate(-50%,-50%);border:none;background:none;padding:0;cursor:pointer;font-family:inherit;}
+  .pnode:disabled{cursor:default;}
+  /* 게임 화면 큐브와 동일 구조의 미니 큐브 스프라이트:
+     위 밝은 띠(nN) + 좌우 중간 띠(nE/nW) + 하단 베젤 받침(nS) + 안쪽 윗면(nFace) */
+  .ncube{position:absolute;inset:0;border-radius:11px;overflow:hidden;display:block;}
+  .ncube>span{position:absolute;background:var(--c,#2a3040);}
+  .ncube>.nN,.ncube>.nE,.ncube>.nW,.ncube>.nS{inset:0;}
+  .ncube>.nN{clip-path:polygon(0 0,100% 0,56% 44%,44% 44%);filter:brightness(.97) saturate(1.05);}
+  .ncube>.nE{clip-path:polygon(100% 0,100% 100%,54% 56%,54% 44%);filter:brightness(.72) saturate(1.1);}
+  .ncube>.nW{clip-path:polygon(0 0,46% 44%,46% 56%,0 100%);filter:brightness(.72) saturate(1.1);}
+  .ncube>.nS{clip-path:polygon(0 100%,0 88%,12% 78%,26% 72%,74% 72%,88% 78%,100% 88%,100% 100%);filter:brightness(.6);z-index:1;}
+  .ncube>.nFace{
+    left:12%;right:12%;top:4.5%;height:73.5%;border-radius:8px;z-index:2;
+    box-shadow:inset 0 0 0 2px rgba(0,0,0,.2);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  }
+  .nFace .no{font-size:17px;font-weight:900;color:rgba(0,0,0,.55);line-height:1.1;}
+  .nFace .st{font-size:8px;letter-spacing:.5px;}
+  .nFace .st .on{color:#fff;}
+  .nFace .st .off{color:rgba(0,0,0,.35);}
+  .pnode.locked .nFace .no{font-size:13px;}
+  .pnode.cur .ncube{outline:3px solid #fff;outline-offset:3px;}
+  .pnode:not(.locked):active .ncube{transform:scale(.94);}
+  .pnode.enterFx .ncube{animation:enterPop .3s;}
+  @keyframes enterPop{0%{transform:scale(1)}45%{transform:scale(1.2)}100%{transform:scale(1)}}
+  /* 아바타 큐브 — 6면이 각각 설정 가능한 진짜 3D 큐브 (추후 유저 커스텀 대상: AVATAR.faces) */
+  .avatarCube{position:absolute;width:34px;height:34px;margin-left:-17px;pointer-events:none;z-index:5;perspective:260px;}
+  .avHop{position:absolute;inset:0;display:block;transform-style:preserve-3d;}
+  .avatarCube.idle .avHop{animation:avatarHop 3.6s ease-in-out infinite;}
+  /* 정지 상태에서도 원근감이 보이도록 고정 틸트 — 굴림(av3d)은 이 안에서 일어남 */
+  .avTilt{position:absolute;inset:0;transform:rotateX(-22deg) rotateY(26deg);transform-style:preserve-3d;}
+  .av3d{position:absolute;inset:0;transform-style:preserve-3d;}
+  .avF{
+    position:absolute;width:34px;height:34px;border-radius:3.5px;backface-visibility:hidden;
+    display:flex;align-items:center;justify-content:center;font-size:12px;color:rgba(0,0,0,.5);
+    box-shadow:inset 0 0 0 2px rgba(0,0,0,.22);
+  }
+  /* 모서리가 비어 보이지 않도록 면 뒤를 채우는 내부 코어 */
+  .avC{position:absolute;width:34px;height:34px;filter:brightness(.85);}
+  @keyframes avatarHop{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-6px) rotate(4deg)}}
+  .warpRing{
+    position:absolute;width:48px;height:48px;border:4px solid #fff;border-radius:12px;pointer-events:none;z-index:6;
+    transform:translate(-50%,-50%) rotate(45deg) scale(.3);opacity:.95;animation:warpPop .32s forwards;
+  }
+  @keyframes warpPop{to{transform:translate(-50%,-50%) rotate(45deg) scale(1.7);opacity:0;}}
+  .bandLbl{position:absolute;font-size:10px;font-weight:800;letter-spacing:1.5px;color:#586074;transform:translateY(-50%);}
+  /* ---------- 스테이지 진입 연출: 카메라 조리개 + 자막 ---------- */
+  #iris{
+    position:fixed;border-radius:50%;pointer-events:none;z-index:80;display:none;
+    transform:translate(-50%,-50%);box-shadow:0 0 0 250vmax #0b0e15;
+    width:260vmax;height:260vmax;
+  }
+  #iris.anim{transition:width .38s ease-in,height .38s ease-in;}
+  #iris.animOut{transition:width .46s ease-out,height .46s ease-out;}
+  #stageCap{
+    position:fixed;left:0;right:0;top:50%;transform:translateY(-50%);
+    display:none;justify-content:center;
+    z-index:85;pointer-events:none;opacity:1;transition:opacity .32s;
+  }
+  #stageCap.show{display:flex;}
+  #stageCap.out{opacity:0;}
+  #stageCap b{
+    font-size:34px;font-weight:900;letter-spacing:3px;color:#fff;
+    text-shadow:0 4px 0 rgba(0,0,0,.45),0 8px 24px rgba(0,0,0,.6);
+    animation:capPop .5s cubic-bezier(.3,1.5,.5,1);
+  }
+  #stageCap b i{color:#ffd166;font-style:normal;}
+  @keyframes capPop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.12);opacity:1}100%{transform:scale(1)}}
+
+
+  /* ---------- settings modal ---------- */
+  .setLabel{font-size:11px;color:#8b93a7;font-weight:700;margin-bottom:8px;letter-spacing:.5px;}
+  .seg{display:flex;gap:7px;}
+  .seg button{
+    flex:1;padding:10px 6px;border-radius:10px;border:1px solid #303748;background:#242a38;
+    color:#c9d0e0;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+  }
+  .seg button.on{border-color:#4cc9f0;color:#4cc9f0;background:#1b2536;}
+  .segSub{font-size:9px;font-weight:600;color:#8b93a7;}
+  .seg button.on .segSub{color:#4cc9f0;opacity:.85;}
+  .setDesc{font-size:10.5px;color:#79819a;margin-top:9px;line-height:1.5;}
+
+  /* ---------- modal ---------- */
+  .modal{
+    position:fixed;inset:0;background:rgba(8,10,16,.74);z-index:50;padding:20px;
+    display:none;align-items:center;justify-content:center;
+  }
+  .modal.show{display:flex;}
+  .modalInner{
+    background:#1b1f2a;border:1px solid #2a3040;border-radius:18px;padding:18px 18px 20px;
+    width:300px;max-width:100%;position:relative;
+  }
+  .modalInner h2{font-size:12px;color:#c3cad9;margin-bottom:12px;font-weight:700;padding-right:22px;}
+  .modal .close{
+    position:absolute;top:9px;right:11px;background:none;border:none;color:#8b93a7;
+    font-size:19px;cursor:pointer;line-height:1;font-family:inherit;
+  }
+  /* compact the vertical stack on phones so Stage + goals + gauge + board fit one screen */
+  @media (max-width:520px){
+    body{padding:6px 6px;}
+    .app{gap:6px;}
+    .card{padding:8px 11px;}
+
+
+
+
+
+
+
+
+
+
+  }
+</style>
+<link rel="stylesheet" href="sandstone.css">
+<link rel="stylesheet" href="frame.css">
+<link rel="stylesheet" href="pastel-garden.css">
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/geometries/RoundedBoxGeometry.js":"./vendor/RoundedBoxGeometry.js","three/addons/environments/RoomEnvironment.js":"./vendor/RoomEnvironment.js"}}</script>
+</head>
+<body class="mHome">
+
+<!-- ===== 스테이지 진입 연출: 조리개 + 자막 ===== -->
+<div id="iris"></div>
+<div id="stageCap"><b id="stageCapText"></b></div>
+
+<!-- ===== 홈 화면 ===== -->
+<div class="screen" id="homeScr">
+  <div class="logoCubes">
+    <span style="background:#ef476f">●</span>
+    <span style="background:#ffd166">▲</span>
+    <span style="background:#06d6a0">■</span>
+    <span style="background:#4cc9f0">★</span>
+  </div>
+  <div class="homeTitle">CUBE POP</div>
+  <div class="homeSub">굴리고 맞추는 큐브 매치 퍼즐</div>
+  <button class="bigBtn" onclick="goMap()">게임 시작</button>
+  <button class="ghostBtn" onclick="openSettings()">⚙ 설정</button>
+</div>
+
+<!-- ===== 스테이지 선택 ===== -->
+<div class="screen" id="mapScr">
+  <div class="mapHead">
+    <button class="backBtn" onclick="goHome()">‹</button>
+    <h2>스테이지 선택</h2>
+  </div>
+  <div class="mapView">
+    <div class="mapScroll" id="mapScroll"><div class="mapCanvas" id="mapCanvas"></div></div>
+    <div class="mapFade top" id="fadeTop"></div>
+    <div class="mapFade bot" id="fadeBot"></div>
+  </div>
+</div>
+
+<div class="app">
+
+  <header class="gameBrand">
+      <button class="topBack" onclick="goMap()" aria-label="스테이지 선택으로" data-game-lock><img src="assets/pastel-garden/icons/back.svg" alt=""></button>
+    <div class="stageHead"><h1>CUBEPOP</h1>
+      <span class="sn" id="stageV">STAGE 1</span>
+    </div>
+    <span class="colors" id="colorsV"></span>
+  </header>
+
+  <!-- ===== 2. Collection goals (한 줄 칩) ===== -->
+  <div class="card goalsCard">
+    <div class="movesBadge"><b id="movesV">0</b><span>남은 횟수</span></div>
+    <div class="goalsContent"><h2>목표</h2>
+    <div class="goalsRow" id="goals"></div>
+    </div>
+  </div>
+
+  <!-- ===== 3. Play area ===== -->
+  <div class="boardWrap">
+    <div id="board">
+      <img class="frameLayer frameRear" src="assets/sandstone/board-frame-rear.png" alt="" draggable="false">
+      <div id="boardScene" aria-hidden="true"></div>
+      <div id="boardInner"></div>
+      <img class="frameLayer frameFront" src="assets/sandstone/board-frame-front.png" alt="" draggable="false">
+    </div>
+      <button id="skipBtn" onclick="requestSkip()">목표 달성! 스킵 →</button>
+      <div id="overlay">
+        <div id="ovStars"></div>
+        <div id="ovTitle"></div>
+        <div id="ovSub"></div>
+        <div id="ovBtns"></div>
+      </div>
+  </div>
+
+  <section class="scorePanel" aria-label="점수">
+    <span class="scoreLabel">SCORE</span><strong id="scoreV" aria-hidden="true">0</strong>
+    <div class="gaugeRow">
+      <div class="gaugeBar">
+        <span class="gFill" id="gFill"></span>
+        <span class="gPin gPin1" id="gPin1"><img src="assets/pastel-garden/score-star-unearned.png" alt=""></span><span class="gPin gPin2" id="gPin2"><img src="assets/pastel-garden/score-star-unearned.png" alt=""></span><span class="gPin gPin3" id="gPin3"><img src="assets/pastel-garden/score-star-unearned.png" alt=""></span>
+      </div>
+      <span class="gScore" id="gScore" role="status" aria-live="polite" aria-atomic="true">0 / 0</span>
+    </div>
+  </section>
+
+  <!-- ===== 4. Controls ===== -->
+  <div class="controls">
+    <button onclick="restartStage()" data-game-lock><img src="assets/pastel-garden/icons/retry.svg" alt=""> 다시</button>
+    <button class="gearBtn" onclick="openSettings()" aria-label="도움말 및 설정"><img src="assets/pastel-garden/icons/help.svg" alt=""> 도움말</button>
+  </div>
+
+
+</div>
+
+<div id="tutorialOverlay" hidden>
+  <svg id="tutorialDim" aria-hidden="true"><defs><mask id="tutorialMask" maskUnits="userSpaceOnUse"><rect id="tutorialMaskBase" fill="white"/><g id="tutorialHoles"></g></mask></defs><rect id="tutorialShade" fill="#24354A" fill-opacity=".58" mask="url(#tutorialMask)"/><g id="tutorialTargets"></g></svg>
+  <img id="tutorialHand" src="assets/pastel-garden/tutorial/gesture-tap.svg" alt="" hidden>
+  <img id="tutorialArrow" src="assets/pastel-garden/tutorial/swipe-arrow-right.svg" alt="" hidden>
+  <section class="playGuide" id="playGuide" aria-label="플레이 안내" role="status" aria-live="polite" aria-atomic="true">
+    <span id="guideCount"></span><strong id="guideTitle"></strong>
+    <p class="guideText" id="guideText"></p><p class="guideNote" id="guideNote"></p>
+  </section>
+  <div class="tutorialActions"><button id="cancelPick" type="button" hidden>선택 취소</button><button id="exitLesson" type="button"><img src="assets/pastel-garden/tutorial/close.svg" alt="">연습 종료</button></div>
+</div>
+<div class="rollPreview" id="rollPreview" role="tooltip" hidden>
+  <div class="previewCross" aria-hidden="true">
+    <div class="previewFace" id="preview-N" style="grid-area:n"><b></b></div>
+    <div class="previewFace" id="preview-W" style="grid-area:w"><b></b></div>
+    <div class="previewFace current" id="preview-U" style="grid-area:u"><b></b></div>
+    <div class="previewFace" id="preview-E" style="grid-area:e"><b></b></div>
+    <div class="previewFace" id="preview-S" style="grid-area:s"><b></b></div>
+  </div>
+</div>
+
+<!-- ===== settings modal ===== -->
+<div class="modal" id="setModal">
+  <div class="modalInner">
+    <button class="close" onclick="closeSettings()">✕</button>
+    <h2>도움말 및 설정</h2>
+    <div class="setLabel">색상 모드</div>
+    <div class="seg">
+      <button id="segBase" onclick="setVivid(false)">기본</button>
+      <button id="segVivid" onclick="setVivid(true)">비비드<span class="segSub">색약 친화</span></button>
+    </div>
+    <div class="setDesc">비비드 모드는 적록 색약에서도 파랑·보라, 빨강·주황이 뚜렷이 구분되도록 검증된 고채도 팔레트입니다.</div>
+    <label class="settingRow" for="previewToggle"><span>큐브 면 배치 말풍선</span><input type="checkbox" id="previewToggle" role="switch" checked></label>
+    <p class="settingHelp">큐브를 누르고 있으면 현재 보이는 면을 가운데에, 실제 상하좌우 옆면의 색을 주변에 십자 그림으로 보여줍니다.</p>
+    <button class="tutorialReplay" onclick="replayTutorial()" data-game-lock>튜토리얼 다시 해보기</button>
+    <p class="settingHelp">학습 스테이지 1부터 다시 연습합니다. 기존 진행 기록은 유지됩니다.</p>
+  </div>
+</div>
+
+<script src="frame-layout.js"></script>
+<script src="rules.js"></script>
+<script>
+'use strict';
+/* ================= stage config ================= */
+/* ---- parametric 30-stage difficulty curve ----
+   Difficulty rises on a log-shaped slope (steep early, flattening late) so the
+   *clear rate* falls from ~100% in the intro to ~30% around stage 30.
+   Main lever is color count (a cube has 6 faces; more colors => each color sits
+   on fewer faces => harder to roll a wanted color and to line matches up).
+   `par` (the 3★ target) is a baked table so early stages give ~70% 3★. */
+// canonical face distribution for a color count (entries sum to 6 faces)
+function distFor(cc){ if(cc<=3)return [2,2,2]; if(cc===4)return [2,2,1,1]; if(cc===5)return [2,1,1,1,1]; return [1,1,1,1,1,1]; }
+/* Color count is the dominant difficulty lever, but a raw 5->6 jump craters the
+   clear rate. So each new color count is introduced *gently* (a fresh band with
+   more moves / fewer goals) and difficulty then ramps *within* that band. The
+   result is a smooth log-shaped glide: fast decline early, flattening to ~30%.
+   Bands: 3c=stages1-2, 4c=3-5, 5c=6-10, 6c=11-30. */
+function bandFor(n){
+  // tune: [goalCount, perGoal@start, perGoal@end, moves@start, moves@end]
+  if(n<2)  return {cc:3, start:0,  len:2 , tune:[2,4,6,18,18]};
+  if(n<5)  return {cc:4, start:2,  len:3 , tune:[2,6,8,18,17]};
+  if(n<10) return {cc:5, start:5,  len:5 , tune:[3,6,9,18,16]};
+  if(n<30) return {cc:6, start:10, len:20, tune:[3,6,10,18,14]};
+  return   {cc:6, start:30, len:20, tune:[3,10,11,14,14]}; // 31~50: 로그 곡선의 평탄 구간 — 스테이지 30 수준에서 미세 상승
+}
+// each leftover move at clear converts to this many guaranteed points (on top of the finale bombs)
+// — deterministic reward for finishing efficiently, so fast early clears reliably earn 3★
+const MOVE_BONUS=120;
+// baked 3★ thresholds (calibrated from bot-sim score percentiles; index = stage-1)
+const PAR_TABLE=[2980,3080,2490,2750,2790,2120,2190,1800,2060,1680,1650,1750,1740,1140,1270,1380,1270,1450,1190,1170,1240,1110,920,910,860,1090,970,890,1190,900,
+                 870,840,960,870,810,890,790,950,1030,870,870,910,870,890,900,810,930,760,840,750]; // 31~50 (평탄 구간, 시뮬레이션 보정)
+function stageConfig(n){
+  const lesson=CubePopRules.lessons[n];
+  if(lesson)return {dist:[2,2,2],goals:[[0,lesson.need]],moves:lesson.moves,par:lesson.par};
+  n-=4; // Six learning stages replace the original two introductory stages.
+  const {cc,start,len,tune}=bandFor(n), dist=distFor(cc);
+  const u = len>1 ? (n-start)/(len-1) : 0;             // 0..1 progress within the color band
+  const [ng,pLo,pHi,mLo,mHi]=tune;
+  const per = Math.round(pLo + (pHi-pLo)*u);           // per-goal target grows within band
+  const moves = Math.round(mLo + (mHi-mLo)*u);         // moves tighten within band
+  const goals=[];
+  for(let i=0;i<ng;i++){ const bonus = dist[i]>=2?1:0; goals.push([i, per+bonus]); }
+  const par = PAR_TABLE[Math.min(n,PAR_TABLE.length-1)] || 1000;
+  return {dist, goals, moves, par};
+}
+
+const PALETTE_BASE =['#f45c70','#f8c54d','#09c6aa','#3ebde8','#b68aee','#f79b58'];
+// 비비드(색약 친화): protan/deutan 시뮬레이션으로 전 색상쌍 구분도를 검증한 팔레트
+// (최약 쌍 ΔE 7.6→15.2, 파랑↔보라 deutan 7.6→21.1, 빨강↔주황 protan 23.5/deutan 18.3)
+const PALETTE_VIVID=['#d81159','#ffdd33','#00e5c3','#3d5afe','#c690ff','#ff7a00'];
+let PALETTE=PALETTE_BASE.slice();
+const SYMS=['●','▲','■','★','◆','♥'];
+const ROWS=6,COLS=6,CELL=64,GAP=8,STEP=CELL+GAP;
+const REST='rotateX(14deg) rotateY(-4deg)';
+const SLOTS=['U','D','N','S','E','W'];
+
+/* ================= state ================= */
+let stageNo=0;
+let faceColorIdx=[];
+let stageColors=[];
+let goals=[];
+let cfgMoves=0,cfgPar=0,stageStartScore=0;
+let grid=[];
+let movesLeft=0,score=0,maxCombo=1;
+let busy=false,over=false,idSeq=0;
+let gameplayRandom=Math.random;
+
+const $=id=>document.getElementById(id);
+const boardInner=$('boardInner');
+const sleep=ms=>window.__SIM?Promise.resolve():new Promise(r=>setTimeout(r,ms));
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(gameplayRandom()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const colHex=ci=>PALETTE[stageColors[ci]];
+const colSym=ci=>SYMS[stageColors[ci]];
+
+/* ================= cube math ================= */
+const identOrient=()=>({U:0,D:1,N:2,S:3,E:4,W:5});
+function pull(o,d){
+  return CubePopRules.pull(o,d);
+}
+function randOrient(){
+  let o=identOrient();const ds='NSEW';
+  for(let i=0;i<14;i++)o=pull(o,ds[Math.floor(gameplayRandom()*4)]);
+  return o;
+}
+const colIdx=(cube,slot)=>faceColorIdx[cube.orient[slot]];
+
+/* ================= board DOM ================= */
+function sizeBoard(){
+  boardInner.style.width=(COLS*STEP-GAP)+'px';
+  boardInner.style.height=(ROWS*STEP-GAP)+'px';
+  boardInner.style.transform=window.CubePopFrame.hitMatrix();
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const s=document.createElement('div');s.className='slot';
+    s.style.transform=`translate(${c*STEP}px,${r*STEP}px)`;
+    boardInner.appendChild(s);
+  }
+}
+function makeCube(r,c){
+  const cube={id:++idSeq,orient:randOrient(),r,c,el:null,wrap:null,f:{},h:{}};
+  const el=document.createElement('div');el.className='cube';
+  el.innerHTML=
+    '<div class="ringBox"><div class="ringPlate">'+
+      '<div class="hN"><b class="hSym"></b></div><div class="hS"><b class="hSym"></b></div>'+
+      '<div class="hE"><b class="hSym"></b></div><div class="hW"><b class="hSym"></b></div>'+
+    '</div></div>'+
+    '<div class="cubeBox"><div class="cubeW">'+
+      '<div class="cf cfF"><span></span></div>'+
+      '<div class="cf cfB"><span></span></div>'+
+      '<div class="cf cfT"><span></span></div>'+
+      '<div class="cf cfBo"><span></span></div>'+
+      '<div class="cf cfR"><span></span></div>'+
+      '<div class="cf cfL"><span></span></div>'+
+    '</div></div>';
+  cube.wrap=el.querySelector('.cubeW');
+  cube.wrap.style.transform=REST;
+  cube.f={U:el.querySelector('.cfF'),D:el.querySelector('.cfB'),N:el.querySelector('.cfT'),
+          S:el.querySelector('.cfBo'),E:el.querySelector('.cfR'),W:el.querySelector('.cfL')};
+  cube.h={N:el.querySelector('.hN'),S:el.querySelector('.hS'),E:el.querySelector('.hE'),W:el.querySelector('.hW')};
+  attachGesture(cube,el);
+  cube.el=el;boardInner.appendChild(el);
+  return cube;
+}
+function paint(cube){
+  for(const slot of SLOTS){
+    const ci=colIdx(cube,slot);
+    cube.f[slot].style.background=colHex(ci);
+    cube.f[slot].querySelector('span').textContent=colSym(ci);
+    cube.f[slot].querySelector('span').dataset.shape=stageColors[ci];
+  }
+  for(const slot of ['N','S','E','W']){
+    const ci=colIdx(cube,slot);
+    cube.h[slot].style.background=colHex(ci);
+    const sym=cube.h[slot].firstElementChild;if(sym)sym.textContent=colSym(ci);
+  }
+  window.CubePopVisual?.paint(cube);
+}
+const place=cube=>{cube.el.style.transform=`translate(${cube.c*STEP}px,${cube.r*STEP}px)`;cube.el.dataset.row=cube.r;cube.el.dataset.col=cube.c;};
+
+// fixed bomb token (not rotatable). type 'H' row, 'V' column, 'A' 3x3 area, 'W' wildcard color-bomb
+function makeBomb(r,c,ci,type){
+  const bomb={id:++idSeq,r,c,el:null,bomb:true,ci,btype:type};
+  const el=document.createElement('div');el.className='cube bomb'+(type==='W'?' wild':'');
+  let inner;
+  if(type==='W')inner='<div class="prism"></div>';
+  else if(type==='A')inner='<div class="burst"></div>';
+  else inner='<div class="stripe '+(type==='H'?'stripeH':'stripeV')+'"></div>';
+  const bg=type==='W'?'':' style="background:'+colHex(ci)+'"';
+  const sym=type==='W'?'✦':colSym(ci);
+  // Fixed specials share the same six square planes and camera as ordinary cubes.
+  el.style.setProperty('--bomb-color',colHex(ci));
+  el.dataset.bomb=type;
+  el.innerHTML='<div class="cubeBox"><div class="cubeW" style="transform:'+REST+'">'+
+    '<div class="cf cfF bombFace'+(type==='W'?' prismFace':'')+'"'+bg+'>'+inner+
+    '<span class="bsym" data-shape="'+(type==='W'?'wild':stageColors[ci])+'">'+sym+'</span></div>'+
+    ['cfB','cfT','cfBo','cfR','cfL'].map(face=>'<div class="cf '+face+' bombSide"></div>').join('')+
+    '</div></div>';
+  // tap: line/area bombs detonate; wildcard arms color-pick (bombs never roll, so tap is unambiguous)
+  attachGesture(bomb,el);
+  bomb.el=el;boardInner.appendChild(el);
+  window.CubePopVisual?.paint(bomb);
+  return bomb;
+}
+
+/* ================= drag-to-roll ================= */
+const ROLL_T={
+  N:REST+' rotateX(90deg)',
+  S:REST+' rotateX(-90deg)',
+  E:REST+' rotateY(90deg)',
+  W:REST+' rotateY(-90deg)'
+};
+const ROLL_PULL={N:'S',S:'N',E:'W',W:'E'};
+let boardPointer=null;
+function attachGesture(cube,el){
+  el.addEventListener('pointerdown',e=>{
+    if(e.isPrimary===false||(e.button!==undefined&&e.button!==0))return;
+    if(boardPointer||busy||over||movesLeft<=0)return;
+    if(!el.isConnected||grid[cube.r][cube.c]!==cube)return;
+    if(armedWild&&!cube.bomb&&!pickableCells.has(cube.r+','+cube.c))return;
+    e.preventDefault();
+    const kind=cube.bomb?'bomb':armedWild?'pick':'roll';
+    boardPointer={cube,x:e.clientX,y:e.clientY,fired:false,pointerId:e.pointerId,kind,wild:armedWild};
+    if(kind==='roll')showRollPreview(cube);
+    try{el.setPointerCapture(e.pointerId);}catch(_){}
+  });
+  el.addEventListener('pointermove',e=>{
+    const g=boardPointer;
+    if(!g||g.cube!==cube||g.fired||e.pointerId!==g.pointerId)return;
+    const dx=e.clientX-g.x,dy=e.clientY-g.y;
+    if(Math.hypot(dx,dy)<(g.kind==='roll'?13:12))return;
+    g.fired=true;
+    hideRollPreview();
+    if(g.kind!=='roll')return; // Moving a tap cancels it, even if the pointer returns.
+    const dir=Math.abs(dx)>Math.abs(dy)?(dx>0?'E':'W'):(dy>0?'S':'N');
+    doRoll(cube,dir);
+  });
+  el.addEventListener('pointerup',e=>{
+    const g=boardPointer;
+    if(!g||g.cube!==cube||e.pointerId!==g.pointerId)return;
+    cancelBoardPointers();
+    if(g.fired||Math.hypot(e.clientX-g.x,e.clientY-g.y)>=12)return;
+    if(g.kind==='bomb')onBombTap(cube);
+    else if(g.kind==='pick'&&armedWild===g.wild&&pickableCells.has(cube.r+','+cube.c))pickWildColor(matchColor(cube));
+  });
+  const cancel=e=>{if(boardPointer&&boardPointer.cube===cube&&boardPointer.pointerId===e.pointerId)cancelBoardPointers();};
+  el.addEventListener('pointercancel',cancel);
+  el.addEventListener('lostpointercapture',cancel);
+}
+async function doRoll(cube,dir){
+  if(busy||over||movesLeft<=0)return;
+  if(!cube.el.isConnected||grid[cube.r][cube.c]!==cube||!allowLessonRoll(cube,dir))return;
+  hideRollPreview();
+  busy=true;
+  movesLeft--;updateHUD();
+  const w=cube.wrap;
+  w.style.transform=ROLL_T[dir];
+  if(window.CubePopVisual)await window.CubePopVisual.roll(cube,dir);
+  else await sleep(265);
+  cube.orient=pull(cube.orient,ROLL_PULL[dir]);
+  w.style.transition='none';
+  w.style.transform=REST;
+  paint(cube);
+  w.getBoundingClientRect();
+  w.style.transition='';
+  busy=false;
+  lastRolled={r:cube.r,c:cube.c};
+  await resolve();
+}
+
+/* ================= match (line-only, 3+) + bombs ================= */
+// matching color: normal cube -> U face; line/area bomb -> fixed color; wildcard -> WILD (special-cased)
+const WILD=-1;
+const matchColor=e=>e.bomb?(e.btype==='W'?WILD:e.ci):colIdx(e,'U');
+const entityAt=k=>{const i=k.indexOf(',');return grid[+k.slice(0,i)][+k.slice(i+1)];};
+const isBombAt=k=>{const e=entityAt(k);return e&&e.bomb;};
+
+// most numerous concrete top color on the board (wildcards excluded)
+function mostCommonColor(){
+  const cnt=[];let best=0,bestN=-1;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const e=grid[r][c];if(!e)continue;const mc=matchColor(e);if(mc===WILD)continue;
+    cnt[mc]=(cnt[mc]||0)+1;if(cnt[mc]>bestN){bestN=cnt[mc];best=mc;}
+  }
+  return best;
+}
+
+// scan one line into runs. a wildcard extends the current concrete run but cannot bridge two colors.
+function scanRun(get,n,dir,runs){
+  let cells=[],color=null;
+  const flush=()=>{if(color!==null&&cells.length>=3)runs.push({dir,ci:color,len:cells.length,cells:cells.slice()});};
+  for(let i=0;i<n;i++){
+    const e=get(i);
+    if(!e){flush();cells=[];color=null;continue;}
+    const mc=matchColor(e);
+    if(mc===WILD){flush();cells=[];color=null;continue;} // 와일드카드는 매치에 참여하지 않음(탭 전용). 런을 끊음
+    if(color===null){color=mc;cells.push(e);}
+    else if(mc===color){cells.push(e);}
+    else{flush();cells=[e];color=mc;}
+  }
+  flush();
+}
+function findRuns(){
+  const runs=[];
+  for(let r=0;r<ROWS;r++)scanRun(i=>grid[r][i],COLS,'H',runs);
+  for(let c=0;c<COLS;c++)scanRun(i=>grid[i][c],ROWS,'V',runs);
+  return runs;
+}
+
+// detonate every bomb found in clearSet, expanding it (chains). wildColors maps a wildcard cell -> target color.
+function detonate(clearSet,wildColors,skip){
+  const q=[];for(const k of clearSet)if(isBombAt(k))q.push(k);
+  const done=new Set();
+  while(q.length){
+    const k=q.pop();if(done.has(k))continue;done.add(k);
+    if(skip&&skip.has(k))continue;               // combo bombs: consumed but don't add their solo effect
+    const b=entityAt(k);if(!b||!b.bomb)continue;
+    const cells=[];
+    if(b.btype==='H'){for(let c=0;c<COLS;c++)cells.push(b.r+','+c);}
+    else if(b.btype==='V'){for(let r=0;r<ROWS;r++)cells.push(r+','+b.c);}
+    else if(b.btype==='A'){for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){const rr=b.r+dr,cc=b.c+dc;if(rr>=0&&rr<ROWS&&cc>=0&&cc<COLS)cells.push(rr+','+cc);}}
+    else{ // 'W' wildcard: clear every cube of one color across the whole board
+      const color=(wildColors&&wildColors.has(k))?wildColors.get(k):mostCommonColor();
+      for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const e=grid[r][c];if(e&&matchColor(e)===color)cells.push(r+','+c);}
+    }
+    for(const kk of cells){clearSet.add(kk);if(isBombAt(kk)&&!done.has(kk))q.push(kk);}
+  }
+}
+
+let skipReq=false,lastRolled=null;
+function requestSkip(){skipReq=true;$('skipBtn').classList.remove('show');}
+
+// one clear step: count goals, animate out, remove, pop new bombs, then gravity + refill
+async function doClearStep(clearSet,spawns,mult,epicenter){
+  const cleared=[];
+  for(const k of clearSet){const e=entityAt(k);if(e)cleared.push(e);}
+  cleared.forEach(e=>{const g=goals.find(g=>g.ci===matchColor(e));if(g)g.got++;});
+  score+=cleared.length*10*mult;
+  maxCombo=Math.max(maxCombo,mult);
+  if(goalsDone()&&!over&&!lessonState)$('skipBtn').classList.add('show');
+  if(mult>1)showFloat('콤보 ×'+mult+'!');
+  else if(cleared.length>=6)showFloat(cleared.length+'개 소멸!');
+  // ripple clear: stagger removal by distance from the epicenter (combos), else simultaneous
+  let maxDelay=0;
+  cleared.forEach(e=>{
+    let delay=0;
+    if(epicenter){delay=Math.min(200,Math.hypot(e.r-epicenter.r,e.c-epicenter.c)*24);maxDelay=Math.max(maxDelay,delay);}
+    e.el.style.transitionDelay=delay+'ms';
+    e.el.style.transform=`translate(${e.c*STEP}px,${e.r*STEP}px) scale(.12)`;e.el.style.opacity=0;
+  });
+  updateHUD();
+  await sleep(290+maxDelay);
+  cleared.forEach(e=>{e.el.style.transitionDelay='';e.el.remove();grid[e.r][e.c]=null;});
+  // pop new bombs in at their spawn cell (no slide from origin), then gravity drops them
+  const fresh=[];
+  for(const s of spawns.values()){
+    const old=grid[s.r][s.c];if(old)old.el.remove();
+    const b=makeBomb(s.r,s.c,s.ci,s.type);grid[s.r][s.c]=b;
+    b.el.style.transition='none';place(b);b.el.getBoundingClientRect();b.el.style.transition='';
+    b.el.classList.add('spawning');fresh.push(b);
+  }
+  if(fresh.length)setTimeout(()=>fresh.forEach(b=>b.el&&b.el.classList.remove('spawning')),440);
+  const falling=[];let fallDuration=0;
+  function prepareFall(cube,rows){
+    // Give a one-cell drop time to read, and longer columns time to enter.
+    const duration=70+Math.min(ROWS,rows)*30;
+    cube.el.classList.add('falling');cube.el.style.setProperty('--fall-duration',duration+'ms');
+    falling.push(cube);fallDuration=Math.max(fallDuration,duration);
+  }
+  for(let c=0;c<COLS;c++){
+    const stack=[];
+    for(let r=ROWS-1;r>=0;r--)if(grid[r][c])stack.push(grid[r][c]);
+    for(let r=ROWS-1;r>=0;r--){const e=stack[ROWS-1-r]||null;grid[r][c]=e;if(e){if(e.r<r)prepareFall(e,r-e.r);e.r=r;e.c=c;place(e);}}
+    const need=ROWS-stack.length;
+    for(let r=0;r<need;r++){
+      const cu=makeCube(r,c);grid[r][c]=cu;paint(cu);
+      prepareFall(cu,need);
+      cu.el.style.transition='none';cu.el.style.transform=`translate(${c*STEP}px,${(r-need)*STEP}px)`;cu.el.getBoundingClientRect();cu.el.style.transition='';
+      place(cu);
+    }
+  }
+  window.CubePopVisual?.wake?.(fallDuration+80);
+  await sleep(Math.max(fresh.length?330:0,fallDuration+40));
+  falling.forEach(cube=>{cube.el.classList.remove('falling');cube.el.style.removeProperty('--fall-duration');});
+}
+
+async function resolve(forced){
+  busy=true;
+  window.TutorialUI?.sync();
+  const finale=forced&&forced.finale;
+  if(forced){detonate(forced.clearSet,forced.wildColors,forced.skip);await doClearStep(forced.clearSet,new Map(),1,forced.epicenter);}
+  let mult=1;
+  while(true){
+    if(skipReq&&goalsDone())break;
+    const runs=findRuns();
+    if(!runs.length)break;
+
+    // bomb spawns. priority: straight 5 -> color bomb(W); L/T intersection -> area(A); straight 4 -> line(H/V).
+    // (an existing bomb caught in a run detonates via detonate() instead of being replaced)
+    const spawns=new Map();
+    if(!finale){                                  // finale cascade: spawn no new bombs — refills just clear
+    const hCells=new Set(),vCells=new Set();
+    for(const run of runs){const S=run.dir==='H'?hCells:vCells;for(const e of run.cells)S.add(e.r+','+e.c);}
+    const pickCell=run=>{let cell=null;if(mult===1&&lastRolled)cell=run.cells.find(e=>e.r===lastRolled.r&&e.c===lastRolled.c)||null;return cell||run.cells[Math.floor(run.cells.length/2)];};
+    for(const run of runs){                       // color bombs from straight 5+
+      if(run.len>=5&&!run.cells.some(e=>e.bomb)){
+        const cell=pickCell(run),key=cell.r+','+cell.c;
+        if(!spawns.has(key))spawns.set(key,{r:cell.r,c:cell.c,ci:run.ci,type:'W'});
+      }
+    }
+    for(const k of hCells){                        // area bombs at intersections
+      if(vCells.has(k)){const e=entityAt(k);if(e&&!e.bomb&&!spawns.has(k))spawns.set(k,{r:e.r,c:e.c,ci:matchColor(e),type:'A'});}
+    }
+    for(const run of runs){                        // line bombs from straight 4
+      if(run.len<4||run.len>=5)continue;
+      if(run.cells.some(e=>e.bomb))continue;
+      if(run.cells.some(e=>{const s=spawns.get(e.r+','+e.c);return s&&(s.type==='A'||s.type==='W');}))continue;
+      const cell=pickCell(run),key=cell.r+','+cell.c;
+      if(!spawns.has(key))spawns.set(key,{r:cell.r,c:cell.c,ci:run.ci,type:run.dir});
+    }
+    }
+
+    // wildcards do NOT auto-match — they only fire on tap. so runs never contain a wildcard here.
+    const clearSet=new Set();
+    for(const run of runs)for(const e of run.cells){const k=e.r+','+e.c;if(!spawns.has(k))clearSet.add(k);}
+    detonate(clearSet,null);
+    for(const k of spawns.keys())clearSet.delete(k);
+
+    await doClearStep(clearSet,spawns,mult);
+    mult++;
+  }
+  $('skipBtn').classList.remove('show');
+  skipReq=false;busy=false;lastRolled=null;
+  lessonResolved();updateHUD();
+  checkEnd();
+}
+
+// line/area bomb tap -> detonate now (costs 1 move)
+function tapDetonate(bomb){
+  if(busy||over||movesLeft<=0)return;
+  if(!bomb.el||!bomb.el.isConnected||grid[bomb.r][bomb.c]!==bomb)return;
+  movesLeft--;updateHUD();
+  const cs=new Set([bomb.r+','+bomb.c]);
+  lastRolled=null;
+  return resolve({clearSet:cs,wildColors:null});
+}
+
+/* ===== wildcard color-pick: tap wildcard to arm, then tap one of its 4 neighbors to clear that color ===== */
+let armedWild=null,pickableCells=new Set();
+function armWild(bomb){
+  if(busy||over||movesLeft<=0)return;
+  cancelBoardPointers();
+  armedWild=bomb;
+  bomb.el.classList.add('armed');
+  $('board').classList.add('picking');
+  updateLessonGuide();
+  pickableCells.clear();
+  for(const [dr,dc] of [[-1,0],[1,0],[0,-1],[0,1]]){        // up / down / left / right
+    const r=bomb.r+dr,c=bomb.c+dc;
+    if(r<0||r>=ROWS||c<0||c>=COLS)continue;
+    const e=grid[r][c];
+    if(!e)continue;
+    e.el.classList.add('pickable');                          // glow both: cubes (color pick) and bombs (combo)
+    if(!e.bomb)pickableCells.add(r+','+c);                    // only normal cubes are color-pick targets
+  }
+  window.TutorialUI?.sync();
+}
+function unarmWild(){
+  cancelBoardPointers();
+  if(armedWild&&armedWild.el)armedWild.el.classList.remove('armed');
+  boardInner.querySelectorAll('.pickable').forEach(el=>el.classList.remove('pickable'));
+  pickableCells.clear();
+  armedWild=null;
+  $('board').classList.remove('picking');
+  if(lessonState&&lessonState.phase==='pick')lessonState.phase='tap';
+  updateLessonGuide();
+}
+function onBombTap(bomb){
+  if(busy||over||movesLeft<=0)return;
+  if(!bomb.el||!bomb.el.isConnected||grid[bomb.r][bomb.c]!==bomb)return;
+  hideRollPreview();
+  if(!allowLessonBomb(bomb))return;
+  if(armedWild){
+    if(bomb===armedWild){unarmWild();return;}                            // tap again -> cancel
+    if(isAdjacent(armedWild,bomb)){const w=armedWild;unarmWild();comboDetonate(w,bomb,bomb);return;} // wildcard + adjacent bomb -> combo (터치한 폭탄 기준)
+    if(bomb.btype==='W'){unarmWild();armWild(bomb);return;}               // a far wildcard re-arms
+    return;
+  }
+  if(bomb.btype==='W'){armWild(bomb);return;}                             // arm color-pick (no move spent yet)
+  const partner=adjacentBomb(bomb);
+  if(partner){comboDetonate(bomb,partner,bomb);return;}                   // adjacent bomb -> combo (터치한 폭탄 기준)
+  return tapDetonate(bomb);                                               // otherwise solo detonate
+}
+/* ===== bomb combos: tap a bomb adjacent to another bomb ===== */
+const isAdjacent=(a,b)=>Math.abs(a.r-b.r)+Math.abs(a.c-b.c)===1;
+function adjacentBomb(bomb){
+  for(const [dr,dc] of [[-1,0],[1,0],[0,-1],[0,1]]){
+    const r=bomb.r+dr,c=bomb.c+dc;
+    if(r<0||r>=ROWS||c<0||c>=COLS)continue;
+    const e=grid[r][c];
+    if(e&&e.bomb)return e;
+  }
+  return null;
+}
+function mergeBurst(mr,mc,tint){
+  const d=document.createElement('div');d.className='mergeBurst';
+  d.style.transform=`translate(${mc*STEP+CELL/2}px,${mr*STEP+CELL/2}px)`;
+  d.style.setProperty('--tint',tint||'#ffd166');
+  d.innerHTML='<div class="fbRing"></div><div class="fbRing sq"></div>';
+  const N=12;
+  for(let i=0;i<N;i++){
+    const s=document.createElement('div');s.className='fbChip';
+    s.style.setProperty('--ang',((i/N)*360+10).toFixed(0)+'deg');
+    s.style.setProperty('--dist',(38+((i%3)*14))+'px');
+    s.style.setProperty('--rot',((i%2?1:-1)*(140+i*18))+'deg');
+    if(stageColors.length)s.style.background=colHex(i%stageColors.length);   // little keycaps in palette colors
+    s.style.animationDelay=((i%2)*24)+'ms';
+    d.appendChild(s);
+  }
+  boardInner.appendChild(d);
+  setTimeout(()=>d.remove(),660);
+}
+function lineBeam(kind,idx,tint){
+  const d=document.createElement('div');d.className='lineBeam '+(kind==='H'?'lineBeamH':'lineBeamV');
+  if(tint)d.style.setProperty('--beam',tint);
+  const TH=18;
+  if(kind==='H'){d.style.left='0';d.style.top=(idx*STEP+(CELL-TH)/2)+'px';d.style.width=(COLS*STEP-GAP)+'px';}
+  else{d.style.top='0';d.style.left=(idx*STEP+(CELL-TH)/2)+'px';d.style.height=(ROWS*STEP-GAP)+'px';}
+  boardInner.appendChild(d);
+  setTimeout(()=>d.remove(),460);
+}
+// wildcard + line/area: turn every cube of `color` into a bomb, let the player see it, then fire them all
+async function convertColorToBombs(color,mode){   // mode: 'line' | 'A'
+  const converted=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const e=grid[r][c];
+    if(!e||e.bomb||matchColor(e)!==color)continue;
+    e.el.remove();
+    const type=mode==='A'?'A':(gameplayRandom()<.5?'H':'V');
+    const nb=makeBomb(r,c,color,type);
+    grid[r][c]=nb;
+    nb.el.style.transition='none';place(nb);nb.el.getBoundingClientRect();nb.el.style.transition='';
+    nb.el.classList.add('spawning','converting');
+    converted.push(nb);
+  }
+  setTimeout(()=>converted.forEach(b=>b.el&&b.el.classList.remove('spawning','converting')),450);
+  await sleep(900);                                // beat: player sees the color become bombs
+  const cs=new Set();converted.forEach(b=>cs.add(b.r+','+b.c));
+  lastRolled=null;
+  if(cs.size)resolve({clearSet:cs,wildColors:null});
+  else{busy=false;checkEnd();}
+}
+async function comboDetonate(a,b,tapped){
+  if(busy||over||movesLeft<=0)return;
+  if(!a||!b||!a.bomb||!b.bomb||grid[a.r][a.c]!==a||grid[b.r][b.c]!==b)return;
+  busy=true;
+  movesLeft--;updateHUD();
+  tapped=tapped&&(tapped===a||tapped===b)?tapped:a;                             // 결합 기준 = 유저가 터치한 폭탄
+  const other=tapped===a?b:a;
+  const isLine=t=>t==='H'||t==='V';
+  const aW=a.btype==='W',bW=b.btype==='W';
+  const tintBomb=a.btype!=='W'?a:(b.btype!=='W'?b:null);
+  const tint=tintBomb?colHex(tintBomb.ci):null;                                 // color-tint the flash by the combined bomb
+  const mr=tapped.r,mc=tapped.c;                                                // 합쳐지는 지점·발동 중심 = 터치한 폭탄 위치
+  // ---- 상대 폭탄이 터치한 폭탄 쪽으로 빨려 들어와 합쳐진 뒤 팡 ----
+  if(other.el){other.el.style.transition='transform .12s cubic-bezier(.55,0,.9,.35)';other.el.style.transform=`translate(${mc*STEP}px,${mr*STEP}px) scale(1.05)`;other.el.style.zIndex=21;}
+  if(tapped.el){tapped.el.style.transition='transform .12s ease-out';tapped.el.style.transform=`translate(${mc*STEP}px,${mr*STEP}px) scale(1.22)`;tapped.el.style.zIndex=22;}
+  await sleep(120);
+  [a,b].forEach(x=>{if(!x.el)return;x.el.style.transition='transform .16s cubic-bezier(.3,1.3,.5,1),opacity .16s';x.el.style.transform=`translate(${mc*STEP}px,${mr*STEP}px) scale(.1)`;x.el.style.opacity=0;});
+  mergeBurst(mr,mc,tint);
+  await sleep(150);
+  [a,b].forEach(x=>{if(x.el)x.el.remove();grid[x.r][x.c]=null;});
+  // ---- wildcard + line/area: convert that color into bombs, then fire (Candy-Crush style) ----
+  if((aW||bW)&&!(aW&&bW)){
+    const other=aW?b:a;
+    showFloat(colSym(other.ci)+' 폭탄 변환!');
+    await convertColorToBombs(other.ci,other.btype==='A'?'A':'line');
+    return;
+  }
+  // ---- direct-effect combos ----
+  showFloat('결합!');
+  const cs=new Set();
+  const add=(r,c)=>{if(r>=0&&r<ROWS&&c>=0&&c<COLS)cs.add(r+','+c);};
+  const addRow=r=>{for(let c=0;c<COLS;c++)add(r,c);};
+  const addCol=c=>{for(let r=0;r<ROWS;r++)add(r,c);};
+  const addArea=(r,c,rad)=>{for(let dr=-rad;dr<=rad;dr++)for(let dc=-rad;dc<=rad;dc++)add(r+dr,c+dc);};
+  if(aW&&bW){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)add(r,c);}          // 색+색: 보드 전체
+  else if(isLine(a.btype)&&isLine(b.btype)){addRow(mr);addCol(mc);lineBeam('H',mr,tint);lineBeam('V',mc,tint);} // 라인+라인: 터치 지점 기준 십자
+  else if(a.btype==='A'&&b.btype==='A'){addArea(mr,mc,2);}                     // 광역+광역: 터치 지점 기준 5x5
+  else{ // 라인+광역: 라인폭탄이 가리키는 방향의 3줄 (터치 지점 중심)
+    const lineB=a.btype==='A'?b:a;
+    if(lineB.btype==='H'){for(let dd=-1;dd<=1;dd++){const rr=mr+dd;if(rr>=0&&rr<ROWS){addRow(rr);lineBeam('H',rr,tint);}}}
+    else{for(let dd=-1;dd<=1;dd++){const cc=mc+dd;if(cc>=0&&cc<COLS){addCol(cc);lineBeam('V',cc,tint);}}}
+  }
+  await sleep(90);
+  lastRolled=null;
+  resolve({clearSet:cs,wildColors:null,epicenter:{r:mr,c:mc}});
+}
+function pickWildColor(color){
+  const wasLessonPick=lessonState&&lessonState.phase==='pick';
+  const wc=armedWild;unarmWild();
+  if(!wc||!wc.el||!wc.el.isConnected||grid[wc.r][wc.c]!==wc)return;
+  if(busy||over||movesLeft<=0||color<0)return;
+  if(wasLessonPick)completeLesson();
+  movesLeft--;updateHUD();
+  const cs=new Set([wc.r+','+wc.c]);
+  const map=new Map();map.set(wc.r+','+wc.c,color);
+  lastRolled=null;
+  return resolve({clearSet:cs,wildColors:map});
+}
+// tap outside the board cancels a pending color-pick
+document.addEventListener('pointerdown',e=>{if(armedWild&&!$('board').contains(e.target))unarmWild();});
+
+/* ================= game flow ================= */
+const goalsDone=()=>goals.every(g=>g.got>=g.need);
+function checkEnd(){
+  if(over)return;
+  if(lessonState&&!lessonState.complete)return;
+  if(goalsDone()){over=true;runFinaleThenWin();return;}
+  if(movesLeft<=0)failStage();
+}
+function starCount(){
+  const sc=score-stageStartScore;
+  if(!cfgPar)return 3;
+  if(sc>=cfgPar)return 3;
+  if(sc>=Math.round(cfgPar*0.6))return 2;
+  if(sc>=Math.round(cfgPar*0.25))return 1;
+  return 0;
+}
+// stage-clear finale: each remaining move turns a random cube into a bomb (line/area mix), then all fire — scored
+async function stageFinale(){
+  const n=movesLeft;movesLeft=0;
+  // leftover moves -> guaranteed points (rewards efficient clears; reduces finale luck)
+  const moveBonus=n*MOVE_BONUS;
+  if(moveBonus){score+=moveBonus;}
+  updateHUD();if(typeof updateStarGauge==='function')updateStarGauge();
+  const cells=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const e=grid[r][c];if(e&&!e.bomb)cells.push([r,c]);}
+  shuffle(cells);
+  const take=Math.min(n,cells.length),converted=[];
+  if(take>0)showFloat('남은 '+n+'회 → +'+moveBonus+'점 & 폭탄!');
+  for(let i=0;i<take;i++){
+    const [r,c]=cells[i],e=grid[r][c],ci=matchColor(e);
+    e.el.remove();
+    const type=gameplayRandom()<0.62?(gameplayRandom()<.5?'H':'V'):'A';
+    const nb=makeBomb(r,c,ci,type);grid[r][c]=nb;
+    nb.el.style.transition='none';place(nb);nb.el.getBoundingClientRect();nb.el.style.transition='';
+    nb.el.classList.add('spawning');converted.push(nb);
+    await sleep(48);
+  }
+  if(!converted.length)return;
+  await sleep(200);
+  // fire the bombs, then let the board refill and auto-cascade (no new bombs) until nothing more clears
+  const cs=new Set();converted.forEach(b=>cs.add(b.r+','+b.c));
+  lastRolled=null;
+  await resolve({clearSet:cs,wildColors:null,finale:true,epicenter:{r:(ROWS-1)/2,c:(COLS-1)/2}});
+}
+async function runFinaleThenWin(){
+  busy=true;$('skipBtn').classList.remove('show');
+  await stageFinale();
+  busy=false;
+  winStage();
+}
+function winStage(){
+  over=true;
+  const s=starCount(),sc=score-stageStartScore;
+  // 진행도 기록: 별(최고 기록)과 다음 스테이지 잠금 해제
+  const stN=stageNo+1;
+  progress.stars[stN]=Math.max(progress.stars[stN]||0,s);
+  if(stN<TOTAL_STAGES)progress.unlocked=Math.max(progress.unlocked,stN+1);
+  saveProg();
+  $('ovStars').innerHTML=[0,1,2].map(i=>'<img src="assets/pastel-garden/score-star-'+(i<s?'earned':'unearned')+'.png" alt="'+(i<s?'획득':'미획득')+'">').join('');
+  $('ovTitle').textContent='STAGE '+stN+' 클리어!';
+  $('ovTitle').style.color='#367a62';
+  $('ovSub').innerHTML='이번 스테이지 <b>'+sc+'</b>점'+(cfgPar?' (별 3개 '+cfgPar+'점)':'');
+  $('ovBtns').innerHTML=(stN<TOTAL_STAGES?'<button class="primary" onclick="nextStage()">다음 스테이지 →</button>':'')+
+    '<button onclick="exitToMap()">맵으로</button>';
+  $('overlay').classList.add('show');
+  updateHUD();
+}
+function failStage(){
+  over=true;
+  $('ovStars').innerHTML='';
+  $('ovTitle').textContent='횟수 소진…';
+  $('ovTitle').style.color='#a44a56';
+  const left=goals.filter(g=>g.got<g.need).map(g=>colSym(g.ci)+' '+(g.need-g.got)+'개').join(' · ');
+  $('ovSub').innerHTML='남은 목표: '+left;
+  $('ovBtns').innerHTML='<button class="primary" onclick="restartStage()">다시 도전</button><button onclick="exitToMap()">맵으로</button>';
+  $('overlay').classList.add('show');
+}
+function updateHUD(){
+  document.querySelectorAll('[data-game-lock]').forEach(button=>{button.disabled=busy;});
+  $('stageV').textContent='STAGE '+(stageNo+1);
+  $('colorsV').textContent=stageColors.length+'색 큐브';
+  $('movesV').textContent=movesLeft;
+  $('movesV').classList.toggle('low',movesLeft<=4);
+  $('goals').innerHTML=goals.map(g=>{
+    const done=g.got>=g.need;
+    return '<div class="gchip'+(done?' done':'')+'">'+
+      '<div class="dot" data-shape="'+stageColors[g.ci]+'" style="background:'+colHex(g.ci)+'">'+colSym(g.ci)+'</div>'+
+      '<div class="cnt">'+(done?'완료':Math.min(g.got,g.need)+'/'+g.need)+'</div>'+
+      (done?'<img class="goalCheck" src="assets/pastel-garden/icons/check.svg" alt="">':'')+
+    '</div>';
+  }).join('');
+  updateStarGauge();
+  window.TutorialUI?.sync();
+  fitBoard();
+}
+function updateStarGauge(){
+  const par=cfgPar||1, sc=Math.max(0,score-stageStartScore), s1=Math.round(par*0.25), s2=Math.round(par*0.6);
+  window.PastelGarden.renderScore(sc,par,[sc>=s1,sc>=s2,sc>=par]);
+}
+function showFloat(txt){
+  const d=document.createElement('div');d.className='float';d.textContent=txt;
+  $('board').appendChild(d);
+  setTimeout(()=>d.remove(),900);
+}
+function buildBoard(){
+  boardInner.querySelectorAll('.cube').forEach(e=>e.remove());
+  grid=[...Array(ROWS)].map(()=>Array(COLS).fill(null));
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const cu=makeCube(r,c);grid[r][c]=cu;paint(cu);place(cu);
+  }
+  const lesson=CubePopRules.lessons[stageNo];
+  if(lesson){
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){grid[r][c].orient={...lesson.layout[r][c]};paint(grid[r][c]);}
+    return;
+  }
+  let guard=0;
+  while(guard++<160){
+    const runs=findRuns();
+    if(!runs.length)break;
+    runs.forEach(run=>run.cells.forEach(cu=>{if(!cu.bomb){cu.orient=randOrient();paint(cu);}}));
+  }
+}
+function setupStage(n,keepScore){
+  window.PastelGarden.reset();
+  cancelBoardPointers();
+  stageNo=n;
+  gameplayRandom=CubePopRules.createRandom(attemptSeed(n));
+  const cfg=stageConfig(n);
+  const k=cfg.dist.length;
+  stageColors=shuffle([0,1,2,3,4,5]).slice(0,k);
+  const faces=[];
+  cfg.dist.forEach((cnt,i)=>{for(let j=0;j<cnt;j++)faces.push(i);});
+  faceColorIdx=shuffle(faces);
+  if(CubePopRules.lessons[n]){stageColors=[0,1,2];faceColorIdx=CubePopRules.faces.slice();}
+  goals=cfg.goals.map(([ci,need])=>({ci,need,got:0}));
+  cfgMoves=cfg.moves;cfgPar=cfg.par||0;
+  movesLeft=cfg.moves;maxCombo=1;over=false;busy=false;
+  if(!keepScore)score=0;
+  stageStartScore=score;
+  skipReq=false;$('skipBtn').classList.remove('show');
+  if(typeof unarmWild==='function')unarmWild();
+  buildBoard();
+  beginLesson();
+  $('overlay').classList.remove('show');
+  updateHUD();
+}
+function nextStage(){transitionToStage(stageNo+1);}  // 다음 스테이지도 조리개+자막 연출
+function restartStage(){if(busy)return;setupStage(stageNo,false);fitBoard();}
+function resetRun(){setupStage(0,false);}
+
+/* ================= 게임 플로우: 홈 → 스테이지 선택 → 플레이 ================= */
+const TOTAL_STAGES=50;
+let progress={unlocked:1,stars:{}};
+try{const p=JSON.parse(localStorage.getItem('cubepop_v2_prog')||'null');if(p&&Number.isInteger(p.unlocked)&&p.unlocked>=1&&p.unlocked<=TOTAL_STAGES&&p.stars&&typeof p.stars==='object')progress=p;}catch(_){}
+function saveProg(){try{localStorage.setItem('cubepop_v2_prog',JSON.stringify(progress));}catch(_){}}
+function setMode(m){cancelBoardPointers();window.TutorialUI?.clear();document.body.classList.remove('mHome','mMap','mPlay');document.body.classList.add(m);}
+function goHome(){setMode('mHome');}
+function goMap(){if(busy)return;unarmWild();renderMap();setMode('mMap');}
+// 아바타 큐브 — 6면 각각 설정 가능 (추후 유저 커스터마이징: faces의 팔레트 인덱스/심볼 교체 지점)
+const AVATAR={faces:[0,1,2,3,4,5]};
+let avMat=null; // 아바타의 3D 방향(누적 회전 행렬)
+// 게임 화면 큐브와 동일 구조의 미니 큐브 스프라이트 마크업 (맵 노드용)
+function cubeSprite(color,inner){
+  return '<span class="ncube" style="--c:'+color+'">'+
+    '<span class="nN"></span><span class="nE"></span><span class="nW"></span><span class="nS"></span>'+
+    '<span class="nFace">'+inner+'</span></span>';
+}
+// 아바타용 6면 3D 큐브 마크업 (코어: 둥근 모서리 틈을 채우는 안쪽 층)
+function avatarCubeHTML(){
+  const half=17, core=15;
+  const T=z=>['translateZ('+z+'px)','rotateY(180deg) translateZ('+z+'px)',
+           'rotateY(90deg) translateZ('+z+'px)','rotateY(-90deg) translateZ('+z+'px)',
+           'rotateX(90deg) translateZ('+z+'px)','rotateX(-90deg) translateZ('+z+'px)'];
+  const TF=T(half),TC=T(core);
+  let f='';
+  for(let i=0;i<6;i++){
+    const ci=AVATAR.faces[i];
+    f+='<span class="avC" style="background:'+PALETTE[ci]+';transform:'+TC[i]+'"></span>';
+  }
+  for(let i=0;i<6;i++){
+    const ci=AVATAR.faces[i];
+    f+='<span class="avF" style="background:'+PALETTE[ci]+';transform:'+TF[i]+'">'+SYMS[ci]+'</span>';
+  }
+  return '<span class="avHop"><span class="avTilt"><span class="av3d">'+f+'</span></span></span>';
+}
+let mapPos=[],avatarStage=1,avatarEl=null,avatarRot=0,mapAnim=false;
+function renderMap(){
+  const GAP=96, XS=[70,185,300,185], W=370, topPad=124, botPad=72; /* 상단 여유: 30스테이지 노드+아바타가 잘리지 않도록 */
+  const H=topPad+botPad+(TOTAL_STAGES-1)*GAP;
+  const cy=n=>H-botPad-(n-1)*GAP, cx=n=>XS[(n-1)%4];
+  mapPos=[];for(let n=1;n<=TOTAL_STAGES;n++)mapPos[n]={x:cx(n),y:cy(n)};
+  const cur=Math.min(progress.unlocked,TOTAL_STAGES);
+  avatarStage=cur;avatarRot=0;mapAnim=false;
+  // 길: 점선(전체) + 지나온 길(현재까지) 초록 틴트
+  let segs='',trail='';
+  for(let n=1;n<TOTAL_STAGES;n++){
+    const seg='M '+cx(n)+' '+cy(n)+' L '+cx(n+1)+' '+cy(n+1)+' ';
+    segs+=seg;
+    if(n+1<=cur)trail+=seg;
+  }
+  let h='<svg viewBox="0 0 '+W+' '+H+'">'+
+    '<path d="'+segs+'" fill="none" stroke="#2a3040" stroke-width="12" stroke-linecap="round" stroke-dasharray="0.1 19"/>'+
+    (trail?'<path d="'+trail+'" fill="none" stroke="#06d6a055" stroke-width="12" stroke-linecap="round" stroke-dasharray="0.1 19"/>':'')+
+    '</svg>';
+  // 난이도(색 개수) 구간 라벨
+  [[1,'배우기 · 3색'],[7,'4색 구간'],[10,'5색 구간'],[15,'6색 구간']].forEach(([n,t])=>{
+    h+='<div class="bandLbl" style="left:6px;top:'+(cy(n)+GAP*.5)+'px;">— '+t+' —</div>';
+  });
+  for(let n=1;n<=TOTAL_STAGES;n++){
+    const st=progress.stars[n]||0, un=n<=cur;
+    const cls=(un?'':' locked')+(n===cur?' cur':'');
+    const col=un?PALETTE[(n-1)%PALETTE.length]:'#2a3040';
+    const inner='<span class="no">'+(un?n:'🔒')+'</span>'+
+      (un?'<span class="st">'+[1,2,3].map(i=>'<span class="'+(i<=st?'on':'off')+'">★</span>').join('')+'</span>':'');
+    h+='<button class="pnode'+cls+'" data-n="'+n+'" style="left:'+cx(n)+'px;top:'+cy(n)+'px;"'+(un?' onclick="selectStage('+(n-1)+')"':' disabled')+'>'+
+       cubeSprite(col,inner)+'</button>';
+  }
+  const cv=$('mapCanvas');cv.style.height=H+'px';cv.innerHTML=h;
+  // 아바타(별도 요소로 배치 — 이동 애니메이션용)
+  avatarEl=document.createElement('div');
+  avatarEl.className='avatarCube idle';
+  avatarEl.innerHTML=avatarCubeHTML();
+  avMat=new DOMMatrix();
+  placeAvatar(cur);
+  cv.appendChild(avatarEl);
+  const sc=$('mapScroll');
+  requestAnimationFrame(()=>{sc.scrollTop=Math.max(0,cy(cur)-sc.clientHeight*.62);updateMapFades();});
+  if(!sc._fadeBound){sc._fadeBound=true;sc.addEventListener('scroll',updateMapFades);}
+}
+function placeAvatar(n){
+  avatarEl.style.left=mapPos[n].x+'px';
+  avatarEl.style.top=(mapPos[n].y-72)+'px';
+}
+function updateMapFades(){
+  const sc=$('mapScroll');if(!sc)return;
+  $('fadeTop').classList.toggle('show',sc.scrollTop>12);
+  $('fadeBot').classList.toggle('show',sc.scrollHeight-sc.clientHeight-sc.scrollTop>12);
+}
+/* 스테이지 선택: 아바타가 길을 따라 데굴데굴 (5스테이지 이상 거리면 뿅 텔레포트) → 도착 입장 연출 */
+function selectStage(idx){
+  if(mapAnim)return;
+  const target=idx+1;
+  if(target===avatarStage){enterFx(target,()=>launchStage(idx,target));return;}
+  mapAnim=true;
+  avatarEl.classList.remove('idle');
+  const sc=$('mapScroll');
+  sc.scrollTo({top:Math.max(0,mapPos[target].y-sc.clientHeight*.55),behavior:'smooth'});
+  const done=()=>{avatarStage=target;mapAnim=false;avatarEl.classList.add('idle');enterFx(target,()=>launchStage(idx,target));};
+  if(Math.abs(target-avatarStage)>=5)teleportFx(target,done);
+  else rollFx(target,done);
+}
+function rollFx(target,done){
+  // 진행 방향에 수직인 화면축으로 실제 3D 굴림. 한 칸을 반칸×2로 쪼개 90°씩 두 번 굴러 '데굴데굴' 빈도를 높임
+  const dir=target>avatarStage?1:-1;
+  let k=avatarStage;
+  const cube=avatarEl.querySelector('.av3d');
+  const SUB=105; // 반칸당 ms
+  avatarEl.style.transition='left .1s linear, top .1s linear';
+  const roll90=(dx,dy)=>{
+    const len=Math.hypot(dx,dy)||1;
+    avMat=new DOMMatrix().rotateAxisAngle(-dy/len,dx/len,0,90).multiply(avMat);
+    cube.style.transition='transform .1s linear';
+    cube.style.transform=avMat.toString();
+  };
+  const setPos=(x,y)=>{avatarEl.style.left=x+'px';avatarEl.style.top=(y-72)+'px';};
+  const step=()=>{
+    const nk=k+dir;
+    const p0=mapPos[k],p1=mapPos[nk];
+    const dx=p1.x-p0.x,dy=p1.y-p0.y;
+    roll90(dx,dy);setPos((p0.x+p1.x)/2,(p0.y+p1.y)/2);          // 반칸 + 90°
+    setTimeout(()=>{
+      roll90(dx,dy);setPos(p1.x,p1.y);                           // 나머지 반칸 + 90°
+      k=nk;
+      if(k!==target)setTimeout(step,SUB);
+      else setTimeout(()=>{cube.style.transition='';avatarEl.style.transition='';done();},SUB+40);
+    },SUB);
+  };
+  step();
+}
+function teleportFx(target,done){
+  const cv=$('mapCanvas');
+  const ring=(n)=>{const r=document.createElement('div');r.className='warpRing';r.style.left=mapPos[n].x+'px';r.style.top=(mapPos[n].y-56)+'px';cv.appendChild(r);setTimeout(()=>r.remove(),340);};
+  const hop=avatarEl.querySelector('.avHop');
+  ring(avatarStage);
+  hop.style.transition='transform .2s cubic-bezier(.55,0,.9,.4)';
+  hop.style.transform='scale(.05) rotate(180deg)';
+  setTimeout(()=>{
+    placeAvatar(target);ring(target);
+    hop.style.transition='transform .24s cubic-bezier(.3,1.6,.5,1)';
+    hop.style.transform='scale(1) rotate(360deg)';
+    setTimeout(()=>{hop.style.transition='';hop.style.transform='';done();},260);
+  },230);
+}
+function enterFx(target,done){
+  const node=$('mapCanvas').querySelector('[data-n="'+target+'"]');
+  if(node){node.classList.add('enterFx');
+    const cv=$('mapCanvas');
+    const r=document.createElement('div');r.className='warpRing';r.style.left=mapPos[target].x+'px';r.style.top=(mapPos[target].y-6)+'px';cv.appendChild(r);
+    setTimeout(()=>r.remove(),340);
+  }
+  setTimeout(done,320);
+}
+function startStage(n){setMode('mPlay');setupStage(n,false);fitBoard();}
+function exitToMap(){$('overlay').classList.remove('show');goMap();}
+/* 스테이지 진입 연출: 조리개가 (ox,oy)를 중심으로 닫힘 → 화면 전환 → 자막 + 중앙에서 조리개 열림 */
+function transitionToStage(idx,ox,oy){
+  const iris=$('iris');
+  iris.style.left=(ox!=null?ox:window.innerWidth/2)+'px';
+  iris.style.top=(oy!=null?oy:window.innerHeight/2)+'px';
+  iris.style.display='block';
+  iris.classList.remove('anim','animOut');
+  iris.style.width='260vmax';iris.style.height='260vmax';
+  iris.getBoundingClientRect();
+  iris.classList.add('anim');
+  iris.style.width='0px';iris.style.height='0px';
+  setTimeout(()=>{
+    startStage(idx);                                            // 검정 화면 아래에서 전환
+    // 조리개 열림 중심 = 플레이 판 중앙
+    const br=$('board').getBoundingClientRect();
+    const bx=br.x+br.width/2, by=br.y+br.height/2;
+    iris.style.left=bx+'px';iris.style.top=by+'px';
+    iris.classList.remove('anim');iris.classList.add('animOut');
+    setTimeout(()=>{iris.style.width='260vmax';iris.style.height='260vmax';},60);
+    setTimeout(()=>{
+      iris.style.display='none';iris.classList.remove('animOut');
+      // 자막: 조리개가 완전히 열린 뒤, 플레이 판 중앙에
+      $('stageCapText').innerHTML='STAGE <i>'+(idx+1)+'</i> START!';
+      const cap=$('stageCap');cap.style.top=by+'px';cap.classList.remove('out');cap.classList.add('show');
+      setTimeout(()=>{cap.classList.add('out');setTimeout(()=>cap.classList.remove('show','out'),340);},1000);
+    },540);
+  },400);
+}
+function launchStage(idx,target){
+  const node=$('mapCanvas').querySelector('[data-n="'+target+'"]');
+  let x=null,y=null;
+  if(node){const r=node.getBoundingClientRect();x=r.x+r.width/2;y=r.y+r.height/2;}
+  transitionToStage(idx,x,y);
+}
+let vividOn=false;
+function setVivid(on){
+  vividOn=on;
+  PALETTE=(on?PALETTE_VIVID:PALETTE_BASE).slice();
+  $('segBase').classList.toggle('on',!on);
+  $('segVivid').classList.toggle('on',on);
+  try{localStorage.setItem('cubepop_vivid',on?'1':'0');}catch(_){}
+  repaintAll();
+  if(document.body.classList.contains('mMap'))renderMap();
+}
+function openSettings(){unarmWild();$('setModal').classList.add('show');}
+function closeSettings(){$('setModal').classList.remove('show');}
+$('setModal').addEventListener('pointerdown',e=>{if(e.target===$('setModal'))closeSettings();});
+function repaintAll(){
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const e=grid[r][c];if(!e)continue;
+    if(e.bomb){if(e.btype!=='W'){const f=e.el.querySelector('.bombFace');if(f)f.style.background=colHex(e.ci);e.el.style.setProperty('--bomb-color',colHex(e.ci));}}
+    else paint(e);
+    if(e.bomb)window.CubePopVisual?.paint(e);
+  }
+  updateHUD();
+}
+
+// iOS 핀치 제스처 차단 (실수로 페이지가 확대되는 것 방지)
+document.addEventListener('gesturestart',e=>e.preventDefault());
+document.addEventListener('gesturechange',e=>e.preventDefault());
+
+/* ================= responsive ================= */
+function fitBoard(){
+  // 핀치줌 중에는 재배치하지 않음 (줌 도중 블록 간격이 실시간으로 변하는 문제 방지)
+  if(window.visualViewport&&window.visualViewport.scale>1.02)return;
+  const natural=704,board=$('board');if(!board)return;
+  // Pack up to three goal columns to their actual content width. A stretched
+  // flex row leaves invisible space on the right, shifting the visible HUD.
+  const goalRow=document.querySelector('.goalsRow'),hudCard=document.querySelector('.goalsCard');
+  if(goalRow?.children.length&&hudCard?.offsetWidth){
+    const chips=[...goalRow.children].map(el=>el.getBoundingClientRect().width);
+    const gap=parseFloat(getComputedStyle(goalRow).columnGap)||0;
+    const hudGap=parseFloat(getComputedStyle(hudCard).columnGap)||0;
+    const available=Math.min(parseFloat(getComputedStyle(goalRow.parentElement).maxWidth)||276,
+      document.querySelector('.app').clientWidth-8-document.querySelector('.movesBadge').getBoundingClientRect().width-hudGap);
+    let columns=Math.min(3,chips.length);
+    const packed=n=>Array.from({length:n},(_,c)=>Math.max(...chips.filter((_,i)=>i%n===c))).reduce((a,b)=>a+b,0)+gap*(n-1);
+    while(columns>1&&packed(columns)>available+.1)columns--;
+    goalRow.style.gridTemplateColumns=`repeat(${columns},max-content)`;
+  }
+  // Start from the new viewport, not the stale scrollbar left by the old board.
+  const vw=window.innerWidth||document.documentElement.clientWidth||480;
+  const landscape=vw>=720&&vw>=window.innerHeight;
+  const phone=vw<=520||(vw<720&&vw>=window.innerHeight);
+  if(landscape){
+    const hud=document.querySelector('.goalsCard');
+    const layout=window.PastelGarden.landscapeLayout(vw,window.innerHeight,hud?.offsetHeight||64);
+    const app=document.querySelector('.app');
+    app.style.setProperty('--landscape-board',layout.boardSize+'px');
+    app.style.setProperty('--landscape-score',layout.scoreWidth+'px');
+    app.style.setProperty('--landscape-controls',layout.controlsWidth+'px');
+    board.style.zoom=layout.boardSize/natural;
+    window.TutorialUI?.refresh();return;
+  }
+  const scW=Math.min(1,(vw-(phone?16:64))/natural);
+  board.style.zoom=scW;
+  const app=document.querySelector('.app'),bw=document.querySelector('.boardWrap');let sc=scW;
+  if(app&&bw&&app.offsetHeight){
+    // Measure the real wrapped HUD and fixed UI; only the common board box scales.
+    const otherH=app.offsetHeight-bw.offsetHeight;
+    const bodyStyle=window.getComputedStyle(document.body);
+    const padding=parseFloat(bodyStyle.paddingTop)+parseFloat(bodyStyle.paddingBottom);
+    sc=Math.min(scW,Math.max(Math.min(200,vw-16)/natural,(window.innerHeight-otherH-padding)/natural));
+  }
+  board.style.zoom=sc;
+  const available=document.documentElement.clientWidth||vw;
+  if(available<vw)board.style.zoom=Math.min(sc,(available-(phone?16:64))/natural);
+  window.TutorialUI?.refresh();
+}
+let boardFitFrame=0;
+function scheduleBoardFit(){
+  fitBoard();
+  // A resized viewport can retain the old scrollbar for one layout pass.
+  if(window.requestAnimationFrame&&!boardFitFrame)boardFitFrame=window.requestAnimationFrame(()=>{boardFitFrame=0;fitBoard();});
+}
+window.addEventListener('resize',scheduleBoardFit);
+window.visualViewport?.addEventListener?.('resize',scheduleBoardFit);
+window.addEventListener('orientationchange',()=>setTimeout(fitBoard,150));
+
+/* ================= init ================= */
+</script>
+<script src="improvements.js"></script>
+<script src="pastel-garden.js"></script>
+<script src="tutorial-ui.js"></script>
+<script>
+sizeBoard();
+setupStage(0,false);
+// 저장된 색상 모드 복원 (기본값: 기본 팔레트)
+let savedVivid=false;
+try{savedVivid=localStorage.getItem('cubepop_vivid')==='1';}catch(_){}
+setVivid(savedVivid);
+fitBoard();
+</script>
+<script>
+window.CubePopVisualBridge={
+  entities:()=>grid.flat().filter(Boolean),
+  describe:entity=>Object.fromEntries(SLOTS.map(slot=>{
+    const ci=entity.bomb?entity.ci:colIdx(entity,slot);
+    return [slot,{hex:entity.btype==='W'&&slot!=='U'?'#09c6aa':colHex(ci),index:stageColors[ci],mark:entity.bomb?(slot==='U'?entity.btype:'plain'):''}];
+  }))
+};
+</script>
+<script type="module" src="render/game-cubes.mjs"></script>
+</body>
+</html>

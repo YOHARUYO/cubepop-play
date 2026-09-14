@@ -1,0 +1,23 @@
+body{padding:26px max(8px,env(safe-area-inset-right)) 6px max(8px,env(safe-area-inset-left));}
+.app{max-width:704px;gap:2px;align-self:flex-start;}
+.boardWrap{margin:0 auto;position:relative;}
+#board{width:704px;height:704px;padding:0;border:0;border-radius:0;background:none;box-shadow:none;isolation:isolate;}
+#board::before,#board::after{display:none;}
+#board.picking{box-shadow:none;}
+.frameLayer{position:absolute;inset:0;width:100%;height:100%;max-width:none;pointer-events:none;user-select:none;}
+.frameRear{z-index:0;}
+.frameFront{z-index:3;}
+#boardScene{position:absolute;inset:0;z-index:1;pointer-events:none;}
+#boardScene canvas{display:block;width:100%;height:100%;}
+#boardInner{position:absolute;left:0;top:0;transform-origin:0 0;z-index:2;border-radius:0;background:none;box-shadow:none;}
+.slot{display:none;}
+.board3d .cubeBox,.board3d .ringBox,.board3d .cubeArt{visibility:hidden;}
+.board3d .cube::before{display:none;}
+.board3d .cube.lessonTarget[data-roll]::before{display:block;}
+.board3d .cube.previewTarget{outline:2px solid #fff9e9;outline-offset:-2px;box-shadow:0 0 0 1px #776853;border-radius:5px;}
+
+@media(max-width:520px){body{padding-top:8px;padding-bottom:8px;}
+.app{gap:2px;}
+
+}
+
