@@ -1,0 +1,65 @@
+/* Interaction Polish v2: scoped to previews, map adornments and teaching cues. */
+.rollPreview{width:196px;padding:16px;background:#fff8e9;border:1.5px solid #243e61;border-radius:21px;box-shadow:0 3px #243e61;color:#243e61;font-family:'CP Noto',sans-serif;}
+.rollPreview::after,.rollPreview.below::after{background:#fff8e9;border-color:#243e61;}
+.previewCross{grid-template-columns:repeat(3,46px);grid-auto-rows:48px;gap:10px;justify-content:center;}
+.previewFace{position:relative;border:1.3px solid #243e61;border-radius:8px;box-shadow:0 4px #243e61;color:#243e6199;}
+.previewFace b,.previewFace b[data-shape]{display:block;width:46px;height:46px;font-size:inherit;line-height:1;}
+.previewFace b svg{display:block;width:100%;height:100%;}
+.previewFace.current{outline:2px solid #e3ae48;outline-offset:4px;}
+.previewFace:not(.current)::after{display:none;}
+#tutorialOverlay .lessonFacePreview{position:relative;inset:auto!important;width:122px;margin:12px auto;padding:4px;background:none;border:0;box-shadow:none;transform:none;pointer-events:none;}
+#tutorialOverlay .lessonFacePreview::after{display:none;}
+.lessonFacePreview .previewCross{grid-template-columns:repeat(3,32px);grid-auto-rows:34px;gap:7px;}
+.lessonFacePreview .previewFace b{width:32px;height:32px;}
+body.mMap .hmStars{top:calc(100% + 12px);width:74px;height:24px;gap:1px;}
+body.mMap .hmStars img{width:24px;height:24px;}
+body.mMap .hmBadge,body.mMap .hmBadge.lock{right:-11px;top:-12px;width:28px;height:30.625px;background:none;border:0;border-radius:0;}
+body.mMap .hmBadge img{width:28px;height:30.625px;}
+body.mMap .pnode .hmLabel{position:absolute;inset:39px 0 auto;height:30px;line-height:30px;font-family:'CP Jua',sans-serif;font-weight:400;}
+body.mMap #mapCanvas .pnode:is(:hover,:active,.enterFx) .hmLabel{transform:none;}
+body.mMap .avatarCube{width:52px;height:56.33px;padding:0;border:0;background:none;border-radius:0;transform:translateX(-50%);box-shadow:none;display:block;animation:none;}
+body.mMap .avatarCube .avHop{width:52px;height:56.33px;animation:none;}
+body.mMap .avatarCube.idle .avHop{animation:hmPawnFloat 2400ms ease-in-out infinite;}
+body.mMap .avatarCube.idle .hmPawnShadow{animation:hmPawnFloatShadow 2400ms ease-in-out infinite;}
+@keyframes hmPawnFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes hmPawnFloatShadow{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.88);opacity:.72}}
+@media(prefers-reduced-motion:reduce){body.mMap .avatarCube.idle .avHop,body.mMap .avatarCube.idle .hmPawnShadow{animation:none;}}
+.hmPawn{display:block;width:52px;height:56.33px;overflow:visible;filter:none;}
+.hmTravel{display:none;position:absolute;left:6px;top:8px;width:40px;height:40px;transform-style:preserve-3d;}
+.hmTumble{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(-18deg) rotateY(24deg);}
+.hmTravelFace{position:absolute;inset:0;border:1px solid #ffffff65;border-radius:3px;backface-visibility:hidden;box-shadow:inset 0 -3px #00000016;}
+.hmTravelFace svg{display:block;width:100%;height:100%;}
+.travelling .hmTravel{display:block;}
+.travelling .hmPawn{visibility:hidden;}
+.hmPawnShadow{position:absolute;left:8px;top:52.2px;width:36px;height:7.6px;border-radius:50%;background:#705f5442;}
+body.mMap .hmAvatarText{position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);}
+#tutorialOverlay .playGuide{width:307px;max-width:calc(100vw - 24px);min-height:0;padding:10px 17px 13px;background:#fff8e9;border:1.5px solid #243e61;border-radius:21px;box-shadow:0 3px #243e61;font-family:'CP Noto',sans-serif;}
+#tutorialOverlay .playGuide::after{background:#fff8e9;border-color:#243e61;}
+#tutorialOverlay #guideCount{font-size:13px;line-height:24px;min-height:24px;margin:0 78px 5px 0;color:#886e59;}
+#tutorialOverlay #guideTitle{font-family:'CP Jua',sans-serif;font-weight:400;font-size:19px;line-height:24px;}
+#tutorialOverlay .guideText{font-size:14px;line-height:22px;margin-top:6px;}
+#tutorialOverlay .tutorialActions{position:static;display:flex;justify-content:flex-end;margin:8px 0 0;gap:8px;}
+#tutorialOverlay .tutorialActions:has(#cancelPick[hidden]){display:none;}
+#tutorialOverlay #exitLesson{position:absolute;right:9px;top:0;width:72px;min-width:72px;height:44px;padding:0;border:0;border-radius:22px;background:transparent;box-shadow:none;filter:none;display:flex;align-items:center;justify-content:center;gap:6px;color:#526b80;font:400 13px/20px 'CP Noto',sans-serif;pointer-events:auto;cursor:pointer;transition:color 100ms;}
+#tutorialOverlay #exitLesson img{width:24px;height:24px;}
+#tutorialOverlay #exitLesson:hover:not(:disabled){color:#243e61;background:transparent;}
+#tutorialOverlay #exitLesson:active:not(:disabled){transform:translateY(1px);background:transparent;box-shadow:none;}
+#tutorialOverlay #exitLesson:focus-visible{outline:2px solid #243e61;outline-offset:2px;}
+#tutorialOverlay #exitLesson:disabled{opacity:.5;cursor:default;}
+#tutorialDirection{display:flex;align-items:center;gap:12px;margin-top:12px;min-height:36px;}
+#tutorialDirection .directionIcon{width:44px;height:22px;position:relative;flex:none;}
+#tutorialDirection[data-vertical=true] .directionIcon{width:22px;height:44px;margin:0 11px;}
+#tutorialOverlay #tutorialArrow{position:absolute;width:44px;height:22px;left:50%;top:50%;margin-left:-22px;margin-top:-11px;transform-origin:center;}
+#tutorialDirection strong{display:block;font-size:14px;line-height:20px;}
+#tutorialDirection small{display:block;font-size:12px;line-height:18px;color:#886e59;}
+#tutorialOverlay #tutorialHand{width:40px;height:40px;transform-origin:17.25px 6px;z-index:2;}
+#tutorialHandLink{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;}
+#tutorialHandLink path{fill:none;stroke:#ffdb76;stroke-width:2;stroke-linecap:round;}
+#tutorialOverlay[data-observing=true] #guideTitle{padding-right:70px;}
+@media(prefers-reduced-motion:reduce){#tutorialOverlay #exitLesson:active:not(:disabled){transform:none;}}
+
+#tutorialOverlay .playGuide[data-docked=true]{display:flex;flex-direction:column;}
+#tutorialOverlay .playGuide[data-docked=true] #guideCount{flex:none;}
+#tutorialOverlay .playGuide[data-docked=true] #guideContent{min-height:0;overflow-y:auto;pointer-events:auto;overscroll-behavior:contain;scrollbar-width:thin;}
+#guideContent:focus-visible{outline:2px solid #243e61;outline-offset:1px;}
+body.mMap .bandLbl{transform:none;}

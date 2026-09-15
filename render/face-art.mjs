@@ -1,13 +1,6 @@
-export const INKS=['#92283a','#966926','#007a6a','#176480','#604185','#9e502b'];
-export function symbolPath(ctx,color){
-  ctx.beginPath();
-  if(color===0)ctx.arc(0,0,.195,0,Math.PI*2);
-  if(color===1){ctx.moveTo(0,-.24);ctx.lineTo(.23,.19);ctx.lineTo(-.23,.19);ctx.closePath();}
-  if(color===2)ctx.rect(-.19,-.19,.38,.38);
-  if(color===3){for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?.108:.25;ctx[i?'lineTo':'moveTo'](Math.cos(a)*r,Math.sin(a)*r);}ctx.closePath();}
-  if(color===4){ctx.moveTo(0,-.235);ctx.lineTo(.235,0);ctx.lineTo(0,.235);ctx.lineTo(-.235,0);ctx.closePath();}
-  if(color===5){ctx.moveTo(0,.23);ctx.bezierCurveTo(-.47,-.04,-.17,-.37,0,-.17);ctx.bezierCurveTo(.17,-.37,.47,-.04,0,.23);ctx.closePath();}
-}
+import './symbols.js';
+export const INKS=globalThis.CubePopSymbols.inks;
+export const symbolPath=globalThis.CubePopSymbols.symbolPath;
 export function drawFace(ctx,color,index,mark=''){
   const size=ctx.canvas.width;ctx.save();ctx.scale(size,size);ctx.fillStyle=color;ctx.fillRect(0,0,1,1);
   if(mark==='W'){

@@ -26,20 +26,23 @@ function setPreview(on){
 }
 function showRollPreview(cube){
   hideRollPreview();
-  if(!previewOn||busy||over||cube.bomb||armedWild||(lessonState&&!lessonState.complete))return;
+  const teaching=lessonState&&!lessonState.complete;
+  if(!previewOn||busy||over||cube.bomb||armedWild||(teaching&&(stageNo!==0||lessonState.phase!=='roll'||cube.r!==lessonState.definition.target[0]||cube.c!==lessonState.definition.target[1])))return;
   previewCube=cube;cube.el.classList.add('previewTarget');
   const faces={};
   for(const position of ['U','N','S','E','W']){
-    // Show the face on this side of the cube, matching its visible edge.
+    // Physical neighboring faces, deliberately distinct from a roll prediction.
     const face=$('preview-'+position),ci=colIdx(cube,position);
     faces[position]=colSym(ci);
-    face.style.background=colHex(ci);face.querySelector('b').textContent=faces[position];
+    face.style.background=colHex(ci);face.style.color=window.CubePopSymbols.inks[stageColors[ci]];face.querySelector('b').innerHTML=window.CubePopSymbols.svg(stageColors[ci]);face.dataset.colorIndex=ci;
     face.querySelector('b').dataset.shape=stageColors[ci];
   }
-  $('rollPreview').setAttribute('aria-label','큐브 면 배치. 가운데 '+faces.U+', 위쪽 옆면 '+faces.N+', 아래쪽 옆면 '+faces.S+', 왼쪽 옆면 '+faces.W+', 오른쪽 옆면 '+faces.E);
-  $('rollPreview').hidden=false;positionRollPreview();
+  $('rollPreview').setAttribute('aria-label','현재 큐브의 면 배치. 가운데 윗면 '+faces.U+', 위쪽 옆면 '+faces.N+', 아래쪽 옆면 '+faces.S+', 왼쪽 옆면 '+faces.W+', 오른쪽 옆면 '+faces.E);
+  $('rollPreview').hidden=false;
+  if(teaching)window.TutorialUI?.showFacePreview();else positionRollPreview();
 }
 function positionRollPreview(){
+  if($('rollPreview').classList.contains('lessonFacePreview')){window.TutorialUI?.refresh();return;}
   if(!previewCube||!previewCube.el.isConnected){hideRollPreview();return;}
   const rect=previewCube.el.getBoundingClientRect(),bubble=$('rollPreview');
   const width=bubble.offsetWidth,height=bubble.offsetHeight;
@@ -57,6 +60,7 @@ function positionRollPreview(){
 function hideRollPreview(){
   if(previewCube)previewCube.el.classList.remove('previewTarget');
   previewCube=null;$('rollPreview').hidden=true;
+  window.TutorialUI?.hideFacePreview();
 }
 function cancelBoardPointers(){
   hideRollPreview();
@@ -89,7 +93,7 @@ function updateLessonCopy(message){
   }
   if(!lessonState){
     $('guideTitle').textContent='플레이 안내';
-    $('guideText').textContent='큐브를 눌러 면 배치를 보고, 원하는 방향으로 굴려보세요.';
+    $('guideText').textContent='큐브를 누르고 있으면 현재 면 배치를 볼 수 있어요. 원하는 방향으로 굴려보세요.';
     $('guideNote').textContent='같은 색 3개 이상을 가로나 세로로 연결해요.';
     return;
   }

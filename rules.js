@@ -27,7 +27,7 @@
   }
   const faces=[0,0,1,1,2,2];
   const definitions=[
-    {title:'가로로 세 개',target:[2,2],direction:'E',cells:[[2,1],[2,2],[2,3]],type:null,moves:4,need:3,seed:1206,
+    {title:'가로로 세 개',target:[2,2],targetSideColors:{W:0,E:2},direction:'E',cells:[[2,1],[2,2],[2,3]],type:null,moves:4,need:3,seed:1206,
       instruction:'화살표가 있는 큐브 하나만 오른쪽으로 돌려보세요. 밝게 보이는 세 개의 윗면 색을 맞춰요.',success:'가로로 같은 색 세 개를 연결했어요!'},
     {title:'세로로 세 개',target:[2,2],direction:'N',cells:[[1,2],[2,2],[3,2]],type:null,moves:4,need:3,
       instruction:'화살표 큐브만 위로 돌려보세요. 자리는 그대로, 세로 세 개의 윗면 색을 맞춰요.',success:'세로 매치도 성공했어요!'},

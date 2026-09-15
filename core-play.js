@@ -13,7 +13,7 @@
   let previousFocus=null,inertState=[],active=false,pending=0;
   const buttonSizes=new WeakMap();
   function paintButtons(){
-    for(const button of document.querySelectorAll('.app .controls button,.app .topBack,#skipBtn,.tutorialActions button,#ovBtns button')){
+    for(const button of document.querySelectorAll('.app .controls button,.app .topBack,#skipBtn,.tutorialActions button:not(#exitLesson),#ovBtns button')){
       if(!button.offsetWidth||!button.offsetHeight)continue;
       button.classList.add('cpButton');
       if(!button.querySelector('.cpLabel')){

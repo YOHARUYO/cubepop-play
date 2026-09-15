@@ -405,6 +405,7 @@
 <link rel="stylesheet" href="pastel-garden.css">
 <link rel="stylesheet" href="home-map.css">
 <link rel="stylesheet" href="core-play.css">
+<link rel="stylesheet" href="interaction-polish.css">
 <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/geometries/RoundedBoxGeometry.js":"./vendor/RoundedBoxGeometry.js","three/addons/environments/RoomEnvironment.js":"./vendor/RoomEnvironment.js"}}</script>
 </head>
 <body class="mHome">
@@ -497,13 +498,14 @@
 
 <div id="tutorialOverlay" hidden>
   <svg id="tutorialDim" aria-hidden="true"><defs><mask id="tutorialMask" maskUnits="userSpaceOnUse"><rect id="tutorialMaskBase" fill="white"/><g id="tutorialHoles"></g></mask></defs><rect id="tutorialShade" fill="#24354A" fill-opacity=".58" mask="url(#tutorialMask)"/><g id="tutorialTargets"></g></svg>
-  <img id="tutorialHand" src="assets/pastel-garden/tutorial/gesture-tap.svg" alt="" hidden>
-  <img id="tutorialArrow" src="assets/pastel-garden/tutorial/swipe-arrow-right.svg" alt="" hidden>
+  <img id="tutorialHand" src="assets/interaction/gesture-roll-hand.svg" alt="" hidden>
+  <svg id="tutorialHandLink" aria-hidden="true" hidden><path/></svg>
   <section class="playGuide" id="playGuide" aria-label="플레이 안내" role="status" aria-live="polite" aria-atomic="true">
     <span id="guideCount"></span><strong id="guideTitle"></strong>
     <p class="guideText" id="guideText"></p><p class="guideNote" id="guideNote"></p>
+    <div id="tutorialDirection" hidden><span class="directionIcon"><img id="tutorialArrow" src="assets/interaction/roll-arc-right.svg" alt=""></span><span><strong id="directionText"></strong><small>제자리에서 90° 회전</small></span></div>
   </section>
-  <div class="tutorialActions"><button id="cancelPick" type="button" hidden>선택 취소</button><button id="exitLesson" type="button"><img src="assets/pastel-garden/tutorial/close.svg" alt="">연습 종료</button></div>
+  <div class="tutorialActions"><button id="cancelPick" type="button" hidden>선택 취소</button><button id="exitLesson" type="button" aria-label="연습 종료"><img src="assets/interaction/tutorial-close.svg" alt=""><span>종료</span></button></div>
 </div>
 <div class="rollPreview" id="rollPreview" role="tooltip" hidden>
   <div class="previewCross" aria-hidden="true">
@@ -527,7 +529,7 @@
     </div>
     <div class="setDesc">비비드 모드는 적록 색약에서도 파랑·보라, 빨강·주황이 뚜렷이 구분되도록 검증된 고채도 팔레트입니다.</div>
     <label class="settingRow" for="previewToggle"><span>큐브 면 배치 말풍선</span><input type="checkbox" id="previewToggle" role="switch" checked></label>
-    <p class="settingHelp">큐브를 누르고 있으면 현재 보이는 면을 가운데에, 실제 상하좌우 옆면의 색을 주변에 십자 그림으로 보여줍니다.</p>
+    <p class="settingHelp">큐브를 누르고 있으면 가운데는 현재 윗면, 주변은 실제 상하좌우 옆면을 보여줍니다. 예를 들어 왼쪽 면을 윗면으로 올리려면 오른쪽으로 굴리세요.</p>
     <button class="tutorialReplay" onclick="replayTutorial()" data-game-lock>튜토리얼 다시 해보기</button>
     <p class="settingHelp">학습 스테이지 1부터 다시 연습합니다. 기존 진행 기록은 유지됩니다.</p>
   </div>
@@ -618,7 +620,7 @@ function randOrient(){
   for(let i=0;i<14;i++)o=pull(o,ds[Math.floor(gameplayRandom()*4)]);
   return o;
 }
-const colIdx=(cube,slot)=>faceColorIdx[cube.orient[slot]];
+const colIdx=(cube,slot)=>(cube.faceColors||faceColorIdx)[cube.orient[slot]];
 
 /* ================= board DOM ================= */
 function sizeBoard(){
@@ -1233,7 +1235,15 @@ function buildBoard(){
   }
   const lesson=CubePopRules.lessons[stageNo];
   if(lesson){
-    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){grid[r][c].orient={...lesson.layout[r][c]};paint(grid[r][c]);}
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+      const cube=grid[r][c];cube.orient={...lesson.layout[r][c]};
+      if(lesson.targetSideColors&&r===lesson.target[0]&&c===lesson.target[1]){
+        // Attach colors to physical face IDs so artwork and rules stay in sync after rolling.
+        cube.faceColors=faceColorIdx.slice();
+        for(const [slot,color] of Object.entries(lesson.targetSideColors))cube.faceColors[cube.orient[slot]]=color;
+      }
+      paint(cube);
+    }
     return;
   }
   let guard=0;
@@ -1544,6 +1554,8 @@ window.addEventListener('orientationchange',()=>setTimeout(fitBoard,150));
 
 /* ================= init ================= */
 </script>
+<script src="render/symbols.js"></script>
+<script src="interaction-layout.js"></script>
 <script src="improvements.js"></script>
 <script src="pastel-garden.js"></script>
 <script src="tutorial-ui.js"></script>
