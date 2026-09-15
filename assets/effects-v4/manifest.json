@@ -1,0 +1,105 @@
+{
+  "version": "5.0-normal-fragment-update",
+  "lightLayerGain": 0.85,
+  "normal": {
+    "id": "FX-01",
+    "chipsPerCell": 8,
+    "creamChipsPerCell": 2,
+    "particleDisplayBoxW": [
+      0.3,
+      0.335,
+      0.37,
+      0.405
+    ],
+    "creamChipDisplayBoxW": 0.18,
+    "particleLifeMs": 200,
+    "flashLifeMs": 45,
+    "flashMaxOpacity": 0.38,
+    "flashDisplayBoxW": [
+      0.45,
+      0.85
+    ],
+    "groundDamage": false,
+    "sandstone": false,
+    "source": "source/normal-v5-renderer.js"
+  },
+  "entries": [
+    {
+      "id": "RUPTURE",
+      "file": "cream-rupture.png",
+      "status": "reused-approved-horizontal-v4-texture",
+      "width": 1254,
+      "height": 1254,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "grid": [
+        1,
+        1
+      ],
+      "colorSpace": "srgb",
+      "alpha": "straight RGBA",
+      "blend": "source-over",
+      "tint": false,
+      "trim": false,
+      "fullCanvasPreserved": true,
+      "displayBoxW": [
+        2.1,
+        1.65
+      ],
+      "sha256": "60a28ee0f784e9b40be0e9e7ebb98f7c64dde73b404fdc588b1bd8034d816e38",
+      "identicalToHorizontalSource": true,
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            1254,
+            1254
+          ],
+          "durationMs": null
+        }
+      ]
+    },
+    {
+      "id": "STONE",
+      "file": "sandstone-shard.png",
+      "status": "reused-approved-horizontal-v4-texture",
+      "width": 1254,
+      "height": 1254,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "grid": [
+        1,
+        1
+      ],
+      "colorSpace": "srgb",
+      "alpha": "straight RGBA",
+      "blend": "source-over",
+      "tint": false,
+      "trim": false,
+      "fullCanvasPreserved": true,
+      "displayBoxW": [
+        0.5,
+        0.62,
+        0.74
+      ],
+      "sha256": "c407d0c9f8c5241b321d9435a6f9933480466ce6d795a5d089cb97a869129fc6",
+      "identicalToHorizontalSource": true,
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            1254,
+            1254
+          ],
+          "durationMs": null
+        }
+      ]
+    }
+  ]
+}

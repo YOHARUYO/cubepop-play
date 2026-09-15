@@ -284,7 +284,7 @@
   .mapFade.bot{bottom:0;background:linear-gradient(rgba(18,21,29,0),#12151d 88%);}
   .mapFade.show{opacity:1;}
   .mapCanvas{position:relative;width:370px;margin:0 auto;}
-  .mapCanvas svg{position:absolute;inset:0;width:100%;height:100%;}
+  .mapCanvas > svg{position:absolute;inset:0;width:100%;height:100%;}
   .pnode{position:absolute;width:62px;height:62px;transform:translate(-50%,-50%);border:none;background:none;padding:0;cursor:pointer;font-family:inherit;}
   .pnode:disabled{cursor:default;}
   /* 게임 화면 큐브와 동일 구조의 미니 큐브 스프라이트:
@@ -403,6 +403,8 @@
 <link rel="stylesheet" href="sandstone.css">
 <link rel="stylesheet" href="frame.css">
 <link rel="stylesheet" href="pastel-garden.css">
+<link rel="stylesheet" href="home-map.css">
+<link rel="stylesheet" href="core-play.css">
 <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/geometries/RoundedBoxGeometry.js":"./vendor/RoundedBoxGeometry.js","three/addons/environments/RoomEnvironment.js":"./vendor/RoomEnvironment.js"}}</script>
 </head>
 <body class="mHome">
@@ -854,6 +856,7 @@ async function doClearStep(clearSet,spawns,mult,epicenter,bursts=[]){
   });
   updateHUD();
   await sleep(fx?fx.coreMs:290+maxDelay);
+  window.CubePopEffects?.release?.(fx);
   cleared.forEach(e=>{e.el.style.transitionDelay='';e.el.remove();grid[e.r][e.c]=null;});
   // pop new bombs in at their spawn cell (no slide from origin), then gravity drops them
   const fresh=[];
@@ -1188,6 +1191,7 @@ function winStage(){
     '<button onclick="exitToMap()">맵으로</button>';
   $('overlay').classList.add('show');
   updateHUD();
+  window.CorePlay?.result('win');
 }
 function failStage(){
   over=true;
@@ -1198,6 +1202,7 @@ function failStage(){
   $('ovSub').innerHTML='남은 목표: '+left;
   $('ovBtns').innerHTML='<button class="primary" onclick="restartStage()">다시 도전</button><button onclick="exitToMap()">맵으로</button>';
   $('overlay').classList.add('show');
+  window.CorePlay?.result('fail',goals.filter(g=>g.got<g.need).map(g=>({shape:stageColors[g.ci],hex:colHex(g.ci),symbol:colSym(g.ci),remaining:g.need-g.got})));
 }
 function updateHUD(){
   window.CubePopEffects?.warm(stageColors.map((_,ci)=>colHex(ci)));
@@ -1304,6 +1309,7 @@ function avatarCubeHTML(){
 }
 let mapPos=[],avatarStage=1,avatarEl=null,avatarRot=0,mapAnim=false;
 function renderMap(){
+  if(window.HomeMap)return window.HomeMap.render();
   const GAP=96, XS=[70,185,300,185], W=370, topPad=124, botPad=72; /* 상단 여유: 30스테이지 노드+아바타가 잘리지 않도록 */
   const H=topPad+botPad+(TOTAL_STAGES-1)*GAP;
   const cy=n=>H-botPad-(n-1)*GAP, cx=n=>XS[(n-1)%4];
@@ -1348,7 +1354,7 @@ function renderMap(){
 }
 function placeAvatar(n){
   avatarEl.style.left=mapPos[n].x+'px';
-  avatarEl.style.top=(mapPos[n].y-72)+'px';
+  avatarEl.style.top=(mapPos[n].y-(window.HomeMap?.avatarOffset()||72))+'px';
 }
 function updateMapFades(){
   const sc=$('mapScroll');if(!sc)return;
@@ -1381,7 +1387,7 @@ function rollFx(target,done){
     cube.style.transition='transform .1s linear';
     cube.style.transform=avMat.toString();
   };
-  const setPos=(x,y)=>{avatarEl.style.left=x+'px';avatarEl.style.top=(y-72)+'px';};
+  const setPos=(x,y)=>{avatarEl.style.left=x+'px';avatarEl.style.top=(y-(window.HomeMap?.avatarOffset()||72))+'px';};
   const step=()=>{
     const nk=k+dir;
     const p0=mapPos[k],p1=mapPos[nk];
@@ -1486,6 +1492,7 @@ document.addEventListener('gesturechange',e=>e.preventDefault());
 function fitBoard(){
   // 핀치줌 중에는 재배치하지 않음 (줌 도중 블록 간격이 실시간으로 변하는 문제 방지)
   if(window.visualViewport&&window.visualViewport.scale>1.02)return;
+  if(window.CorePlay?.fit())return;
   const natural=704,board=$('board');if(!board)return;
   window.PastelGarden?.layoutGoals();
   // Start from the new viewport, not the stale scrollbar left by the old board.
@@ -1542,6 +1549,9 @@ window.addEventListener('orientationchange',()=>setTimeout(fitBoard,150));
 <script src="tutorial-ui.js"></script>
 <script src="render/effects-plan.js"></script>
 <script src="render/game-effects.js"></script>
+<script src="home-map-surfaces.js"></script>
+<script src="home-map.js"></script>
+<script src="core-play.js"></script>
 <script>
 sizeBoard();
 setupStage(0,false);

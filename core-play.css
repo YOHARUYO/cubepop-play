@@ -1,0 +1,70 @@
+/* Core Play Pop owns play UI only. Board projection and artwork stay in frame.css. */
+html:has(body.mPlay){scrollbar-width:none}
+html:has(body.mPlay)::-webkit-scrollbar{display:none}
+@font-face{font-family:CP Jua;src:url('assets/fonts/jua-400.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:CP Noto;src:url('assets/fonts/noto-sans-kr-400.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:CP Noto;src:url('assets/fonts/noto-sans-kr-700.woff2') format('woff2');font-weight:700;font-display:swap}
+body.mPlay{--pg-ink:#243E61;--pg-top:#FFF8E9;--pg-bottom:#FFF8E9;--pg-border:#BBA88D;--pg-lilac:#243E61;padding:max(10px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(22px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));font:400 14px/22px 'CP Noto',sans-serif;font-synthesis:none;color:#243E61}
+body.mPlay .app{width:100%;max-width:704px;gap:0;align-items:center}
+body.mPlay .gameBrand{position:relative;display:flex;justify-content:center;width:100%;height:102px;flex:0 0 102px;margin:0}
+body.mPlay .stageHead{height:100%;justify-content:flex-start;gap:4px}
+body.mPlay .stageHead h1{position:relative;width:120px;height:80px;margin:0;letter-spacing:0;line-height:0}
+body.mPlay .cpLogo{display:block;width:100%;height:100%;object-fit:contain}
+body.mPlay .stageHead .sn{font:700 13px/18px 'CP Noto',sans-serif;letter-spacing:2px;color:#6F625D}
+body.mPlay .topBack{position:absolute;left:12px;top:10px;width:44px;height:44px}
+body.mPlay .goalsCard.card{width:calc(100% - 16px);max-width:100%;min-height:64px;margin:13px 0 0;gap:12px;box-shadow:none}
+body.mPlay .movesBadge,body.mPlay .goalsCard[data-compact=true] .movesBadge{flex:0 0 68px;width:68px;min-height:64px;padding:0 10px 0 0}
+body.mPlay .movesBadge b,body.mPlay #movesV.low{font:400 40px/42px 'CP Jua',sans-serif;color:#243E61;white-space:normal;overflow-wrap:anywhere;max-width:100%}
+body.mPlay .movesBadge span{font:400 13px/18px 'CP Noto',sans-serif}
+body.mPlay .goalsContent h2{font:700 13px/18px 'CP Noto',sans-serif;margin:0 0 7px}
+body.mPlay .goalsRow{gap:8px}
+body.mPlay .gchip{height:auto;min-height:38px}
+body.mPlay .goalTop,body.mPlay .goalsRow[data-check-below=true] .goalTop{height:auto;min-height:22px;gap:5px;padding-right:15px}
+body.mPlay .gchip .dot,body.mPlay .goalsCard[data-compact=true] .dot{width:20px;height:20px;flex:0 0 20px}
+body.mPlay .gchip .cnt,body.mPlay .goalMeasure{font:700 14px/22px 'CP Noto',sans-serif}
+body.mPlay .gchip .cnt{min-width:0;white-space:normal;overflow-wrap:anywhere}
+body.mPlay .goalTrack,body.mPlay .goalsRow[data-check-below=true] .goalTrack{position:relative;top:auto;left:auto;right:auto;height:7px;margin-top:7px;border-radius:4px;background:#DDD0BB;box-shadow:inset 0 1px #F6EBD7}
+body.mPlay .goalCheck,body.mPlay .goalsRow[data-check-below=true] .goalCheck{width:13px;height:13px;top:4px;right:0}
+body.mPlay .boardWrap{margin:13px auto 0;flex:0 0 auto}
+body.mPlay .scorePanel{width:295px;max-width:calc(100% - 36px);height:100px;flex:0 0 100px;margin:15px 0 0;border:1px solid #BBA88D;border-bottom:3px solid #243E61;border-radius:24px;background:#FFF8E9;box-shadow:none;overflow:visible}
+body.mPlay .scoreLabel{top:4px;font:700 11px/14px 'CP Noto',sans-serif;letter-spacing:1.5px}
+body.mPlay #scoreV{top:18px;left:8px;right:8px;font:400 30px/30px 'CP Jua',sans-serif;white-space:normal;overflow-wrap:anywhere}
+body.mPlay .scorePanel .gaugeRow{top:auto;bottom:22px;left:50%;width:calc(100% - 58px);height:7px}
+body.mPlay .gaugeBar{height:7px}
+body.mPlay .gPin{width:30px;height:30px}
+body.mPlay .controls{width:calc(100% - 52px);max-width:576px;height:50px;flex:0 0 50px;margin:30px 0 0;gap:12px}
+body.mPlay .controls button{width:138px;height:50px;flex:0 1 138px}
+body.mPlay .cpButton,body.mPlay .cpButton:hover,body.mPlay .cpButton:active,body.mPlay #ovBtns .cpButton.primary{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:0;border:0;border-radius:16px;background:none;box-shadow:none;filter:none;transform:none;opacity:1;font:400 20px/24px 'CP Jua',sans-serif;color:#243E61;isolation:isolate;overflow:visible;cursor:pointer;text-shadow:none}
+body.mPlay .cpButton::before,body.mPlay .cpButton::after{display:none}
+body.mPlay .cpSurface{position:absolute;inset:0;display:block;width:100%;height:calc(100% + 7px);pointer-events:none;z-index:-1;max-width:none;filter:none;box-shadow:none;transition:transform 100ms}
+body.mPlay .topBack.cpButton{position:absolute;left:12px;top:10px}
+body.mPlay .cpLabel{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;max-width:calc(100% - 12px);pointer-events:none;transition:transform 100ms;line-height:24px}
+body.mPlay .cpLabel img{width:20px;height:20px;flex:0 0 20px}
+body.mPlay .cpButton:hover:not(:disabled) .cpLabel{color:#147A96}
+body.mPlay .cpButton:active:not(:disabled) :is(.cpSurface,.cpLabel){transform:translateY(2px)}
+body.mPlay .cpButton:disabled{cursor:default}
+body.mPlay .cpButton:disabled .cpSurface{opacity:.45}
+body.mPlay .cpButton:focus-visible{outline:2px solid #147A96;outline-offset:5px}
+/* Legacy :is(...,#skipBtn) selectors carry ID specificity for every button. */
+body.mPlay :is(.cpButton,#skipBtn.cpButton):is(:hover,:active,:disabled){background:none;box-shadow:none;filter:none;transform:none;opacity:1}
+body.mPlay :is(.cpButton,#skipBtn.cpButton):focus-visible{outline:2px solid #147A96;outline-offset:5px}
+body.mPlay #skipBtn.cpButton:is(:hover,:active,:disabled){transform:translateX(-50%)}
+body.mPlay #skipBtn.cpButton{position:absolute;left:50%;transform:translateX(-50%);width:210px;height:44px}
+body.mPlay .tutorialActions .cpButton{width:128px;height:44px;font-size:18px}
+body.mPlay :is(.guideText,#ovSub){font:400 14px/23px 'CP Noto',sans-serif}
+body.mPlay #guideTitle{font:700 15px/22px 'CP Noto',sans-serif}
+body.mPlay .coreResultLayer{position:fixed;inset:0;z-index:80;background:rgb(36 53 74 / .58);display:flex;align-items:center;justify-content:center;padding:16px 20px;overflow:auto;overscroll-behavior:contain}
+.coreResultLayer[hidden]{display:none!important}
+body.mPlay #overlay{position:relative;inset:auto;transform:none;width:332px;max-width:100%;min-height:270px;max-height:calc(100dvh - 32px);overflow:auto;margin:0;padding:20px 20px 22px;gap:8px;border:2px solid #243E61;border-bottom:5px solid #243E61;border-radius:27px;background:#FFF8E9;box-shadow:none;text-align:center}
+body.mPlay #ovTitle{font:400 28px/36px 'CP Jua',sans-serif;overflow-wrap:anywhere}
+body.mPlay #ovStars:empty{display:none}
+body.mPlay #ovSub{width:100%;color:#6F625D}
+body.mPlay .cpRemaining{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 18px;margin:12px 0 6px}
+body.mPlay .cpRemainingItem{display:flex;align-items:center;gap:7px;font-weight:700;color:#243E61;overflow-wrap:anywhere;max-width:100%}
+body.mPlay .cpRemainingItem .gchip{width:20px;height:20px;min-height:0;flex:none}
+body.mPlay #ovBtns{display:flex;flex-direction:column;gap:17px;margin-top:8px;width:100%;padding-bottom:0}
+body.mPlay #ovBtns .cpButton{width:100%;height:44px;flex:0 0 44px}
+@media(min-width:768px){body.mPlay{padding-top:max(4px,env(safe-area-inset-top));padding-bottom:max(11px,env(safe-area-inset-bottom))}body.mPlay .gameBrand{height:87px;flex-basis:87px}body.mPlay .stageHead h1{width:100px;height:67px}body.mPlay .stageHead{gap:2px}body.mPlay .goalsCard.card{width:max(460px,82%);max-width:100%;margin-top:7px;min-height:60px}body.mPlay .movesBadge{min-height:60px}body.mPlay .boardWrap{margin-top:0}body.mPlay .scorePanel{width:296px;margin-top:12px}body.mPlay .controls{width:310px;height:44px;flex-basis:44px;margin-top:15px}body.mPlay .controls button{width:140px;height:44px;flex-basis:140px}}
+@media(max-width:340px){body.mPlay{padding:7px max(4px,env(safe-area-inset-right)) 10px max(4px,env(safe-area-inset-left))}body.mPlay .gameBrand{height:91px;flex-basis:91px}body.mPlay .stageHead h1{width:106px;height:70px}body.mPlay .stageHead{gap:3px}body.mPlay .goalsCard.card{margin-top:9px}body.mPlay .boardWrap{margin-top:11px}body.mPlay .goalsCard.card{gap:8px}body.mPlay .movesBadge,body.mPlay .goalsCard[data-compact=true] .movesBadge{flex-basis:62px;width:62px;padding-right:6px}body.mPlay .gchip .dot{width:16px;height:16px;flex-basis:16px}body.mPlay .scorePanel{width:276px;max-width:calc(100% - 36px)}body.mPlay .controls{width:calc(100% - 32px);height:44px;flex-basis:44px;margin-top:15px}body.mPlay .controls button{width:130px;height:44px;flex-basis:130px;font-size:19px}body.mPlay #overlay{padding:18px 16px 22px}}
+@media(prefers-reduced-motion:reduce){body.mPlay .cpButton :is(.cpSurface,.cpLabel){transition:none;transform:none!important}}
+@media(max-width:340px){body.mPlay .gchip .cnt,body.mPlay .goalMeasure{font-size:13px}body.mPlay .goalsCard[data-compact=true] .gchip .dot{width:16px;height:16px;flex-basis:16px}body.mPlay .goalTop{gap:3px;padding-right:13px}}
