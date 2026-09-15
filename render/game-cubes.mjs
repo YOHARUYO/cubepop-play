@@ -57,7 +57,9 @@ export function createCubeVisuals(bridge){
     const spawning=entity.el.classList.contains('spawning');
     if(spawning&&!record.spawning)record.spawnStart=now;
     record.spawning=spawning;
-    if(spawning&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+    const fxPose=window.CubePopEffects?.sample(entity,now);
+    if(fxPose){scale*=fxPose.scale;opacity*=fxPose.opacity;}
+    if(spawning&&!fxPose&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
       const t=Math.min(1,(now-record.spawnStart)/380),points=[[0,.05],[.55,1.32],[.78,.92],[1,1]];
       const i=points.findIndex((p,i)=>i>0&&t<=p[0]),a=points[Math.max(0,i-1)],b=points[Math.max(1,i)];
       const u=(t-a[0])/(b[0]-a[0]);scale*=a[1]+(b[1]-a[1])*u*u*(3-2*u);opacity*=Math.min(1,.15+t*2);

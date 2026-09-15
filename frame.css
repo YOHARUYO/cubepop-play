@@ -13,6 +13,7 @@ body{padding:26px max(8px,env(safe-area-inset-right)) 6px max(8px,env(safe-area-
 .slot{display:none;}
 .board3d .cubeBox,.board3d .ringBox,.board3d .cubeArt{visibility:hidden;}
 .board3d .cube::before{display:none;}
+.board3d.effectsReady .bomb.spawning::after{display:none;}
 .board3d .cube.lessonTarget[data-roll]::before{display:block;}
 .board3d .cube.previewTarget{outline:2px solid #fff9e9;outline-offset:-2px;box-shadow:0 0 0 1px #776853;border-radius:5px;}
 

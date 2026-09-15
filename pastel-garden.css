@@ -6,18 +6,32 @@ body.mPlay{padding:max(16px,env(safe-area-inset-top)) max(8px,env(safe-area-inse
 .stageHead{text-align:center;display:flex;flex-direction:column;align-items:center;}
 .gameBrand h1{font-size:24px;line-height:28px;font-weight:900;letter-spacing:2px;}
 .stageHead .sn{font-size:10px;line-height:15px;font-weight:700;letter-spacing:2px;color:var(--pg-muted);}
-.gameBrand .colors,.goalsContent h2{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);}
-.goalsCard.card{display:flex;align-self:center;width:fit-content;max-width:calc(100% - 8px);align-items:center;gap:8px;padding:0;margin:20px 0;min-height:64px;flex:0 0 auto;border:0;background:none;}
-.movesBadge{flex:0 0 56px;width:56px;height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:1px solid #72876c;border-radius:28px 28px 7px 7px;background:linear-gradient(#849580,#82937e);box-shadow:inset 0 1px #cfdacb;}
-.movesBadge b,#movesV.low{color:#fffcf6;font-size:29px;line-height:32px;font-weight:800;font-variant-numeric:tabular-nums;}
-.movesBadge span{font-size:9px;line-height:13px;font-weight:700;color:#142638;white-space:nowrap;}
-.goalsContent{flex:0 1 auto;width:max-content;max-width:276px;min-width:0;}.goalsRow{display:grid;grid-template-columns:repeat(3,max-content);align-items:center;gap:6px;}
-.gchip,.scorePanel,.controls button,.topBack,.tutorialActions button,#ovBtns button,#skipBtn,.playGuide{border:1px solid var(--pg-border);background:linear-gradient(145deg,var(--pg-top),var(--pg-bottom));box-shadow:inset 0 1px #fff,0 2px var(--pg-lilac),1px 3px 4px #75604b12;color:var(--pg-ink);}
-.gchip{position:relative;display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:max-content;min-width:68px;max-width:88px;height:40px;gap:4px;padding:0 7px;border-radius:20px;}
-.gchip .dot{display:flex;align-items:center;justify-content:center;flex:0 0 19px;width:19px;height:19px;border-radius:3px;color:transparent;font-size:0;box-shadow:inset 0 1px #ffffff77,inset 0 -1px #37281922;}
+.gameBrand .colors{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);}
+.goalsCard.card,.controls{width:clamp(288px,82%,576px);max-width:calc(100% - 16px);}
+.goalsCard.card{display:flex;align-self:center;align-items:stretch;gap:14px;padding:0;margin:20px 0;min-height:64px;flex:0 0 auto;border:0;background:none;}
+.movesBadge{flex:0 0 72px;width:72px;min-height:64px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:3px 8px 0 0;gap:0;border:0;border-radius:0;background:none;box-shadow:none;}
+.movesBadge::after{content:'';position:absolute;right:0;top:5px;bottom:0;width:1px;background:#BCA994;}
+.movesBadge b,#movesV.low{color:#29435B;font-size:38px;line-height:43px;font-weight:800;font-variant-numeric:tabular-nums;}
+.movesBadge span{font-size:11px;line-height:16px;font-weight:400;color:#6F625D;white-space:nowrap;}
+.goalsContent{flex:1;min-width:0;}.goalsContent h2{font-size:13px;line-height:16px;font-weight:700;margin:0 0 8px;color:#29435B;}
+.goalsRow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:start;gap:8px;}
+.scorePanel,.controls button,.topBack,.tutorialActions button,#ovBtns button,#skipBtn,.playGuide{border:1px solid var(--pg-border);background:linear-gradient(145deg,var(--pg-top),var(--pg-bottom));box-shadow:inset 0 1px #fff,0 2px var(--pg-lilac),1px 3px 4px #75604b12;color:var(--pg-ink);}
+.gchip{position:relative;display:block;width:100%;min-width:0;max-width:none;height:40px;padding:0;border:0;border-radius:0;background:none;box-shadow:none;}
+.goalTop{display:flex;align-items:center;gap:6px;height:20px;padding-right:18px;}
+.gchip .dot{display:flex;align-items:center;justify-content:center;flex:0 0 20px;width:20px;height:20px;border-radius:2px;color:transparent;font-size:0;box-shadow:none;}
 .gchip .dot[data-shape="0"]{border-radius:50%;}.gchip .dot[data-shape="1"]{clip-path:polygon(50% 0,100% 100%,0 100%);}.gchip .dot[data-shape="3"]{clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 94%,50% 72%,21% 94%,32% 57%,2% 35%,39% 35%);}.gchip .dot[data-shape="4"]{clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);}.gchip .dot[data-shape="5"]{clip-path:polygon(50% 20%,65% 2%,85% 2%,100% 19%,100% 42%,50% 100%,0 42%,0 19%,15% 2%,35% 2%);}
-.gchip .cnt{font-size:11px;font-weight:700;line-height:16px;white-space:nowrap;color:var(--pg-ink);font-variant-numeric:tabular-nums;}
-.gchip.done{padding:0 5px;gap:2px;}.gchip.done .cnt{color:var(--pg-complete);}.goalCheck{position:static;flex:0 0 10px;width:10px;height:10px;}
+.gchip .cnt,.goalMeasure{font-size:13px;font-weight:700;line-height:20px;white-space:nowrap;color:var(--pg-ink);font-variant-numeric:tabular-nums;}
+.goalMeasure{position:absolute;visibility:hidden;width:max-content;pointer-events:none;}
+.gchip.done{padding:0;}.gchip.done .cnt{color:var(--pg-ink);}
+.goalCheck{position:absolute;right:0;top:4px;width:12px;height:12px;visibility:hidden;}
+.goalTrack{position:absolute;left:0;right:0;top:30px;height:4px;border-radius:2px;background:linear-gradient(#D9CCBC,#E3D7C7);overflow:hidden;}
+.goalFill{height:100%;width:0;border-radius:inherit;transition:width 180ms ease-out;}
+.goalsCard[data-compact=true] .movesBadge{flex-basis:64px;width:64px;}
+.goalsCard[data-compact=true] .dot{width:16px;height:16px;flex-basis:16px;}
+.goalsRow[data-check-below=true] .goalTop{padding-right:0;}
+.goalsRow[data-check-below=true] .goalTrack{top:24px;}
+.goalsRow[data-check-below=true] .goalCheck{top:30px;width:10px;height:10px;}
+@media(prefers-reduced-motion:reduce){.goalFill{transition:none;}}
 .scorePanel{position:relative;align-self:center;width:336px;max-width:calc(100% - 32px);height:100px;flex:0 0 100px;margin:14px 0 0;transform:none;border-radius:50px;text-align:center;overflow:visible;}
 .scoreLabel{position:absolute;top:6px;left:0;right:0;font-size:9px;line-height:11px;letter-spacing:2px;font-weight:700;color:var(--pg-muted);}
 #scoreV{position:absolute;top:20px;left:12px;right:12px;font-size:26px;line-height:28px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;}
@@ -27,7 +41,7 @@ body.mPlay{padding:max(16px,env(safe-area-inset-top)) max(8px,env(safe-area-inse
 .gPin{position:absolute;top:50%;width:30px;height:30px;transform:translate(-50%,-50%);pointer-events:none;font-size:0;line-height:0;transition:none;}
 .gPin,.gPin.on{text-shadow:none;}.gPin1{left:25%;}.gPin2{left:60%;}.gPin3{left:100%;}.gPin img{display:block;width:100%;height:100%;object-fit:contain;}
 .gScore{position:absolute;width:1px;height:1px;min-width:0;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
-.controls{display:flex;align-self:center;width:clamp(288px,82%,576px);max-width:calc(100% - 16px);justify-content:space-between;gap:16px;height:48px;flex:0 0 48px;padding:0;margin:18px 0 0;}
+.controls{display:flex;align-self:center;justify-content:space-between;gap:16px;height:48px;flex:0 0 48px;padding:0;margin:18px 0 0;}
 .controls button,.topBack,.tutorialActions button,#ovBtns button,#skipBtn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-width:44px;min-height:44px;padding:8px 14px;border-radius:999px;font:700 14px/20px 'Segoe UI','Malgun Gothic',sans-serif;cursor:pointer;transition:transform 100ms,box-shadow 100ms,background 100ms;}
 .controls button{width:112px;height:48px;}.controls img,.topBack img{width:22px;height:22px;display:block;}
 .topBack{position:static;width:44px;height:44px;padding:10px;}
@@ -84,15 +98,11 @@ body.mPlay{padding:max(16px,env(safe-area-inset-top)) max(8px,env(safe-area-inse
  body.mPlay::before{background-size:cover;background-position:center top;}
  body.mPlay .app{--landscape-hud-width:344px;width:max(var(--landscape-board,400px),var(--landscape-hud-width));max-width:none;}
  .gameBrand{margin:0;}
- .goalsCard.card{align-self:center;width:fit-content;align-items:flex-start;gap:18px;margin:8px 0 0;}
- .goalsContent{flex:0 1 auto;width:max-content;max-width:calc(var(--landscape-hud-width) - 80px);padding:8px 0;}
- .goalsRow{gap:8px 6px;}
- .gchip{height:48px;min-width:calc((var(--landscape-hud-width) - 80px)/3 - 6px);max-width:100%;padding:0 10px;gap:8px;border-radius:17px;}
- .gchip .dot{width:22px;height:22px;flex-basis:22px;}.gchip .cnt{font-size:13px;line-height:18px;}
- .gchip.done{padding:0 5px;gap:2px;}
+ .goalsCard.card,.controls{width:var(--landscape-controls,328px);}
+ .goalsCard.card{margin:8px 0 0;}
  .scorePanel{width:var(--landscape-score,280px);max-width:none;height:92px;flex-basis:92px;margin-top:16px;border-radius:46px;}
  .scorePanel .gaugeRow{top:64px;width:calc(100% - 48px);}.gPin{width:26px;height:26px;}
- .controls{align-self:center;width:var(--landscape-controls,328px);justify-content:space-between;margin-top:12px;height:48px;flex-basis:48px;}
+ .controls{align-self:center;justify-content:space-between;margin-top:12px;height:48px;flex-basis:48px;}
  .controls button{height:48px;}
  .playGuide{min-height:184px;}#tutorialOverlay[data-phase=pick] .playGuide{min-height:206px;}
  #tutorialOverlay[data-observing=true] .playGuide{min-height:144px;}

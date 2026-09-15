@@ -801,6 +801,7 @@ function findRuns(){
 
 // detonate every bomb found in clearSet, expanding it (chains). wildColors maps a wildcard cell -> target color.
 function detonate(clearSet,wildColors,skip){
+  const bursts=[];
   const q=[];for(const k of clearSet)if(isBombAt(k))q.push(k);
   const done=new Set();
   while(q.length){
@@ -815,17 +816,27 @@ function detonate(clearSet,wildColors,skip){
       const color=(wildColors&&wildColors.has(k))?wildColors.get(k):mostCommonColor();
       for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const e=grid[r][c];if(e&&matchColor(e)===color)cells.push(r+','+c);}
     }
+    bursts.push({id:b.id,type:b.btype,r:b.r,c:b.c,hex:colHex(b.ci),targets:[...new Set([b.id,...cells.map(kk=>entityAt(kk)?.id).filter(id=>id!==undefined)])]});
     for(const kk of cells){clearSet.add(kk);if(isBombAt(kk)&&!done.has(kk))q.push(kk);}
   }
+  return bursts;
+}
+
+let effectEventSeq=0;
+function effectCell(e){return {id:e.id,entity:e,r:e.r,c:e.c,hex:colHex(e.btype==='W'?0:matchColor(e))};}
+function spawnEffects(entities){
+  if(!window.CubePopEffects?.enabled||!entities.length)return;
+  window.CubePopEffects.spawn({id:++effectEventSeq,cells:entities.map(effectCell),bursts:[]});
 }
 
 let skipReq=false,lastRolled=null;
 function requestSkip(){skipReq=true;$('skipBtn').classList.remove('show');}
 
 // one clear step: count goals, animate out, remove, pop new bombs, then gravity + refill
-async function doClearStep(clearSet,spawns,mult,epicenter){
+async function doClearStep(clearSet,spawns,mult,epicenter,bursts=[]){
   const cleared=[];
   for(const k of clearSet){const e=entityAt(k);if(e)cleared.push(e);}
+  const fx=window.CubePopEffects?.enabled?window.CubePopEffects.play({id:++effectEventSeq,cells:cleared.map(effectCell),bursts,level:mult}):null;
   cleared.forEach(e=>{const g=goals.find(g=>g.ci===matchColor(e));if(g)g.got++;});
   score+=cleared.length*10*mult;
   maxCombo=Math.max(maxCombo,mult);
@@ -835,13 +846,14 @@ async function doClearStep(clearSet,spawns,mult,epicenter){
   // ripple clear: stagger removal by distance from the epicenter (combos), else simultaneous
   let maxDelay=0;
   cleared.forEach(e=>{
+    if(fx)return;
     let delay=0;
     if(epicenter){delay=Math.min(200,Math.hypot(e.r-epicenter.r,e.c-epicenter.c)*24);maxDelay=Math.max(maxDelay,delay);}
     e.el.style.transitionDelay=delay+'ms';
     e.el.style.transform=`translate(${e.c*STEP}px,${e.r*STEP}px) scale(.12)`;e.el.style.opacity=0;
   });
   updateHUD();
-  await sleep(290+maxDelay);
+  await sleep(fx?fx.coreMs:290+maxDelay);
   cleared.forEach(e=>{e.el.style.transitionDelay='';e.el.remove();grid[e.r][e.c]=null;});
   // pop new bombs in at their spawn cell (no slide from origin), then gravity drops them
   const fresh=[];
@@ -852,6 +864,7 @@ async function doClearStep(clearSet,spawns,mult,epicenter){
     b.el.classList.add('spawning');fresh.push(b);
   }
   if(fresh.length)setTimeout(()=>fresh.forEach(b=>b.el&&b.el.classList.remove('spawning')),440);
+  spawnEffects(fresh);
   const falling=[];let fallDuration=0;
   function prepareFall(cube,rows){
     // Give a one-cell drop time to read, and longer columns time to enter.
@@ -880,7 +893,7 @@ async function resolve(forced){
   busy=true;
   window.TutorialUI?.sync();
   const finale=forced&&forced.finale;
-  if(forced){detonate(forced.clearSet,forced.wildColors,forced.skip);await doClearStep(forced.clearSet,new Map(),1,forced.epicenter);}
+  if(forced){const bursts=[...(forced.bursts||[]),...detonate(forced.clearSet,forced.wildColors,forced.skip)];await doClearStep(forced.clearSet,new Map(),1,forced.epicenter,bursts);}
   let mult=1;
   while(true){
     if(skipReq&&goalsDone())break;
@@ -915,10 +928,10 @@ async function resolve(forced){
     // wildcards do NOT auto-match — they only fire on tap. so runs never contain a wildcard here.
     const clearSet=new Set();
     for(const run of runs)for(const e of run.cells){const k=e.r+','+e.c;if(!spawns.has(k))clearSet.add(k);}
-    detonate(clearSet,null);
+    const bursts=detonate(clearSet,null);
     for(const k of spawns.keys())clearSet.delete(k);
 
-    await doClearStep(clearSet,spawns,mult);
+    await doClearStep(clearSet,spawns,mult,undefined,bursts);
     mult++;
   }
   $('skipBtn').classList.remove('show');
@@ -995,6 +1008,7 @@ function adjacentBomb(bomb){
   return null;
 }
 function mergeBurst(mr,mc,tint){
+  if(window.CubePopEffects?.enabled)return;
   const d=document.createElement('div');d.className='mergeBurst';
   d.style.transform=`translate(${mc*STEP+CELL/2}px,${mr*STEP+CELL/2}px)`;
   d.style.setProperty('--tint',tint||'#ffd166');
@@ -1013,6 +1027,7 @@ function mergeBurst(mr,mc,tint){
   setTimeout(()=>d.remove(),660);
 }
 function lineBeam(kind,idx,tint){
+  if(window.CubePopEffects?.enabled)return;
   const d=document.createElement('div');d.className='lineBeam '+(kind==='H'?'lineBeamH':'lineBeamV');
   if(tint)d.style.setProperty('--beam',tint);
   const TH=18;
@@ -1036,6 +1051,7 @@ async function convertColorToBombs(color,mode){   // mode: 'line' | 'A'
     converted.push(nb);
   }
   setTimeout(()=>converted.forEach(b=>b.el&&b.el.classList.remove('spawning','converting')),450);
+  spawnEffects(converted);
   await sleep(900);                                // beat: player sees the color become bombs
   const cs=new Set();converted.forEach(b=>cs.add(b.r+','+b.c));
   lastRolled=null;
@@ -1054,11 +1070,12 @@ async function comboDetonate(a,b,tapped){
   const tintBomb=a.btype!=='W'?a:(b.btype!=='W'?b:null);
   const tint=tintBomb?colHex(tintBomb.ci):null;                                 // color-tint the flash by the combined bomb
   const mr=tapped.r,mc=tapped.c;                                                // 합쳐지는 지점·발동 중심 = 터치한 폭탄 위치
+  const reduceFx=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   // ---- 상대 폭탄이 터치한 폭탄 쪽으로 빨려 들어와 합쳐진 뒤 팡 ----
-  if(other.el){other.el.style.transition='transform .12s cubic-bezier(.55,0,.9,.35)';other.el.style.transform=`translate(${mc*STEP}px,${mr*STEP}px) scale(1.05)`;other.el.style.zIndex=21;}
-  if(tapped.el){tapped.el.style.transition='transform .12s ease-out';tapped.el.style.transform=`translate(${mc*STEP}px,${mr*STEP}px) scale(1.22)`;tapped.el.style.zIndex=22;}
+  if(other.el&&!reduceFx){other.el.style.transition='transform .12s cubic-bezier(.55,0,.9,.35)';other.el.style.transform=`translate(${mc*STEP}px,${mr*STEP}px) scale(1.05)`;other.el.style.zIndex=21;}
+  if(tapped.el&&!reduceFx){tapped.el.style.transition='transform .12s ease-out';tapped.el.style.transform=`translate(${mc*STEP}px,${mr*STEP}px) scale(1.22)`;tapped.el.style.zIndex=22;}
   await sleep(120);
-  [a,b].forEach(x=>{if(!x.el)return;x.el.style.transition='transform .16s cubic-bezier(.3,1.3,.5,1),opacity .16s';x.el.style.transform=`translate(${mc*STEP}px,${mr*STEP}px) scale(.1)`;x.el.style.opacity=0;});
+  [a,b].forEach(x=>{if(!x.el)return;x.el.style.transition=reduceFx?'none':'transform .16s cubic-bezier(.3,1.3,.5,1),opacity .16s';if(!reduceFx)x.el.style.transform=`translate(${mc*STEP}px,${mr*STEP}px) scale(.1)`;x.el.style.opacity=0;});
   mergeBurst(mr,mc,tint);
   await sleep(150);
   [a,b].forEach(x=>{if(x.el)x.el.remove();grid[x.r][x.c]=null;});
@@ -1072,9 +1089,10 @@ async function comboDetonate(a,b,tapped){
   // ---- direct-effect combos ----
   showFloat('결합!');
   const cs=new Set();
+  const comboRays=[];
   const add=(r,c)=>{if(r>=0&&r<ROWS&&c>=0&&c<COLS)cs.add(r+','+c);};
-  const addRow=r=>{for(let c=0;c<COLS;c++)add(r,c);};
-  const addCol=c=>{for(let r=0;r<ROWS;r++)add(r,c);};
+  const addRow=r=>{const targets=[];for(let c=0;c<COLS;c++){add(r,c);if(grid[r][c])targets.push(grid[r][c].id);}comboRays.push({id:`${tapped.id}:H:${r}`,sourceId:tapped.id,type:'H',r,c:mc,hex:tint||'#ffd166',targets});};
+  const addCol=c=>{const targets=[];for(let r=0;r<ROWS;r++){add(r,c);if(grid[r][c])targets.push(grid[r][c].id);}comboRays.push({id:`${tapped.id}:V:${c}`,sourceId:tapped.id,type:'V',r:mr,c,hex:tint||'#ffd166',targets});};
   const addArea=(r,c,rad)=>{for(let dr=-rad;dr<=rad;dr++)for(let dc=-rad;dc<=rad;dc++)add(r+dr,c+dc);};
   if(aW&&bW){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)add(r,c);}          // 색+색: 보드 전체
   else if(isLine(a.btype)&&isLine(b.btype)){addRow(mr);addCol(mc);lineBeam('H',mr,tint);lineBeam('V',mc,tint);} // 라인+라인: 터치 지점 기준 십자
@@ -1086,7 +1104,7 @@ async function comboDetonate(a,b,tapped){
   }
   await sleep(90);
   lastRolled=null;
-  resolve({clearSet:cs,wildColors:null,epicenter:{r:mr,c:mc}});
+  resolve({clearSet:cs,wildColors:null,epicenter:{r:mr,c:mc},bursts:[{id:tapped.id,type:'COMBO',r:mr,c:mc,hex:tint||'#ffd166',targets:[...cs].map(k=>entityAt(k)?.id).filter(id=>id!==undefined)},...comboRays]});
 }
 function pickWildColor(color){
   const wasLessonPick=lessonState&&lessonState.phase==='pick';
@@ -1138,6 +1156,7 @@ async function stageFinale(){
     const nb=makeBomb(r,c,ci,type);grid[r][c]=nb;
     nb.el.style.transition='none';place(nb);nb.el.getBoundingClientRect();nb.el.style.transition='';
     nb.el.classList.add('spawning');converted.push(nb);
+    spawnEffects([nb]);
     await sleep(48);
   }
   if(!converted.length)return;
@@ -1181,19 +1200,13 @@ function failStage(){
   $('overlay').classList.add('show');
 }
 function updateHUD(){
+  window.CubePopEffects?.warm(stageColors.map((_,ci)=>colHex(ci)));
   document.querySelectorAll('[data-game-lock]').forEach(button=>{button.disabled=busy;});
   $('stageV').textContent='STAGE '+(stageNo+1);
   $('colorsV').textContent=stageColors.length+'색 큐브';
   $('movesV').textContent=movesLeft;
   $('movesV').classList.toggle('low',movesLeft<=4);
-  $('goals').innerHTML=goals.map(g=>{
-    const done=g.got>=g.need;
-    return '<div class="gchip'+(done?' done':'')+'">'+
-      '<div class="dot" data-shape="'+stageColors[g.ci]+'" style="background:'+colHex(g.ci)+'">'+colSym(g.ci)+'</div>'+
-      '<div class="cnt">'+(done?'완료':Math.min(g.got,g.need)+'/'+g.need)+'</div>'+
-      (done?'<img class="goalCheck" src="assets/pastel-garden/icons/check.svg" alt="">':'')+
-    '</div>';
-  }).join('');
+  window.PastelGarden.renderGoals(goals.map(g=>({...g,shape:stageColors[g.ci],hex:colHex(g.ci),symbol:colSym(g.ci)})));
   updateStarGauge();
   window.TutorialUI?.sync();
   fitBoard();
@@ -1226,6 +1239,7 @@ function buildBoard(){
   }
 }
 function setupStage(n,keepScore){
+  window.CubePopEffects?.clear();
   window.PastelGarden.reset();
   cancelBoardPointers();
   stageNo=n;
@@ -1258,7 +1272,7 @@ const TOTAL_STAGES=50;
 let progress={unlocked:1,stars:{}};
 try{const p=JSON.parse(localStorage.getItem('cubepop_v2_prog')||'null');if(p&&Number.isInteger(p.unlocked)&&p.unlocked>=1&&p.unlocked<=TOTAL_STAGES&&p.stars&&typeof p.stars==='object')progress=p;}catch(_){}
 function saveProg(){try{localStorage.setItem('cubepop_v2_prog',JSON.stringify(progress));}catch(_){}}
-function setMode(m){cancelBoardPointers();window.TutorialUI?.clear();document.body.classList.remove('mHome','mMap','mPlay');document.body.classList.add(m);}
+function setMode(m){cancelBoardPointers();window.TutorialUI?.clear();window.CubePopEffects?.clear();document.body.classList.remove('mHome','mMap','mPlay');document.body.classList.add(m);}
 function goHome(){setMode('mHome');}
 function goMap(){if(busy)return;unarmWild();renderMap();setMode('mMap');}
 // 아바타 큐브 — 6면 각각 설정 가능 (추후 유저 커스터마이징: faces의 팔레트 인덱스/심볼 교체 지점)
@@ -1473,31 +1487,26 @@ function fitBoard(){
   // 핀치줌 중에는 재배치하지 않음 (줌 도중 블록 간격이 실시간으로 변하는 문제 방지)
   if(window.visualViewport&&window.visualViewport.scale>1.02)return;
   const natural=704,board=$('board');if(!board)return;
-  // Pack up to three goal columns to their actual content width. A stretched
-  // flex row leaves invisible space on the right, shifting the visible HUD.
-  const goalRow=document.querySelector('.goalsRow'),hudCard=document.querySelector('.goalsCard');
-  if(goalRow?.children.length&&hudCard?.offsetWidth){
-    const chips=[...goalRow.children].map(el=>el.getBoundingClientRect().width);
-    const gap=parseFloat(getComputedStyle(goalRow).columnGap)||0;
-    const hudGap=parseFloat(getComputedStyle(hudCard).columnGap)||0;
-    const available=Math.min(parseFloat(getComputedStyle(goalRow.parentElement).maxWidth)||276,
-      document.querySelector('.app').clientWidth-8-document.querySelector('.movesBadge').getBoundingClientRect().width-hudGap);
-    let columns=Math.min(3,chips.length);
-    const packed=n=>Array.from({length:n},(_,c)=>Math.max(...chips.filter((_,i)=>i%n===c))).reduce((a,b)=>a+b,0)+gap*(n-1);
-    while(columns>1&&packed(columns)>available+.1)columns--;
-    goalRow.style.gridTemplateColumns=`repeat(${columns},max-content)`;
-  }
+  window.PastelGarden?.layoutGoals();
   // Start from the new viewport, not the stale scrollbar left by the old board.
   const vw=window.innerWidth||document.documentElement.clientWidth||480;
   const landscape=vw>=720&&vw>=window.innerHeight;
   const phone=vw<=520||(vw<720&&vw>=window.innerHeight);
   if(landscape){
     const hud=document.querySelector('.goalsCard');
-    const layout=window.PastelGarden.landscapeLayout(vw,window.innerHeight,hud?.offsetHeight||64);
     const app=document.querySelector('.app');
-    app.style.setProperty('--landscape-board',layout.boardSize+'px');
-    app.style.setProperty('--landscape-score',layout.scoreWidth+'px');
-    app.style.setProperty('--landscape-controls',layout.controlsWidth+'px');
+    // HUD and controls share a width; settle wrapping after assigning that width.
+    let layout,hudHeight=64;
+    for(let pass=0;pass<3;pass++){
+      layout=window.PastelGarden.landscapeLayout(vw,window.innerHeight,hudHeight);
+      app.style.setProperty('--landscape-board',layout.boardSize+'px');
+      app.style.setProperty('--landscape-score',layout.scoreWidth+'px');
+      app.style.setProperty('--landscape-controls',layout.controlsWidth+'px');
+      window.PastelGarden.layoutGoals();
+      const measured=hud?.offsetHeight||64;
+      if(measured===hudHeight)break;
+      hudHeight=measured;
+    }
     board.style.zoom=layout.boardSize/natural;
     window.TutorialUI?.refresh();return;
   }
@@ -1531,6 +1540,8 @@ window.addEventListener('orientationchange',()=>setTimeout(fitBoard,150));
 <script src="improvements.js"></script>
 <script src="pastel-garden.js"></script>
 <script src="tutorial-ui.js"></script>
+<script src="render/effects-plan.js"></script>
+<script src="render/game-effects.js"></script>
 <script>
 sizeBoard();
 setupStage(0,false);
@@ -1542,6 +1553,7 @@ fitBoard();
 </script>
 <script>
 window.CubePopVisualBridge={
+  colors:()=>stageColors.map((_,ci)=>colHex(ci)),
   entities:()=>grid.flat().filter(Boolean),
   describe:entity=>Object.fromEntries(SLOTS.map(slot=>{
     const ci=entity.bomb?entity.ci:colIdx(entity,slot);
