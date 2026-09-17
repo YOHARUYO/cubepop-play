@@ -23,11 +23,12 @@
   function paintButton(button){
     const rect=button.getBoundingClientRect?.(),w=rect?.width||0,h=rect?.height||0;if(!w||!h)return;
     const square=button.dataset.square==='true',gold=!button.disabled&&(button.dataset.gold==='true'||button.classList.contains('on'));
-    const key=[w,h,square,gold].join();if(sizeCache.get(button)===key)return;
-    sizeCache.set(button,key);button.querySelector('.hmSurface')?.remove();button.insertAdjacentHTML('afterbegin',S.svg(w,h,square,gold));
-    S.raster(w,h,square,gold)?.then(url=>{
+    const theme=button.classList.contains('pnode')?(button.dataset.theme||'sandstone'):'sandstone';
+    const key=[w,h,square,gold,S.plan(w,h,square,gold,theme).key,window.devicePixelRatio].join();if(sizeCache.get(button)===key)return;
+    sizeCache.set(button,key);button.querySelector('.hmSurface')?.remove();button.insertAdjacentHTML('afterbegin',S.svg(w,h,square,gold,theme));
+    S.raster(w,h,square,gold,window.devicePixelRatio||1,theme)?.then(url=>{
       if(sizeCache.get(button)!==key||!button.isConnected)return;
-      const img=document.createElement('img');img.className='hmSurface';img.alt='';img.setAttribute('aria-hidden','true');img.style.width=w+'px';img.style.height=(h+7)+'px';img.dataset.asset=S.plan(w,h,square,gold).id;img.dataset.rasterReady='true';img.src=url;
+      const img=document.createElement('img');img.className='hmSurface';img.alt='';img.setAttribute('aria-hidden','true');img.style.width=w+'px';img.style.height=(h+7)+'px';img.dataset.asset=S.plan(w,h,square,gold,theme).id;img.dataset.theme=S.plan(w,h,square,gold,theme).theme;img.dataset.rasterReady='true';img.src=url;
       button.querySelector('.hmSurface')?.replaceWith(img);
     }).catch(()=>{button.dataset.surfaceError='true';});
   }
@@ -72,10 +73,12 @@
     for(let n=1;n<=TOTAL_STAGES;n++){
       const p=mapPos[n],complete=Object.hasOwn(progress.stars,n),stars=Math.max(0,Math.min(3,progress.stars[n]||0)),un=n<=cur,current=n===cur;
       const state=!un?'locked':current?'next':complete?'complete':'open';
-      html+='<button class="pnode hmButton '+(!un?'locked ':'')+(current?'cur':'')+'" data-n="'+n+'" data-state="'+state+'" data-complete="'+complete+'" data-square="true" data-gold="'+current+'" style="left:'+p.x+'px;top:'+p.y+'px" aria-label="스테이지 '+n+', '+(!un?'잠김':(complete?'완료, 별 '+stars+'개':'미완료'))+(current?', '+(complete&&n===50?'마지막 스테이지':'다음 도전'):'')+'" '+(!un?'disabled':'onclick="selectStage('+(n-1)+')"')+'>'+S.svg(l.face,l.face,true,current&&un)+'<span class="hmLabel">'+n+'</span><span class="hmStars" aria-hidden="true">'+[1,2,3].map(i=>'<img src="assets/pastel-garden/score-star-'+(i<=stars?'earned':'unearned')+'.png" alt="">').join('')+'</span>'+(!un?'<span class="hmBadge lock"><img src="assets/interaction/stage-lock.svg" alt=""></span>':complete?'<span class="hmBadge"><img src="assets/interaction/stage-clear.svg" alt=""></span>':'')+'</button>';
+      html+='<button class="pnode hmButton '+(!un?'locked ':'')+(current?'cur':'')+'" data-n="'+n+'" data-state="'+state+'" data-complete="'+complete+'" data-square="true" data-gold="'+current+'" style="left:'+p.x+'px;top:'+p.y+'px" aria-label="스테이지 '+n+', '+(!un?'잠김':(complete?'완료, 별 '+stars+'개':'미완료'))+(current?', '+(complete&&n===50?'마지막 스테이지':'다음 도전'):'')+'" '+(!un?'disabled':'onclick="selectStage('+(n-1)+')"')+'>'+S.svg(l.face,l.face,true,current&&un,window.CubePopThemes?.forStage(n)||'sandstone')+'<span class="hmLabel">'+n+'</span><span class="hmStars" aria-hidden="true">'+[1,2,3].map(i=>'<img src="assets/pastel-garden/score-star-'+(i<=stars?'earned':'unearned')+'.png" alt="">').join('')+'</span>'+(!un?'<span class="hmBadge lock"><img src="assets/interaction/stage-lock.svg" alt=""></span>':complete?'<span class="hmBadge"><img src="assets/interaction/stage-clear.svg" alt=""></span>':'')+'</button>';
     }
     [[1,'배우기 · 3색'],[7,'4색 구간'],[10,'5색 구간'],[15,'6색 구간']].forEach(([n,t])=>{html+='<div class="bandLbl" style="top:'+(mapPos[n].y+l.face/2+45)+'px">'+t+'</div>';});
     cv.style.height=l.height+'px';cv.innerHTML=html;
+    cv.querySelectorAll('.pnode').forEach(button=>{button.dataset.theme=window.CubePopThemes?.forStage(Number(button.dataset.n))||'sandstone';});
+    window.CubePopThemeUI?.mapLayout(l);
     // Layout dimensions are known even when goMap renders before its screen is visible.
     requestAnimationFrame(()=>cv.querySelectorAll('.hmButton').forEach(watch));
     avatarEl=document.createElement('div');avatarEl.className='avatarCube idle';avatarEl.setAttribute('aria-hidden','true');

@@ -221,12 +221,6 @@
   }
   @keyframes convRing{0%{transform:scale(1.25);opacity:0;}40%{opacity:1;}100%{transform:scale(1);opacity:0;}}
 
-  .float{
-    position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
-    font-size:26px;font-weight:900;color:#ffd166;text-shadow:0 2px 8px rgba(0,0,0,.6);
-    pointer-events:none;animation:floatUp .9s ease forwards;z-index:20;white-space:nowrap;
-  }
-  @keyframes floatUp{0%{opacity:0;transform:translate(-50%,-30%) scale(.6);}25%{opacity:1;transform:translate(-50%,-50%) scale(1.1);}70%{opacity:1;}100%{opacity:0;transform:translate(-50%,-90%) scale(1);}}
 
   #skipBtn{
     position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:25;
@@ -339,20 +333,6 @@
   }
   #iris.anim{transition:width .38s ease-in,height .38s ease-in;}
   #iris.animOut{transition:width .46s ease-out,height .46s ease-out;}
-  #stageCap{
-    position:fixed;left:0;right:0;top:50%;transform:translateY(-50%);
-    display:none;justify-content:center;
-    z-index:85;pointer-events:none;opacity:1;transition:opacity .32s;
-  }
-  #stageCap.show{display:flex;}
-  #stageCap.out{opacity:0;}
-  #stageCap b{
-    font-size:34px;font-weight:900;letter-spacing:3px;color:#fff;
-    text-shadow:0 4px 0 rgba(0,0,0,.45),0 8px 24px rgba(0,0,0,.6);
-    animation:capPop .5s cubic-bezier(.3,1.5,.5,1);
-  }
-  #stageCap b i{color:#ffd166;font-style:normal;}
-  @keyframes capPop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.12);opacity:1}100%{transform:scale(1)}}
 
 
   /* ---------- settings modal ---------- */
@@ -404,15 +384,16 @@
 <link rel="stylesheet" href="frame.css">
 <link rel="stylesheet" href="pastel-garden.css">
 <link rel="stylesheet" href="home-map.css">
+<link rel="stylesheet" href="themes.css">
 <link rel="stylesheet" href="core-play.css">
 <link rel="stylesheet" href="interaction-polish.css">
 <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/geometries/RoundedBoxGeometry.js":"./vendor/RoundedBoxGeometry.js","three/addons/environments/RoomEnvironment.js":"./vendor/RoomEnvironment.js"}}</script>
-</head>
+<link rel="stylesheet" href="announcements.css"></head>
 <body class="mHome">
 
 <!-- ===== 스테이지 진입 연출: 조리개 + 자막 ===== -->
 <div id="iris"></div>
-<div id="stageCap"><b id="stageCapText"></b></div>
+
 
 <!-- ===== 홈 화면 ===== -->
 <div class="screen" id="homeScr">
@@ -746,6 +727,7 @@ function attachGesture(cube,el){
 async function doRoll(cube,dir){
   if(busy||over||movesLeft<=0)return;
   if(!cube.el.isConnected||grid[cube.r][cube.c]!==cube||!allowLessonRoll(cube,dir))return;
+  const announcementToken=window.CubePopAnnouncements?.token();
   hideRollPreview();
   busy=true;
   movesLeft--;updateHUD();
@@ -761,7 +743,7 @@ async function doRoll(cube,dir){
   w.style.transition='';
   busy=false;
   lastRolled={r:cube.r,c:cube.c};
-  await resolve();
+  await resolve(undefined,announcementToken);
 }
 
 /* ================= match (line-only, 3+) + bombs ================= */
@@ -837,7 +819,7 @@ let skipReq=false,lastRolled=null;
 function requestSkip(){skipReq=true;$('skipBtn').classList.remove('show');}
 
 // one clear step: count goals, animate out, remove, pop new bombs, then gravity + refill
-async function doClearStep(clearSet,spawns,mult,epicenter,bursts=[]){
+async function doClearStep(clearSet,spawns,mult,epicenter,bursts=[],announcementToken=window.CubePopAnnouncements?.token()){
   const cleared=[];
   for(const k of clearSet){const e=entityAt(k);if(e)cleared.push(e);}
   const fx=window.CubePopEffects?.enabled?window.CubePopEffects.play({id:++effectEventSeq,cells:cleared.map(effectCell),bursts,level:mult}):null;
@@ -845,8 +827,7 @@ async function doClearStep(clearSet,spawns,mult,epicenter,bursts=[]){
   score+=cleared.length*10*mult;
   maxCombo=Math.max(maxCombo,mult);
   if(goalsDone()&&!over&&!lessonState)$('skipBtn').classList.add('show');
-  if(mult>1)showFloat('콤보 ×'+mult+'!');
-  else if(cleared.length>=6)showFloat(cleared.length+'개 소멸!');
+  if(mult>1||cleared.length>=6)showFloat({kind:mult>1?'combo':'popped',mult,count:cleared.length,ids:cleared.map(e=>e.id),token:announcementToken,id:'clear:'+ ++announcementEventSeq});
   // ripple clear: stagger removal by distance from the epicenter (combos), else simultaneous
   let maxDelay=0;
   cleared.forEach(e=>{
@@ -894,11 +875,11 @@ async function doClearStep(clearSet,spawns,mult,epicenter,bursts=[]){
   falling.forEach(cube=>{cube.el.classList.remove('falling');cube.el.style.removeProperty('--fall-duration');});
 }
 
-async function resolve(forced){
+async function resolve(forced,announcementToken=window.CubePopAnnouncements?.token()){
   busy=true;
   window.TutorialUI?.sync();
   const finale=forced&&forced.finale;
-  if(forced){const bursts=[...(forced.bursts||[]),...detonate(forced.clearSet,forced.wildColors,forced.skip)];await doClearStep(forced.clearSet,new Map(),1,forced.epicenter,bursts);}
+  if(forced){const bursts=[...(forced.bursts||[]),...detonate(forced.clearSet,forced.wildColors,forced.skip)];await doClearStep(forced.clearSet,new Map(),1,forced.epicenter,bursts,announcementToken);}
   let mult=1;
   while(true){
     if(skipReq&&goalsDone())break;
@@ -936,7 +917,7 @@ async function resolve(forced){
     const bursts=detonate(clearSet,null);
     for(const k of spawns.keys())clearSet.delete(k);
 
-    await doClearStep(clearSet,spawns,mult,undefined,bursts);
+    await doClearStep(clearSet,spawns,mult,undefined,bursts,announcementToken);
     mult++;
   }
   $('skipBtn').classList.remove('show');
@@ -1042,7 +1023,7 @@ function lineBeam(kind,idx,tint){
   setTimeout(()=>d.remove(),460);
 }
 // wildcard + line/area: turn every cube of `color` into a bomb, let the player see it, then fire them all
-async function convertColorToBombs(color,mode){   // mode: 'line' | 'A'
+async function convertColorToBombs(color,mode,announcementToken=window.CubePopAnnouncements?.token()){   // mode: 'line' | 'A'
   const converted=[];
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
     const e=grid[r][c];
@@ -1060,12 +1041,13 @@ async function convertColorToBombs(color,mode){   // mode: 'line' | 'A'
   await sleep(900);                                // beat: player sees the color become bombs
   const cs=new Set();converted.forEach(b=>cs.add(b.r+','+b.c));
   lastRolled=null;
-  if(cs.size)resolve({clearSet:cs,wildColors:null});
+  if(cs.size)resolve({clearSet:cs,wildColors:null},announcementToken);
   else{busy=false;checkEnd();}
 }
 async function comboDetonate(a,b,tapped){
   if(busy||over||movesLeft<=0)return;
   if(!a||!b||!a.bomb||!b.bomb||grid[a.r][a.c]!==a||grid[b.r][b.c]!==b)return;
+  const announcementToken=window.CubePopAnnouncements?.token();
   busy=true;
   movesLeft--;updateHUD();
   tapped=tapped&&(tapped===a||tapped===b)?tapped:a;                             // 결합 기준 = 유저가 터치한 폭탄
@@ -1082,17 +1064,17 @@ async function comboDetonate(a,b,tapped){
   await sleep(120);
   [a,b].forEach(x=>{if(!x.el)return;x.el.style.transition=reduceFx?'none':'transform .16s cubic-bezier(.3,1.3,.5,1),opacity .16s';if(!reduceFx)x.el.style.transform=`translate(${mc*STEP}px,${mr*STEP}px) scale(.1)`;x.el.style.opacity=0;});
   mergeBurst(mr,mc,tint);
+  const coreRect=tapped.el?.getBoundingClientRect();
+  showFloat({kind:'fusion',id:'fusion:'+ ++announcementEventSeq,token:announcementToken,core:coreRect?{top:coreRect.top-24,bottom:coreRect.bottom+24,left:coreRect.left-24,right:coreRect.right+24}:null});
   await sleep(150);
   [a,b].forEach(x=>{if(x.el)x.el.remove();grid[x.r][x.c]=null;});
   // ---- wildcard + line/area: convert that color into bombs, then fire (Candy-Crush style) ----
   if((aW||bW)&&!(aW&&bW)){
     const other=aW?b:a;
-    showFloat(colSym(other.ci)+' 폭탄 변환!');
-    await convertColorToBombs(other.ci,other.btype==='A'?'A':'line');
+    await convertColorToBombs(other.ci,other.btype==='A'?'A':'line',announcementToken);
     return;
   }
   // ---- direct-effect combos ----
-  showFloat('결합!');
   const cs=new Set();
   const comboRays=[];
   const add=(r,c)=>{if(r>=0&&r<ROWS&&c>=0&&c<COLS)cs.add(r+','+c);};
@@ -1109,7 +1091,7 @@ async function comboDetonate(a,b,tapped){
   }
   await sleep(90);
   lastRolled=null;
-  resolve({clearSet:cs,wildColors:null,epicenter:{r:mr,c:mc},bursts:[{id:tapped.id,type:'COMBO',r:mr,c:mc,hex:tint||'#ffd166',targets:[...cs].map(k=>entityAt(k)?.id).filter(id=>id!==undefined)},...comboRays]});
+  resolve({clearSet:cs,wildColors:null,epicenter:{r:mr,c:mc},bursts:[{id:tapped.id,type:'COMBO',r:mr,c:mc,hex:tint||'#ffd166',targets:[...cs].map(k=>entityAt(k)?.id).filter(id=>id!==undefined)},...comboRays]},announcementToken);
 }
 function pickWildColor(color){
   const wasLessonPick=lessonState&&lessonState.phase==='pick';
@@ -1178,6 +1160,7 @@ async function runFinaleThenWin(){
   winStage();
 }
 function winStage(){
+  window.CubePopAnnouncements?.clear();
   over=true;
   const s=starCount(),sc=score-stageStartScore;
   // 진행도 기록: 별(최고 기록)과 다음 스테이지 잠금 해제
@@ -1196,6 +1179,7 @@ function winStage(){
   window.CorePlay?.result('win');
 }
 function failStage(){
+  window.CubePopAnnouncements?.clear();
   over=true;
   $('ovStars').innerHTML='';
   $('ovTitle').textContent='횟수 소진…';
@@ -1222,10 +1206,9 @@ function updateStarGauge(){
   const par=cfgPar||1, sc=Math.max(0,score-stageStartScore), s1=Math.round(par*0.25), s2=Math.round(par*0.6);
   window.PastelGarden.renderScore(sc,par,[sc>=s1,sc>=s2,sc>=par]);
 }
-function showFloat(txt){
-  const d=document.createElement('div');d.className='float';d.textContent=txt;
-  $('board').appendChild(d);
-  setTimeout(()=>d.remove(),900);
+let announcementEventSeq=0;
+function showFloat(value){
+  window.CubePopAnnouncements?.emit(typeof value==='string'?{kind:'notice',text:value}:value);
 }
 function buildBoard(){
   boardInner.querySelectorAll('.cube').forEach(e=>e.remove());
@@ -1254,6 +1237,7 @@ function buildBoard(){
   }
 }
 function setupStage(n,keepScore){
+  window.CubePopAnnouncements?.clear();
   window.CubePopEffects?.clear();
   window.PastelGarden.reset();
   cancelBoardPointers();
@@ -1287,7 +1271,7 @@ const TOTAL_STAGES=50;
 let progress={unlocked:1,stars:{}};
 try{const p=JSON.parse(localStorage.getItem('cubepop_v2_prog')||'null');if(p&&Number.isInteger(p.unlocked)&&p.unlocked>=1&&p.unlocked<=TOTAL_STAGES&&p.stars&&typeof p.stars==='object')progress=p;}catch(_){}
 function saveProg(){try{localStorage.setItem('cubepop_v2_prog',JSON.stringify(progress));}catch(_){}}
-function setMode(m){cancelBoardPointers();window.TutorialUI?.clear();window.CubePopEffects?.clear();document.body.classList.remove('mHome','mMap','mPlay');document.body.classList.add(m);}
+function setMode(m){window.CubePopAnnouncements?.clear();cancelBoardPointers();window.TutorialUI?.clear();window.CubePopEffects?.clear();document.body.classList.remove('mHome','mMap','mPlay');document.body.classList.add(m);}
 function goHome(){setMode('mHome');}
 function goMap(){if(busy)return;unarmWild();renderMap();setMode('mMap');}
 // 아바타 큐브 — 6면 각각 설정 가능 (추후 유저 커스터마이징: faces의 팔레트 인덱스/심볼 교체 지점)
@@ -1439,6 +1423,7 @@ function startStage(n){setMode('mPlay');setupStage(n,false);fitBoard();}
 function exitToMap(){$('overlay').classList.remove('show');goMap();}
 /* 스테이지 진입 연출: 조리개가 (ox,oy)를 중심으로 닫힘 → 화면 전환 → 자막 + 중앙에서 조리개 열림 */
 function transitionToStage(idx,ox,oy){
+  window.CubePopAnnouncements?.clear();
   const iris=$('iris');
   iris.style.left=(ox!=null?ox:window.innerWidth/2)+'px';
   iris.style.top=(oy!=null?oy:window.innerHeight/2)+'px';
@@ -1450,6 +1435,7 @@ function transitionToStage(idx,ox,oy){
   iris.style.width='0px';iris.style.height='0px';
   setTimeout(()=>{
     startStage(idx);                                            // 검정 화면 아래에서 전환
+    const announcementToken=window.CubePopAnnouncements?.token();
     // 조리개 열림 중심 = 플레이 판 중앙
     const br=$('board').getBoundingClientRect();
     const bx=br.x+br.width/2, by=br.y+br.height/2;
@@ -1459,9 +1445,7 @@ function transitionToStage(idx,ox,oy){
     setTimeout(()=>{
       iris.style.display='none';iris.classList.remove('animOut');
       // 자막: 조리개가 완전히 열린 뒤, 플레이 판 중앙에
-      $('stageCapText').innerHTML='STAGE <i>'+(idx+1)+'</i> START!';
-      const cap=$('stageCap');cap.style.top=by+'px';cap.classList.remove('out');cap.classList.add('show');
-      setTimeout(()=>{cap.classList.add('out');setTimeout(()=>cap.classList.remove('show','out'),340);},1000);
+      showFloat({kind:'stage',stage:stageNo+1,token:announcementToken});
     },540);
   },400);
 }
@@ -1561,6 +1545,9 @@ window.addEventListener('orientationchange',()=>setTimeout(fitBoard,150));
 <script src="tutorial-ui.js"></script>
 <script src="render/effects-plan.js"></script>
 <script src="render/game-effects.js"></script>
+<script src="theme-catalog.js"></script>
+<script src="stage-themes.js"></script>
+<script src="themes.js"></script>
 <script src="home-map-surfaces.js"></script>
 <script src="home-map.js"></script>
 <script src="core-play.js"></script>
@@ -1584,5 +1571,7 @@ window.CubePopVisualBridge={
 };
 </script>
 <script type="module" src="render/game-cubes.mjs"></script>
+<script src="theme-ui.js"></script>
+<script src="announcements.js"></script>
 </body>
 </html>

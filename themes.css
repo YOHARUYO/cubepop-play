@@ -1,0 +1,12 @@
+/* No geometry or art filters: only loaded theme resources change. */
+body.mPlay[data-play-theme]{position:relative;}
+body.mPlay[data-play-theme]::before{position:absolute;min-height:100dvh;background-image:var(--theme-background);background-position:center top;background-size:cover;}
+body.mPlay[data-play-theme]::after{display:none;}
+.themeMapEnvironment{position:fixed;left:0;width:100%;z-index:-1;pointer-events:none;overflow:hidden;}
+body:not(.mMap) .themeMapEnvironment{display:none;}
+.themeMapRegion{position:absolute;inset:0;background-size:cover;background-position:center top;pointer-events:none;}
+body.mMap .pnode[data-theme="coast"]:disabled .hmSurface{opacity:.6;}
+body.mMap .pnode[data-theme="coast"]:is(:hover,:active,.enterFx) .hmLabel{transform:none;}
+body.mMap .pnode[data-theme="coast"]:hover:not(:disabled) .hmSurface{transform:none;}
+body.mMap .pnode[data-theme="coast"]:active:not(:disabled) .hmSurface{transform:translateY(2px);}
+@media(prefers-reduced-motion:reduce){body.mMap .pnode[data-theme="coast"] .hmSurface{transition:none;}}
