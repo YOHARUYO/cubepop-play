@@ -62,8 +62,13 @@
     }
     return l;
   }
+  let lastMapViewportHeight=0;
   function render(keepScroll=false){
-    const cv=$('mapCanvas'),sc=$('mapScroll'),oldPos=mapPos[avatarStage],relative=oldPos?oldPos.y-sc.scrollTop:null;
+    const cv=$('mapCanvas'),sc=$('mapScroll');
+    const oldHeight=lastMapViewportHeight||sc.clientHeight;
+    let anchor=avatarStage;
+    if(keepScroll)for(let n=1;n<mapPos.length;n++)if(mapPos[n]&&(!mapPos[anchor]||Math.abs(mapPos[n].y-sc.scrollTop-oldHeight/2)<Math.abs(mapPos[anchor].y-sc.scrollTop-oldHeight/2)))anchor=n;
+    const relative=mapPos[anchor]?(mapPos[anchor].y-sc.scrollTop)/oldHeight:null;
     const l=mapLayout(),cur=Math.max(1,Math.min(progress.unlocked,TOTAL_STAGES));
     cv.querySelectorAll('.hmButton').forEach(b=>resizeObserver?.unobserve(b));
     document.body.style.setProperty('--hm-map-w',l.W+'px');document.body.style.setProperty('--hm-node-size',l.face+'px');
@@ -89,7 +94,7 @@
     travel.innerHTML='<span class="hmTumble">'+rotations.map((rotation,i)=>'<span class="hmTravelFace" style="transform:'+rotation+' translateZ(20px);background:'+palette[colors[i]]+';color:'+window.CubePopSymbols.inks[colors[i]]+'">'+window.CubePopSymbols.svg(colors[i])+'</span>').join('')+'</span>';
     avatarEl.querySelector('.avHop').appendChild(travel);
     avMat=typeof DOMMatrix==='function'?new DOMMatrix():null;placeAvatar(cur);cv.appendChild(avatarEl);
-    requestAnimationFrame(()=>{sc.scrollTop=Math.max(0,mapPos[cur].y-(keepScroll&&relative!==null?relative:sc.clientHeight*.43));updateMapFades();watch(back);});
+    requestAnimationFrame(()=>{sc.scrollTop=Math.max(0,mapPos[keepScroll&&relative!==null?anchor:cur].y-sc.clientHeight*(keepScroll&&relative!==null?Math.max(.2,Math.min(.8,relative)):.43));lastMapViewportHeight=sc.clientHeight;updateMapFades();watch(back);});
     if(!sc._fadeBound){sc._fadeBound=true;sc.addEventListener('scroll',updateMapFades);}
     return l;
   }

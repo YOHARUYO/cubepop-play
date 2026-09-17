@@ -10,3 +10,17 @@ body.mMap .pnode[data-theme="coast"]:is(:hover,:active,.enterFx) .hmLabel{transf
 body.mMap .pnode[data-theme="coast"]:hover:not(:disabled) .hmSurface{transform:none;}
 body.mMap .pnode[data-theme="coast"]:active:not(:disabled) .hmSurface{transform:translateY(2px);}
 @media(prefers-reduced-motion:reduce){body.mMap .pnode[data-theme="coast"] .hmSurface{transition:none;}}
+/* UI and scenery are separate: only the landscape fades into the quiet floor. */
+body.mMap::before{display:none}
+.themeMapEnvironment{inset:0;height:100dvh}
+.themeMapFloor,.themeMapRegions,.themeMapRegion{position:absolute;inset:0;pointer-events:none}
+.themeMapFloor,.themeMapRegion{background-size:200% auto;background-position:center center;background-repeat:no-repeat;background-color:#f8ebd4}
+.themeMapScenery{position:absolute;inset:0 0 auto;background-size:cover;background-position:center;mask-image:linear-gradient(to bottom,#000 0%,#000 45%,rgba(0,0,0,.92) 58%,rgba(0,0,0,.55) 76%,rgba(0,0,0,.12) 92%,transparent 100%)}
+body.mMap .mapHead{position:relative;left:auto;translate:none;width:min(100vw,900px);height:calc(176px + env(safe-area-inset-top));box-sizing:border-box;padding:env(safe-area-inset-top) 60px 0;display:flex;justify-content:center;align-items:center;gap:0;background:none;border:0;border-radius:0;box-shadow:none;z-index:5}
+body.mMap .mapHead h2{font-family:'CP Jua',sans-serif;font-weight:400;font-synthesis:none;font-size:30px;line-height:1.25;color:#243e61}
+.mapThemeName{display:block;margin-top:7px;font-family:'CP Jua',sans-serif;font-weight:400;font-size:14px;line-height:1.25;color:#6f625d}
+body.mMap .mapHead .backBtn{position:absolute;left:12px;top:calc(12px + env(safe-area-inset-top));margin:0;align-self:auto}
+body.mMap .mapView{height:calc(100dvh - var(--map-header-height,176px))}
+body.mMap .mapFade{display:none}
+@media(max-width:599px){body.mMap .mapHead{height:calc(144px + env(safe-area-inset-top))}body.mMap .mapHead h2{font-size:24px}}
+@media(max-height:649px){body.mMap .mapHead{height:calc(112px + env(safe-area-inset-top))}}

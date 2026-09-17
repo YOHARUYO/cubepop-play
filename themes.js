@@ -2,7 +2,7 @@
 (function(root){
   'use strict';
   function create(catalog,assignments,loadImage){
-    const loaded=new Set(['sandstone']),pending=new Map(),errors=new Map();
+    const loaded=new Set(),pending=new Map(),errors=new Map();
     for(let i=0;i<assignments.length;i++){
       const a=assignments[i];
       if(!Number.isInteger(a.from)||!Number.isInteger(a.to)||a.from<1||a.to>50||a.from>a.to||!catalog[a.theme])throw Error('Invalid stage theme assignment');
@@ -11,7 +11,13 @@
     const assigned=n=>Number.isInteger(n)&&n>=1&&n<=50?(assignments.find(a=>n>=a.from&&n<=a.to)?.theme||'sandstone'):'sandstone';
     const effective=id=>catalog[id]?.ready&&loaded.has(id)?id:'sandstone';
     const forStage=n=>effective(assigned(n));
-    const resource=id=>catalog[effective(id)];
+    const resource=id=>{
+      const c=catalog[effective(id)];
+      // The original courtyard stays usable while the new orientation pair loads,
+      // and remains the fallback if either new background fails.
+      return c===catalog.sandstone&&!loaded.has('sandstone')&&c.fallbackBackground
+        ?{...c,background:{portrait:c.fallbackBackground,landscape:c.fallbackBackground}}:c;
+    };
     async function preload(id){
       if(!catalog[id]?.ready)return 'sandstone';
       if(loaded.has(id))return id;

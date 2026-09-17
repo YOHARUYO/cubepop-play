@@ -1,8 +1,9 @@
 /* Production resources only. Concept previews/source studies never belong here. */
 (function(root){
   const catalog={
-    sandstone:{ready:true,revision:'frame-v5-node-v3',
-      background:{portrait:'assets/sandstone/courtyard.webp',landscape:'assets/sandstone/courtyard.webp'},
+    sandstone:{ready:true,revision:'ui-polish-v2',
+      fallbackBackground:'assets/sandstone/courtyard.webp',
+      background:{portrait:'assets/themes/sandstone/desert-portrait.webp',landscape:'assets/themes/sandstone/desert-landscape.webp'},
       frame:{rear:'assets/sandstone/board-frame-rear.png',front:'assets/sandstone/board-frame-front.png'},
       nodes:{ivory:'assets/home-map/node-ivory.png',gold:'assets/home-map/node-gold.png'}},
     coast:{ready:true,revision:'coastal-garden-production-v1',

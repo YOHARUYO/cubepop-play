@@ -1126,6 +1126,7 @@ function starCount(){
 }
 // stage-clear finale: each remaining move turns a random cube into a bomb (line/area mix), then all fire — scored
 async function stageFinale(){
+  const announcementToken=window.CubePopAnnouncements?.token();
   const n=movesLeft;movesLeft=0;
   // leftover moves -> guaranteed points (rewards efficient clears; reduces finale luck)
   const moveBonus=n*MOVE_BONUS;
@@ -1135,7 +1136,6 @@ async function stageFinale(){
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const e=grid[r][c];if(e&&!e.bomb)cells.push([r,c]);}
   shuffle(cells);
   const take=Math.min(n,cells.length),converted=[];
-  if(take>0)showFloat('남은 '+n+'회 → +'+moveBonus+'점 & 폭탄!');
   for(let i=0;i<take;i++){
     const [r,c]=cells[i],e=grid[r][c],ci=matchColor(e);
     e.el.remove();
@@ -1147,11 +1147,12 @@ async function stageFinale(){
     await sleep(48);
   }
   if(!converted.length)return;
+  showFloat({kind:'bonus',count:converted.length,token:announcementToken,id:'bonus:'+ ++announcementEventSeq});
   await sleep(200);
   // fire the bombs, then let the board refill and auto-cascade (no new bombs) until nothing more clears
   const cs=new Set();converted.forEach(b=>cs.add(b.r+','+b.c));
   lastRolled=null;
-  await resolve({clearSet:cs,wildColors:null,finale:true,epicenter:{r:(ROWS-1)/2,c:(COLS-1)/2}});
+  await resolve({clearSet:cs,wildColors:null,finale:true,epicenter:{r:(ROWS-1)/2,c:(COLS-1)/2}},announcementToken);
 }
 async function runFinaleThenWin(){
   busy=true;$('skipBtn').classList.remove('show');
