@@ -16,13 +16,13 @@
       // The original courtyard stays usable while the new orientation pair loads,
       // and remains the fallback if either new background fails.
       return c===catalog.sandstone&&!loaded.has('sandstone')&&c.fallbackBackground
-        ?{...c,background:{portrait:c.fallbackBackground,landscape:c.fallbackBackground}}:c;
+        ?{...c,banner:c.fallbackBackground,background:{portrait:c.fallbackBackground,landscape:c.fallbackBackground}}:c;
     };
     async function preload(id){
       if(!catalog[id]?.ready)return 'sandstone';
       if(loaded.has(id))return id;
       if(!pending.has(id)){
-        const c=catalog[id],paths=[...new Set([...Object.values(c.background),...Object.values(c.frame),...Object.values(c.nodes)])];
+        const c=catalog[id],paths=[...new Set([...Object.values(c.background),...Object.values(c.frame),...Object.values(c.nodes),c.banner].filter(Boolean))];
         pending.set(id,Promise.all(paths.map(loadImage)).then(()=>{loaded.add(id);return id;}).catch(error=>{errors.set(id,String(error));return 'sandstone';}));
       }
       return pending.get(id);
@@ -46,7 +46,7 @@
     return {assigned,effective,forStage,resource,preload,regions,node,errors};
   }
   function loadImage(path){return new Promise((resolve,reject)=>{
-    const img=new root.Image();img.onload=()=>resolve(img);img.onerror=()=>reject(Error('Theme asset failed: '+path));img.src=path;
+    const img=new root.Image();img.onload=()=>{if(img.decode)img.decode().then(()=>resolve(img),reject);else resolve(img);};img.onerror=()=>reject(Error('Theme asset failed: '+path));img.src=path;
   });}
   root.CubePopThemes=create(root.CubePopThemeCatalog||{},root.CubePopStageThemes||[],loadImage);
   if(typeof module==='object')module.exports={create};

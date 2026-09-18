@@ -10,14 +10,13 @@
   const floor=document.createElement('div');floor.className='themeMapFloor';
   const regions=document.createElement('div');regions.className='themeMapRegions';
   const scenery=document.createElement('div');scenery.className='themeMapScenery';
+  const sceneryBase=document.createElement('div'),sceneryNext=document.createElement('div'),floorNext=document.createElement('div');
+  sceneryBase.className='themeSceneryImage';sceneryNext.className='themeSceneryImage themeIncoming';floorNext.className='themeFloorImage themeIncoming';
+  scenery.append(sceneryBase,sceneryNext);floor.appendChild(floorNext);
   mapLayer.append(floor,regions,scenery);document.body.appendChild(mapLayer);
   let mode='mHome',revision=0,layout=null,bannerTheme=null,candidate=null,stableTimer=null;
-  const banners=new Map();
-  // Decoded once, separate from the six atomic play-theme resources.
-  const bannerReady=Promise.all(['sandstone','coast'].map(async id=>{
-    const image=new Image();image.src='assets/home-map/map-banner-'+id+'.webp';
-    try{await image.decode();banners.set(id,image.src);}catch(_){}
-  }));
+  const reduced=root.matchMedia('(prefers-reduced-motion: reduce)');
+  let fades=[],fadeGeneration=0,queuedBanner=null,bannerKey=null;
   const landscape=()=>root.innerWidth>root.innerHeight;
   const url=path=>'url("'+path+'")';
   function frames(c){
@@ -36,15 +35,34 @@
     document.body.style.setProperty('--map-header-height',h+'px');
     scenery.style.height=Math.max(h,Math.min(320,root.innerWidth/3))+'px';
   }
-  function commitBanner(id){
-    bannerTheme=id;head.dataset.theme=id;
-    name.textContent=id==='coast'?'산토리니 정원':'사암 정원';
-    scenery.style.backgroundImage=banners.has(id)?url(banners.get(id)):'none';
-    floor.style.backgroundImage=url(T.resource(id).background.portrait);
+  function settleBanner(){
+    ++fadeGeneration;
+    for(const a of fades)a.cancel();fades=[];queuedBanner=null;
+    if(bannerTheme){const c=T.resource(bannerTheme);sceneryBase.style.backgroundImage=url(c.banner);floor.style.backgroundImage=url(c.background.portrait);}
+    sceneryNext.style.opacity=floorNext.style.opacity='0';delete scenery.dataset.transitioning;
+  }
+  function commitBanner(id,immediate=false){
+    const c=T.resource(id),key=[id,c.revision,c.banner,c.background.portrait].join(':');
+    // Finish the current blend, then visit only the latest stable target. Two
+    // opaque scenery layers avoid a dark dip and remain bounded during fast scrolling.
+    if(fades.length&&!immediate&&!reduced.matches){queuedBanner=id;return;}
+    if(key===bannerKey&&!immediate)return;
+    const animate=bannerTheme!==null&&id!==bannerTheme&&!immediate&&!reduced.matches;
+    settleBanner();bannerTheme=id;bannerKey=key;head.dataset.theme=id;name.textContent=c.name;
+    if(!animate){settleBanner();return;}
+    sceneryNext.style.backgroundImage=url(c.banner);floorNext.style.backgroundImage=url(c.background.portrait);
+    scenery.dataset.transitioning='true';
+    const token=fadeGeneration;
+    fades=[sceneryNext,floorNext].map(el=>el.animate([{opacity:0},{opacity:1}],{duration:320,easing:'ease-in-out',fill:'forwards'}));
+    Promise.all(fades.map(a=>a.finished)).then(()=>{
+      if(token!==fadeGeneration)return;
+      const next=queuedBanner;settleBanner();
+      if(mode==='mMap'&&next&&next!==bannerTheme)commitBanner(next);
+    }).catch(()=>{});
   }
   function considerBanner(id,immediate=false){
-    if(immediate){clearTimeout(stableTimer);candidate=null;commitBanner(id);return;}
-    if(id===bannerTheme){clearTimeout(stableTimer);candidate=null;return;}
+    if(immediate){clearTimeout(stableTimer);candidate=null;commitBanner(id,true);return;}
+    if(id===bannerTheme){clearTimeout(stableTimer);candidate=null;queuedBanner=null;commitBanner(id);return;}
     if(candidate===id)return;
     clearTimeout(stableTimer);candidate=id;
     stableTimer=setTimeout(()=>{if(mode==='mMap'&&candidate===id)commitBanner(id);candidate=null;},120);
@@ -74,15 +92,15 @@
       if(ticket===revision&&mode==='mPlay')paintPlay();
     }else if(mode==='mMap'){
       reset();paintMap();
-      await Promise.all([bannerReady,...[...new Set(Array.from({length:50},(_,i)=>T.assigned(i+1)))].map(T.preload)]);
+      await Promise.all([...new Set(['sandstone',...Array.from({length:50},(_,i)=>T.assigned(i+1))])].map(T.preload));
       if(ticket!==revision||mode!=='mMap')return;
       document.querySelectorAll('.pnode').forEach(button=>{button.dataset.theme=T.forStage(Number(button.dataset.n));root.HomeMap.paintButton(button);});
       // Refresh an already selected header once its images have decoded.
-      commitBanner(T.forStage(progress.unlocked));paintMap();
+      paintMap();
     }else reset();
   }
   const originalMode=setMode;setMode=function(next){
-    originalMode(next);mode=next;clearTimeout(stableTimer);candidate=null;
+    originalMode(next);mode=next;clearTimeout(stableTimer);candidate=null;settleBanner();
     if(next==='mMap'){measureHeader();considerBanner(T.forStage(progress.unlocked),true);}
     refresh();
   };
@@ -91,4 +109,5 @@
   sc.addEventListener('scroll',paintMap,{passive:true});
   new ResizeObserver(()=>{measureHeader();paintMap();}).observe(head);
   root.addEventListener('resize',()=>{if(mode==='mPlay')paintPlay();else paintMap();});
+  reduced.addEventListener('change',()=>{if(reduced.matches){const next=queuedBanner;settleBanner();if(mode==='mMap'&&next)commitBanner(next,true);}});
 })(window);
