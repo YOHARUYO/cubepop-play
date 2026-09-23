@@ -1,0 +1,85 @@
+/* Garden symbols are game-state decorations, on the existing projected board. */
+#gimmickHud{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;justify-content:center;grid-column:1/-1;width:100%;font:700 14px/1.5 'CP Noto',sans-serif;color:#284657;padding:4px 0}
+#gimmickHud[hidden]{display:none}.gmGoal{white-space:nowrap}.gmGoal b{font-size:17px}.gmCountdown{color:#58417a}.gmHelpButton{min-height:44px;padding:0 12px;border:1px solid #bdac90;border-radius:22px;background:#fff8e8;color:#284657;font:inherit;cursor:pointer}.gmHelpButton:focus-visible{outline:3px solid #447d9b;outline-offset:2px}
+#gimmickTerrain{position:absolute;inset:0;pointer-events:none}.gimmickTile,.gimmickFloor{position:absolute;left:0;top:0;width:64px;height:64px;box-sizing:border-box}.gimmickTile{pointer-events:auto;display:grid;place-items:center;border-radius:8px;font:700 28px/1 sans-serif;color:#4a5b67;box-shadow:inset 0 -7px #56616a44;border:3px solid #b3b9b6;background:#d3d9d5}.gm-void{background:#b2a89a66;border:1px dashed #a2968666;box-shadow:none;border-radius:4px}.gm-rock{background:linear-gradient(140deg,#edf0e6,#9caaac);clip-path:polygon(9% 15%,35% 3%,85% 9%,100% 39%,92% 97%,5% 90%,0 45%)}.gm-fountain{background:#79b9c6;border:6px solid #e6ddca;color:#fff3dc;border-radius:5px}.gm-door{background:repeating-linear-gradient(90deg,#405871 0 7px,#d1bb70 8px 11px);color:#fff4d8;text-shadow:0 1px #172c3e;border:4px solid #cfbd83;border-radius:20px 20px 3px 3px;font-size:23px}
+.gimmickSkin{position:absolute;inset:0;border-radius:8px;pointer-events:none;box-sizing:border-box;display:none;font:bold 17px/1 sans-serif;padding:3px;color:#234865;text-shadow:0 1px #fff}
+.gimmickIce .gimmickSkin{display:block;border:3px solid #bff5ff;background:linear-gradient(135deg,#d5f9ff44,transparent 50%);box-shadow:inset 0 0 0 1px #28789c,0 2px 0 #247ba6}
+.gimmickIce[data-ice="2"] .gimmickSkin{border:6px double #ddfaff;background:#d2f3ff22}.iceCrack .gimmickSkin{outline:3px dashed #fff}
+.gimmickFloor{pointer-events:none}.gmStar,.gmKey,.gmRotor{position:absolute;bottom:-5px;background:#fff4d8;color:#3c5072;border:1px solid #88754e;border-radius:7px;font:bold 15px/20px sans-serif;min-width:19px;text-align:center;padding:0 2px;box-shadow:0 1px #b4935e}.gmStar{left:1px;color:#726180}.gmStar.lit{background:#ffc953;color:#5e431b;border-color:#9a632a}.gmKey{left:0;bottom:0;color:#405c99}.gmKey-B{color:#85446a}.gmKey-C{color:#377059}.gmRotor{right:0;bottom:-5px;display:flex;align-items:center;gap:2px;padding:0 1px;background:#f2e8ff}.gmRotor i{width:16px;height:16px;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#263c54}.gmRotor svg{width:12px;height:12px}.gimmickEntry{position:absolute;left:0;top:0;width:24px;height:3px;border:1px solid #b9e9ef;border-radius:3px;background:#447c97;box-shadow:0 1px #fff}
+#gimmickHelp{position:fixed;z-index:180;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(440px,calc(100vw - 24px));max-height:44vh;overflow:auto;box-sizing:border-box;padding:14px 18px;background:#fff8e9;border:2px solid #bea781;border-radius:18px;box-shadow:0 5px 0 #c9bcd0;color:#284657;font:14px/1.6 'CP Noto',sans-serif}
+#gimmickHelp[hidden]{display:none}#gimmickHelp h2{font:20px/1.3 'CP Jua',sans-serif;margin:0 0 6px}#gimmickHelp p{margin:0}#gimmickHelp button{display:block;min-height:44px;margin:8px 0 0 auto;padding:0 18px;border:1px solid #baa580;border-radius:22px;background:#f4d174;color:#284657;font:16px 'CP Jua',sans-serif}.gimmickFocus{outline:4px solid #fff7bf!important;outline-offset:3px}
+#gimmickFeedback{position:fixed;z-index:190;left:50%;top:12px;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);padding:8px 12px;background:#fff4df;border:1px solid #b6a080;border-radius:12px;color:#284657;font:14px/1.4 sans-serif;pointer-events:none}#gimmickFeedback[hidden]{display:none}.gmRemaining{font:700 14px/1.5 sans-serif;color:#754444}
+.gimmickGame .goalsCard{flex-wrap:wrap}.gimmickGame #boardInner .cube{overflow:visible}
+@media(prefers-reduced-motion:reduce){.iceCrack .gimmickSkin{outline-style:solid}}
+
+.gmFallClip{position:absolute;inset:0;width:424px;height:424px;pointer-events:none}.gmFallClip .cube{pointer-events:auto}.gmFirstMove{margin-top:8px!important;font-weight:700}#gimmickTerrain{z-index:2}
+.gmStar{font-size:24px;line-height:24px;min-width:22px}.gmKey{font-size:21px;line-height:24px}.gmRotor{font-size:22px;line-height:24px}.gmRotor i{width:21px;height:21px}.gmRotor svg{width:17px;height:17px}.gimmickSkin{font-size:22px}
+.gimmickFloor:has(.gmRotor) .gmStar{top:-7px;bottom:auto}.gmKey.dormant{opacity:.55}
+.gmGroup-A{--group:#405c99}.gmGroup-B{--group:#85446a}.gmGroup-C{--group:#377059}.gm-door{background:repeating-linear-gradient(90deg,var(--group,#405871) 0 7px,#d1bb70 8px 11px)}
+.gmCarriedKey{pointer-events:none;z-index:3;left:auto;right:-3px;bottom:-3px;font-size:15px;line-height:21px;min-width:22px}
+/* v8 artwork uses the full square registration, on the untransformed board plane. */
+#gimmickVines{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}
+.board3d.vines3d #gimmickVines{visibility:hidden}
+.gmInsetKey{pointer-events:none}
+.gmVineArt{pointer-events:none}.gmVineArt.releasing{animation:gmVineRelease 200ms ease-out forwards}
+.gmVineArt.rejected{animation:gmVineReject 160ms ease-out}
+@keyframes gmVineRelease{to{opacity:0}}@keyframes gmVineReject{50%{opacity:.65}}
+.gimmickVine .cubeBox,.gimmickVine .ringBox,.gimmickVine .cubeArt,.gimmickVine .gimmickSkin{visibility:hidden!important;display:none!important}
+.gimmickVine::before,.gimmickVine::after{display:none!important}
+.gimmickVine,.board3d .cube.gimmickVine.previewTarget{outline:none!important;box-shadow:none!important;background:transparent!important}
+.gmVineIcon{display:inline-block;width:28px;height:28px;object-fit:contain;vertical-align:middle;pointer-events:none}
+@media(prefers-reduced-motion:reduce){.gmVineArt.releasing,.gmVineArt.rejected{animation:none}}
+
+/* Integrated v1–v8 art, scoped to stages 21–50. Full PNG canvases are retained. */
+#gimmickArtFloor,#gimmickArtMarkers{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+#gimmickArtFloor{z-index:0}#gimmickArtMarkers{z-index:2}
+.gimmickGame .gimmickTile{background:none;border:0;box-shadow:none;clip-path:none;color:transparent}
+.gimmickGame .gmCarriedKey{width:31px;height:31px;right:0;bottom:-5px;min-width:0;padding:0;border:0;box-shadow:none;background:none}
+.gmCarriedKey img{width:100%;height:100%;object-fit:contain}
+.gimmickVine .gmCarriedKey{display:none}
+.gimmickIce .gimmickSkin,.gimmickIce[data-ice="2"] .gimmickSkin{border:0;box-shadow:none;outline:0;background:rgba(163,229,255,.075) url('assets/gimmicks/integrated/ice/rim-1.png') center/contain no-repeat;clip-path:polygon(8% 0,92% 0,100% 8%,100% 92%,92% 100%,8% 100%,0 92%,0 8%)}
+.gimmickIce[data-ice="2"] .gimmickSkin{background:rgba(163,229,255,.13) url('assets/gimmicks/integrated/ice/rim-2.png') center/contain no-repeat}
+.gimmickIce .gimmickSkin:after{content:'';position:absolute;inset:0;background:url('assets/gimmicks/integrated/ice/frost-25.png') center/contain;opacity:.6}
+.gimmickIce[data-ice="2"] .gimmickSkin:after{opacity:.9}.board3d .gimmickSkin{display:none!important}
+.gmGateOpening{transform-box:fill-box;transform-origin:bottom;animation:gmGateOpen 180ms ease-in forwards}
+@keyframes gmGateOpen{to{transform:translateY(12%);clip-path:inset(100% 0 0);opacity:0}}
+.gmKeySignal{animation:gmSignal 220ms ease-out forwards}@keyframes gmSignal{50%{opacity:1}to{opacity:0}}
+.gmLit{animation:gmStarLight 240ms ease-out}@keyframes gmStarLight{from{opacity:.5}to{opacity:1}}
+.gmPreviewExtra{border-top:1px solid #cab894;margin-top:8px;padding-top:8px;font:13px/1.4 'CP Noto',sans-serif;color:#36506a;display:grid;gap:4px}
+.gmPreviewExtra span{display:flex;gap:6px;align-items:center;justify-content:center}.gmPreviewExtra i{display:inline-grid;place-items:center;width:32px;height:32px;border:1px solid #36506a;border-radius:5px}.gmPreviewExtra i svg{width:24px;height:24px}.gmPreviewExtra img{width:28px;height:28px}
+.gimmickGame .goalsCard{position:relative;display:grid!important;grid-template-columns:1fr auto;gap:8px!important;width:calc(100% - 24px)!important;max-width:560px!important;min-height:119px;margin:8px auto!important;padding:0!important;box-sizing:border-box}
+.gimmickGame .goalsContent{display:none!important}
+.gimmickGame .movesBadge{grid-column:1;grid-row:1;display:flex!important;flex-direction:row-reverse;justify-content:flex-end;gap:6px;align-items:center;height:44px!important;min-height:44px!important;width:auto!important;padding:0!important;border:0!important;background:none!important}
+.gimmickGame .movesBadge b{font:28px/1 'CP Jua',sans-serif!important}.gimmickGame .movesBadge span{font:13px/1.3 'CP Jua',sans-serif!important;white-space:nowrap}
+.gimmickGame #gimmickHud{grid-column:1/-1;grid-row:2;display:block;padding:0;font-family:'CP Jua',sans-serif}
+.gmTools{position:absolute;right:0;top:0;height:44px;display:flex;align-items:center;gap:8px}.gmTools .gmCountdown{font:13px/1.3 'CP Jua',sans-serif;max-width:130px;text-align:center}
+.gmTools .gmHelpButton{height:44px;min-width:44px;width:44px;padding:0;font:23px 'CP Jua',sans-serif;border:1px solid #c6ad79;border-bottom:3px solid #36506a;background:#fff6df;border-radius:50%}
+.gmCards{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:stretch}.gmCards .gmGoal{flex:1 1 calc(25% - 6px);max-width:98px;min-width:65px;height:67px;box-sizing:border-box;padding:6px 4px 5px;position:relative;background:#fff6df;border:1px solid #c6ad79;border-bottom:3px solid #36506a;border-radius:13px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;color:#284657}
+.gmValue{display:flex;gap:3px;align-items:center;justify-content:center;width:100%;height:28px}.gmValue b{font:20px/25px 'CP Jua',sans-serif;white-space:nowrap}.gmIcon{display:inline-flex;width:27px;height:27px;flex:0 0 27px;align-items:center;justify-content:center}.gmIcon>svg{width:23px;height:23px}.gmIcon>img{width:27px;height:27px}
+.gmCaption{font:13px/17px 'CP Jua',sans-serif;white-space:nowrap}.gmDone{position:absolute;right:2px;top:2px;width:13px;height:13px}.gmDone[hidden]{display:none}.gmGoal.done{background:#f0f2e7;border-bottom-color:#537964}
+.gmProgress{position:absolute;left:9px;right:9px;bottom:4px;height:3px;border-radius:3px;overflow:hidden;background:#d9cfb8}.gmProgress i{display:block;height:100%;transition:width 180ms ease}.gmRemaining .gmVineIcon{width:26px;height:26px}
+@media(max-width:340px){.gimmickGame .goalsCard{width:calc(100% - 16px)!important}.gmCards{gap:5px}.gmCards .gmGoal{padding:6px 3px 5px}.gmValue b{font-size:18px}.gmIcon,.gmIcon>img{width:24px;height:24px;flex-basis:24px}.gmIcon>svg{width:21px;height:21px}}
+@media(prefers-reduced-motion:reduce){.gmGateOpening,.gmKeySignal,.gmLit{animation:none}.gmProgress i{transition:none}}
+#gimmickHelpDim{position:fixed;inset:0;width:100%;height:100%;z-index:175;pointer-events:none}
+#gimmickHelpHand{position:fixed;width:64px;height:64px;z-index:179;pointer-events:none}#gimmickHelpHand[hidden]{display:none}
+.gimmickGame .gimmickFocus{outline:none!important}.gmHelpArrow{display:inline-block;width:44px;height:44px;vertical-align:middle;margin:2px 6px 2px 0}
+#gimmickHelp{max-height:calc(100dvh - 24px);padding:12px 16px;font-size:14px;z-index:180}#gimmickHelp button:focus-visible{outline:3px solid #447d9b;outline-offset:3px}
+#gimmickArtTransient{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}.gmIceChip{animation:gmIceChip 220ms ease-out forwards}@keyframes gmIceChip{to{opacity:0}}
+.gmReduced .gmGateOpening,.gmReduced .gmKeySignal,.gmReduced .gmLit,.gmReduced .gmIceChip,.gmReduced .gmVineArt{animation:none!important}
+/* Approved v10 shell: PNG alpha already contains 30% / 50% frost. */
+.gimmickIce .gimmickSkin,.gimmickIce[data-ice="2"] .gimmickSkin{background-color:transparent;background-image:url('assets/gimmicks/polish-v13/ice/rim-1.png')}
+.gimmickIce[data-ice="2"] .gimmickSkin{background-image:url('assets/gimmicks/polish-v13/ice/rim-2.png')}
+.gimmickIce .gimmickSkin:after{background-image:url('assets/gimmicks/polish-v13/ice/frost-30.png');opacity:1}
+.gimmickIce[data-ice="2"] .gimmickSkin:after{background-image:url('assets/gimmicks/polish-v13/ice/frost-50.png');opacity:1}
+body.mPlay .gmTools{height:auto;min-height:0;margin:0 0 4px}
+body.mPlay .gmTools[hidden]{display:none}
+body:not(.gimmickGame) #gardenRulesSetting{display:none}
+#gimmickHelp{overflow:visible;border:1px solid #243e61;border-bottom:3px solid #243e61;border-radius:22px;background:#fff8e9;box-shadow:none;padding:16px;font:14px/1.6 'CP Noto',sans-serif}
+#gimmickHelp>small{display:block;min-height:24px;margin-right:78px;color:#886e59;font:13px/24px 'CP Noto',sans-serif}
+#gimmickHelp h2{font:18px/25px 'CP Jua',sans-serif;margin:5px 0}
+#gimmickHelp .gmHelpExit{position:absolute;right:9px;top:0;width:72px;height:44px;min-height:44px;padding:0;margin:0;border:0;background:none;box-shadow:none;display:flex;align-items:center;justify-content:center;gap:6px;font:13px/20px 'CP Noto',sans-serif}
+#gimmickHelp .gmHelpExit img{width:24px;height:24px}
+#gimmickHelp::after{content:'';position:absolute;width:14px;height:14px;left:var(--tail-x,50%);background:#fff8e9;border-right:1px solid #243e61;border-bottom:1px solid #243e61;transform:translateX(-50%) rotate(45deg);bottom:-9px}
+#gimmickHelp[data-tail=top]::after{top:-8px;bottom:auto;transform:translateX(-50%) rotate(225deg)}
+#gimmickHelp[data-tail=none]::after{display:none}
+#gimmickHelp .gmHelpArrow{width:44px;height:22px;object-fit:contain;margin:12px 10px;vertical-align:middle}

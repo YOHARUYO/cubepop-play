@@ -513,11 +513,16 @@
     <p class="settingHelp">큐브를 누르고 있으면 가운데는 현재 윗면, 주변은 실제 상하좌우 옆면을 보여줍니다. 예를 들어 왼쪽 면을 윗면으로 올리려면 오른쪽으로 굴리세요.</p>
     <button class="tutorialReplay" onclick="replayTutorial()" data-game-lock>튜토리얼 다시 해보기</button>
     <p class="settingHelp">학습 스테이지 1부터 다시 연습합니다. 기존 진행 기록은 유지됩니다.</p>
+    <label class="settingRow" for="developerToggle"><span>개발자 모드</span><input type="checkbox" id="developerToggle" role="switch" aria-describedby="developerHelp"></label>
+    <p class="settingHelp" id="developerHelp">켜면 50단계 모두 플레이할 수 있습니다. 테스트 플레이의 클리어·별은 진행 기록에 저장하지 않습니다. 끄면 기존 해금 상태로 돌아갑니다.</p>
   </div>
 </div>
 
 <script src="frame-layout.js"></script>
 <script src="rules.js"></script>
+<script src="stage-layouts.js"></script>
+<script src="gimmick-rules.js"></script>
+<link rel="stylesheet" href="gimmicks.css">
 <script>
 'use strict';
 /* ================= stage config ================= */
@@ -549,6 +554,7 @@ const MOVE_BONUS=120;
 const PAR_TABLE=[2980,3080,2490,2750,2790,2120,2190,1800,2060,1680,1650,1750,1740,1140,1270,1380,1270,1450,1190,1170,1240,1110,920,910,860,1090,970,890,1190,900,
                  870,840,960,870,810,890,790,950,1030,870,870,910,870,890,900,810,930,760,840,750]; // 31~50 (평탄 구간, 시뮬레이션 보정)
 function stageConfig(n){
+  if(n>=20&&window.GimmickPlay)return window.GimmickPlay.config(n);
   const lesson=CubePopRules.lessons[n];
   if(lesson)return {dist:[2,2,2],goals:[[0,lesson.need]],moves:lesson.moves,par:lesson.par};
   n-=4; // Six learning stages replace the original two introductory stages.
@@ -614,8 +620,8 @@ function sizeBoard(){
     boardInner.appendChild(s);
   }
 }
-function makeCube(r,c){
-  const cube={id:++idSeq,orient:randOrient(),r,c,el:null,wrap:null,f:{},h:{}};
+function makeCube(r,c,orientation){
+  const cube={id:++idSeq,orient:orientation?{...orientation}:randOrient(),r,c,el:null,wrap:null,f:{},h:{}};
   const el=document.createElement('div');el.className='cube';
   el.innerHTML=
     '<div class="ringBox"><div class="ringPlate">'+
@@ -694,6 +700,7 @@ function attachGesture(cube,el){
     if(e.isPrimary===false||(e.button!==undefined&&e.button!==0))return;
     if(boardPointer||busy||over||movesLeft<=0)return;
     if(!el.isConnected||grid[cube.r][cube.c]!==cube)return;
+    if(window.GimmickPlay?.active()&&!window.GimmickPlay.canUse(cube)){window.GimmickPlay.reject(cube);return;}
     if(armedWild&&!cube.bomb&&!pickableCells.has(cube.r+','+cube.c))return;
     e.preventDefault();
     const kind=cube.bomb?'bomb':armedWild?'pick':'roll';
@@ -710,6 +717,9 @@ function attachGesture(cube,el){
     hideRollPreview();
     if(g.kind!=='roll')return; // Moving a tap cancels it, even if the pointer returns.
     const dir=Math.abs(dx)>Math.abs(dy)?(dx>0?'E':'W'):(dy>0?'S':'N');
+    // The roll is committed now. Matching can remove this capture target before
+    // pointerup; it must no longer own (and block) the next board gesture.
+    cancelBoardPointers();
     doRoll(cube,dir);
   });
   el.addEventListener('pointerup',e=>{
@@ -725,6 +735,10 @@ function attachGesture(cube,el){
   el.addEventListener('lostpointercapture',cancel);
 }
 async function doRoll(cube,dir){
+  if(window.GimmickPlay?.active()){
+    if(!cube.el?.isConnected||grid[cube.r]?.[cube.c]!==cube)return;
+    return window.GimmickPlay.play({type:'roll',k:cube.r*6+cube.c,dir});
+  }
   if(busy||over||movesLeft<=0)return;
   if(!cube.el.isConnected||grid[cube.r][cube.c]!==cube||!allowLessonRoll(cube,dir))return;
   const announcementToken=window.CubePopAnnouncements?.token();
@@ -967,6 +981,7 @@ function unarmWild(){
   updateLessonGuide();
 }
 function onBombTap(bomb){
+  if(window.GimmickPlay?.active())return window.GimmickPlay.tap(bomb);
   if(busy||over||movesLeft<=0)return;
   if(!bomb.el||!bomb.el.isConnected||grid[bomb.r][bomb.c]!==bomb)return;
   hideRollPreview();
@@ -1094,6 +1109,7 @@ async function comboDetonate(a,b,tapped){
   resolve({clearSet:cs,wildColors:null,epicenter:{r:mr,c:mc},bursts:[{id:tapped.id,type:'COMBO',r:mr,c:mc,hex:tint||'#ffd166',targets:[...cs].map(k=>entityAt(k)?.id).filter(id=>id!==undefined)},...comboRays]},announcementToken);
 }
 function pickWildColor(color){
+  if(window.GimmickPlay?.active())return window.GimmickPlay.pick(color);
   const wasLessonPick=lessonState&&lessonState.phase==='pick';
   const wc=armedWild;unarmWild();
   if(!wc||!wc.el||!wc.el.isConnected||grid[wc.r][wc.c]!==wc)return;
@@ -1109,7 +1125,7 @@ function pickWildColor(color){
 document.addEventListener('pointerdown',e=>{if(armedWild&&!$('board').contains(e.target))unarmWild();});
 
 /* ================= game flow ================= */
-const goalsDone=()=>goals.every(g=>g.got>=g.need);
+const goalsDone=()=>window.GimmickPlay?.active()?window.GimmickPlay.done():goals.every(g=>g.got>=g.need);
 function checkEnd(){
   if(over)return;
   if(lessonState&&!lessonState.complete)return;
@@ -1166,9 +1182,11 @@ function winStage(){
   const s=starCount(),sc=score-stageStartScore;
   // 진행도 기록: 별(최고 기록)과 다음 스테이지 잠금 해제
   const stN=stageNo+1;
-  progress.stars[stN]=Math.max(progress.stars[stN]||0,s);
-  if(stN<TOTAL_STAGES)progress.unlocked=Math.max(progress.unlocked,stN+1);
-  saveProg();
+  if(!developerAttempt){
+    progress.stars[stN]=Math.max(progress.stars[stN]||0,s);
+    if(stN<TOTAL_STAGES)progress.unlocked=Math.max(progress.unlocked,stN+1);
+    saveProg();
+  }
   $('ovStars').innerHTML=[0,1,2].map(i=>'<img src="assets/pastel-garden/score-star-'+(i<s?'earned':'unearned')+'.png" alt="'+(i<s?'획득':'미획득')+'">').join('');
   $('ovTitle').textContent='STAGE '+stN+' 클리어!';
   $('ovTitle').style.color='#367a62';
@@ -1201,6 +1219,7 @@ function updateHUD(){
   window.PastelGarden.renderGoals(goals.map(g=>({...g,shape:stageColors[g.ci],hex:colHex(g.ci),symbol:colSym(g.ci)})));
   updateStarGauge();
   window.TutorialUI?.sync();
+  window.GimmickPlay?.hud();
   fitBoard();
 }
 function updateStarGauge(){
@@ -1238,6 +1257,9 @@ function buildBoard(){
   }
 }
 function setupStage(n,keepScore){
+  developerAttempt=developerMode;
+  if(n>=20&&window.GimmickPlay)return window.GimmickPlay.start(n,keepScore);
+  window.GimmickPlay?.stop();
   window.CubePopAnnouncements?.clear();
   window.CubePopEffects?.clear();
   window.PastelGarden.reset();
@@ -1263,16 +1285,29 @@ function setupStage(n,keepScore){
   $('overlay').classList.remove('show');
   updateHUD();
 }
-function nextStage(){transitionToStage(stageNo+1);}  // 다음 스테이지도 조리개+자막 연출
-function restartStage(){if(busy)return;setupStage(stageNo,false);fitBoard();}
+function nextStage(){if(isStageUnlocked(stageNo+2))transitionToStage(stageNo+1);else exitToMap();}
+function restartStage(){if(busy)return;const wasTest=developerAttempt;setupStage(stageNo,false);developerAttempt=developerAttempt||wasTest;fitBoard();}
 function resetRun(){setupStage(0,false);}
 
 /* ================= 게임 플로우: 홈 → 스테이지 선택 → 플레이 ================= */
 const TOTAL_STAGES=50;
+let developerMode=false,developerAttempt=false;
+try{developerMode=localStorage.getItem('cubepop_v2_developer')==='1';}catch(_){}
+function isStageUnlocked(n){return Number.isInteger(n)&&n>=1&&n<=TOTAL_STAGES&&(developerMode||n<=progress.unlocked);}
+function setDeveloperMode(on){
+  developerMode=!!on;
+  // A test run cannot become a recorded run by turning the switch off mid-game.
+  if(developerMode&&document.body.classList.contains('mPlay'))developerAttempt=true;
+  $('developerToggle').checked=developerMode;
+  try{localStorage.setItem('cubepop_v2_developer',developerMode?'1':'0');}catch(_){}
+  if(document.body.classList.contains('mMap'))renderMap();
+}
+$('developerToggle').checked=developerMode;
+$('developerToggle').addEventListener('change',e=>setDeveloperMode(e.target.checked));
 let progress={unlocked:1,stars:{}};
 try{const p=JSON.parse(localStorage.getItem('cubepop_v2_prog')||'null');if(p&&Number.isInteger(p.unlocked)&&p.unlocked>=1&&p.unlocked<=TOTAL_STAGES&&p.stars&&typeof p.stars==='object')progress=p;}catch(_){}
 function saveProg(){try{localStorage.setItem('cubepop_v2_prog',JSON.stringify(progress));}catch(_){}}
-function setMode(m){window.CubePopAnnouncements?.clear();cancelBoardPointers();window.TutorialUI?.clear();window.CubePopEffects?.clear();document.body.classList.remove('mHome','mMap','mPlay');document.body.classList.add(m);}
+function setMode(m){window.GimmickPlay?.closeHelp();if(m!=='mPlay')window.GimmickPlay?.stop();window.CubePopAnnouncements?.clear();cancelBoardPointers();window.TutorialUI?.clear();window.CubePopEffects?.clear();document.body.classList.remove('mHome','mMap','mPlay');document.body.classList.add(m);}
 function goHome(){setMode('mHome');}
 function goMap(){if(busy)return;unarmWild();renderMap();setMode('mMap');}
 // 아바타 큐브 — 6면 각각 설정 가능 (추후 유저 커스터마이징: faces의 팔레트 인덱스/심볼 교체 지점)
@@ -1327,7 +1362,7 @@ function renderMap(){
     h+='<div class="bandLbl" style="left:6px;top:'+(cy(n)+GAP*.5)+'px;">— '+t+' —</div>';
   });
   for(let n=1;n<=TOTAL_STAGES;n++){
-    const st=progress.stars[n]||0, un=n<=cur;
+    const st=progress.stars[n]||0, un=isStageUnlocked(n);
     const cls=(un?'':' locked')+(n===cur?' cur':'');
     const col=un?PALETTE[(n-1)%PALETTE.length]:'#2a3040';
     const inner='<span class="no">'+(un?n:'🔒')+'</span>'+
@@ -1358,7 +1393,7 @@ function updateMapFades(){
 }
 /* 스테이지 선택: 아바타가 길을 따라 데굴데굴 (5스테이지 이상 거리면 뿅 텔레포트) → 도착 입장 연출 */
 function selectStage(idx){
-  if(mapAnim)return;
+  if(mapAnim||!isStageUnlocked(idx+1))return;
   const target=idx+1;
   if(target===avatarStage){enterFx(target,()=>launchStage(idx,target));return;}
   mapAnim=true;
@@ -1476,6 +1511,7 @@ function repaintAll(){
     else paint(e);
     if(e.bomb)window.CubePopVisual?.paint(e);
   }
+  window.GimmickPlay?.repaint();
   updateHUD();
 }
 
@@ -1552,6 +1588,8 @@ window.addEventListener('orientationchange',()=>setTimeout(fitBoard,150));
 <script src="home-map-surfaces.js"></script>
 <script src="home-map.js"></script>
 <script src="core-play.js"></script>
+<script src="gimmick-art.js"></script>
+<script src="gimmick-play.js"></script>
 <script>
 sizeBoard();
 setupStage(0,false);

@@ -1,0 +1,948 @@
+{
+  "version": "gimmick-art-v1-v8-1",
+  "registration": {
+    "cell": [
+      656,
+      628,
+      224,
+      224
+    ],
+    "fountain": [
+      548,
+      520,
+      440,
+      440
+    ],
+    "board": 1536
+  },
+  "entries": [
+    {
+      "manifestHashProvided": true,
+      "version": 3,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v3/assets/ice/rim-1.png",
+      "destination": "assets/gimmicks/integrated/ice/rim-1.png",
+      "width": 512,
+      "height": 512,
+      "pivot": [
+        256,
+        256
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "ice shell",
+      "layer": "cube depth",
+      "sha256": "f3ea8bb665cb5819e36113f1ec60f833ae7f3977dbcee296c92c11cb1881bca0"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 3,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v3/assets/ice/rim-2.png",
+      "destination": "assets/gimmicks/integrated/ice/rim-2.png",
+      "width": 512,
+      "height": 512,
+      "pivot": [
+        256,
+        256
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "ice shell",
+      "layer": "cube depth",
+      "sha256": "92617ddfa17c5d99e1230e473035144890bc667958d64df2afe2e6b0aad4f480"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 3,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v3/assets/ice/frost-25.png",
+      "destination": "assets/gimmicks/integrated/ice/frost-25.png",
+      "width": 512,
+      "height": 512,
+      "pivot": [
+        256,
+        256
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "ice shell",
+      "layer": "cube depth",
+      "sha256": "7e7e1e2f05e5f896c8a96c8de875867cf278a6e5eb71c96be561cb1368686cf4"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 3,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v3/assets/objects/rock.png",
+      "destination": "assets/gimmicks/integrated/objects/rock.png",
+      "width": 1024,
+      "height": 1024,
+      "pivot": [
+        512,
+        512
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "fixed",
+      "layer": "terrain",
+      "sha256": "f709f13ddb74ef8d527f71540f5fa50714808830c716060f0875d5c2ff9fa79e"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/keys/key-A.png",
+      "destination": "assets/gimmicks/integrated/keys/key-A.png",
+      "width": 512,
+      "height": 512,
+      "pivot": [
+        256,
+        256
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "carried or pending",
+      "layer": "cube marker",
+      "sha256": "dc041ddf3e18b440bacc28e533539540a6302fec965fd5981edca0525d5b0174"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/groups/crest-A.png",
+      "destination": "assets/gimmicks/integrated/groups/crest-A.png",
+      "width": 256,
+      "height": 256,
+      "pivot": [
+        128,
+        128
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "group signal",
+      "layer": "marker",
+      "sha256": "a68c7ac2bc903d91f7f8696c4b9a74b56d0f81052e227aceb0cafbbd88a40046"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 6,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v6/assets/gate-A.png",
+      "destination": "assets/gimmicks/integrated/gate-A.png",
+      "width": 1024,
+      "height": 1024,
+      "pivot": [
+        512,
+        512
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "closed/opening",
+      "layer": "terrain",
+      "sha256": "e991510199e6c819dab62bbd1a389cd659b876a051fae5f53b768f56c8d10440"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/keys/key-B.png",
+      "destination": "assets/gimmicks/integrated/keys/key-B.png",
+      "width": 512,
+      "height": 512,
+      "pivot": [
+        256,
+        256
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "carried or pending",
+      "layer": "cube marker",
+      "sha256": "f5dfccc34508d4e49bd5c5247622f6471462eede8412fa81d23452b5a91af6d1"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/groups/crest-B.png",
+      "destination": "assets/gimmicks/integrated/groups/crest-B.png",
+      "width": 256,
+      "height": 256,
+      "pivot": [
+        128,
+        128
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "group signal",
+      "layer": "marker",
+      "sha256": "e3ba2c9875a223f8d9e4679c2db0417d35dbb7001103fae6277f9e12c17ec7c6"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 6,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v6/assets/gate-B.png",
+      "destination": "assets/gimmicks/integrated/gate-B.png",
+      "width": 1024,
+      "height": 1024,
+      "pivot": [
+        512,
+        512
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "closed/opening",
+      "layer": "terrain",
+      "sha256": "c4bbea3e16b3ac922359e919a908a414e2b0fa2cbfbc2775d4f9d535563520ee"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/keys/key-C.png",
+      "destination": "assets/gimmicks/integrated/keys/key-C.png",
+      "width": 512,
+      "height": 512,
+      "pivot": [
+        256,
+        256
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "carried or pending",
+      "layer": "cube marker",
+      "sha256": "0b1cc734d4dbef3a225eff513a9906f3d86528eadf02ad3ba91f8750cccd1bf7"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/groups/crest-C.png",
+      "destination": "assets/gimmicks/integrated/groups/crest-C.png",
+      "width": 256,
+      "height": 256,
+      "pivot": [
+        128,
+        128
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "group signal",
+      "layer": "marker",
+      "sha256": "ebf2557c12d3faecd26432e861bb9dfc4836ad5a3532e21662d895000c0659cc"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 6,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v6/assets/gate-C.png",
+      "destination": "assets/gimmicks/integrated/gate-C.png",
+      "width": 1024,
+      "height": 1024,
+      "pivot": [
+        512,
+        512
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "closed/opening",
+      "layer": "terrain",
+      "sha256": "9250a2c25f070806d2b4c2fcd4fa8d76411862468bc582d586e9ed9c3ae3624a"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 6,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v6/assets/gate-master.png",
+      "destination": "assets/gimmicks/integrated/gate-master.png",
+      "width": 1024,
+      "height": 1024,
+      "pivot": [
+        512,
+        512
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "master reference",
+      "layer": "terrain",
+      "sha256": "af8401dcfd6c46edb2071d172d786d61c5a97e17b95de8086d4634566a6d08c8"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 6,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v6/assets/goal-door.png",
+      "destination": "assets/gimmicks/integrated/goal-door.png",
+      "width": 256,
+      "height": 256,
+      "pivot": [
+        128,
+        128
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "door groups remaining",
+      "layer": "HUD",
+      "sha256": "735d1491aae8e3085c37fde32d1a671000f513caecfab573e24c698326ee95ed"
+    },
+    {
+      "manifestHashProvided": false,
+      "version": 2,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v2/assets/gates/open-threshold.svg",
+      "destination": "assets/gimmicks/integrated/gates/open-threshold.svg",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "opened",
+      "layer": "floor",
+      "sha256": "55c0760e0f4054286e11ef82d5b5182b27ef2f1a9b0b869033ba0d3121c0923d"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 7,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v7/assets/fountain.png",
+      "destination": "assets/gimmicks/integrated/fountain.png",
+      "width": 1024,
+      "height": 1024,
+      "pivot": [
+        512,
+        512
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "fixed 2x2",
+      "layer": "terrain",
+      "sha256": "5fdc74f2f49b8aa8f5f1e00f49bae143d94d30227d1c8805039dd9c32e25b3eb"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 6,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v6/assets/void-alps.png",
+      "destination": "assets/gimmicks/integrated/void-alps.png",
+      "width": 1024,
+      "height": 1024,
+      "pivot": [
+        512,
+        512
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "void only",
+      "layer": "terrain",
+      "sha256": "0f096215d282e25496adb0df23213c7a98bec3e040f06cf502e5eb6bb939f1fa"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 7,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v7/assets/void-royal.png",
+      "destination": "assets/gimmicks/integrated/void-royal.png",
+      "width": 1024,
+      "height": 1024,
+      "pivot": [
+        512,
+        512
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "void only",
+      "layer": "terrain",
+      "sha256": "537158987139083106a10e6343a9c6b9177c4a666536f2519c5b6a2cbd194151"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 7,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v7/assets/void-astral.png",
+      "destination": "assets/gimmicks/integrated/void-astral.png",
+      "width": 1024,
+      "height": 1024,
+      "pivot": [
+        512,
+        512
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "void only",
+      "layer": "terrain",
+      "sha256": "8b55cb4c5a795c14aeb56f39c9ec40b38cf833023d1dcaa191f8cda7e2734259"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 3,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v3/assets/constellation/unlit.png",
+      "destination": "assets/gimmicks/integrated/constellation/unlit.png",
+      "width": 256,
+      "height": 256,
+      "pivot": [
+        128,
+        128
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "unlit",
+      "layer": "marker",
+      "sha256": "6bddfaba4f0e8921f2db7e8e4ee4b914c3d954567a1935d314c14334b0e82c1f"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 3,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v3/assets/constellation/lit.png",
+      "destination": "assets/gimmicks/integrated/constellation/lit.png",
+      "width": 256,
+      "height": 256,
+      "pivot": [
+        128,
+        128
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "lit",
+      "layer": "marker",
+      "sha256": "966d97c16b53a16dc872fa99b6a66326ce49856feab630dc4465a4e81b739691"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 3,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v3/assets/ui/goal-ice.png",
+      "destination": "assets/gimmicks/integrated/ui/goal-ice.png",
+      "width": 256,
+      "height": 256,
+      "pivot": [
+        128,
+        128
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "goal-ice",
+      "layer": "HUD/marker",
+      "sha256": "744b706625eab04b4b1f4fa1a8fe13e1112460a0d6dbccce424064a03dfd5d3a"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 3,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v3/assets/ui/goal-star.png",
+      "destination": "assets/gimmicks/integrated/ui/goal-star.png",
+      "width": 256,
+      "height": 256,
+      "pivot": [
+        128,
+        128
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "goal-star",
+      "layer": "HUD/marker",
+      "sha256": "966d97c16b53a16dc872fa99b6a66326ce49856feab630dc4465a4e81b739691"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 3,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v3/assets/ui/guide-key.png",
+      "destination": "assets/gimmicks/integrated/ui/guide-key.png",
+      "width": 256,
+      "height": 256,
+      "pivot": [
+        128,
+        128
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "guide-key",
+      "layer": "HUD/marker",
+      "sha256": "65b2faefcc8e867a0248b02050adb519444e15c731694bf9a77af252c3fdcf8f"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 3,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v3/assets/ui/locked.png",
+      "destination": "assets/gimmicks/integrated/ui/locked.png",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "locked",
+      "layer": "HUD/marker",
+      "sha256": "679b73761931d556cf211d80f612b286accf82fffde183ab9fe23d7c3a0642aa"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 3,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v3/assets/ui/complete.png",
+      "destination": "assets/gimmicks/integrated/ui/complete.png",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "complete",
+      "layer": "HUD/marker",
+      "sha256": "6ad508ed4a0a0e6ae26a5a37ccb6cb0831ef8e32b20d3c80a8761626a46516d8"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/rotor/N-idle.svg",
+      "destination": "assets/gimmicks/integrated/rotor/N-idle.svg",
+      "width": 96,
+      "height": 96,
+      "pivot": [
+        48,
+        48
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "idle",
+      "layer": "front rail",
+      "sha256": "d22967c32e00132c3caea52d44ae8b3238daaa7ef39d0c3538a76d912ce246a8"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/rotor/N-ready.svg",
+      "destination": "assets/gimmicks/integrated/rotor/N-ready.svg",
+      "width": 96,
+      "height": 96,
+      "pivot": [
+        48,
+        48
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "ready",
+      "layer": "front rail",
+      "sha256": "86beaa685cc22b4a4d8fafe9e882edfc8badaa94b86aaa882a842e386b6ec22c"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/rotor/N-skip.svg",
+      "destination": "assets/gimmicks/integrated/rotor/N-skip.svg",
+      "width": 96,
+      "height": 96,
+      "pivot": [
+        48,
+        48
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "skip",
+      "layer": "front rail",
+      "sha256": "f33a260d730e231d8491541cdbde7ec6cdbfa678853f2b2bc8ad6807fb578d25"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/rotor/E-idle.svg",
+      "destination": "assets/gimmicks/integrated/rotor/E-idle.svg",
+      "width": 96,
+      "height": 96,
+      "pivot": [
+        48,
+        48
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "idle",
+      "layer": "front rail",
+      "sha256": "f10d9a107e92cccab174bdeb5db136078a21aa0dfe5cc96edf0b108dbc8dda87"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/rotor/E-ready.svg",
+      "destination": "assets/gimmicks/integrated/rotor/E-ready.svg",
+      "width": 96,
+      "height": 96,
+      "pivot": [
+        48,
+        48
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "ready",
+      "layer": "front rail",
+      "sha256": "308d3f75284728448307117a2228ca287dcbf9e078165c1a1439263776a4ff16"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/rotor/E-skip.svg",
+      "destination": "assets/gimmicks/integrated/rotor/E-skip.svg",
+      "width": 96,
+      "height": 96,
+      "pivot": [
+        48,
+        48
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "skip",
+      "layer": "front rail",
+      "sha256": "f33a260d730e231d8491541cdbde7ec6cdbfa678853f2b2bc8ad6807fb578d25"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/rotor/S-idle.svg",
+      "destination": "assets/gimmicks/integrated/rotor/S-idle.svg",
+      "width": 96,
+      "height": 96,
+      "pivot": [
+        48,
+        48
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "idle",
+      "layer": "front rail",
+      "sha256": "96585ac8120445aff9aa5deaa4291a6e91efc00a0e4a43051bbe3f75e2b0bf1a"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/rotor/S-ready.svg",
+      "destination": "assets/gimmicks/integrated/rotor/S-ready.svg",
+      "width": 96,
+      "height": 96,
+      "pivot": [
+        48,
+        48
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "ready",
+      "layer": "front rail",
+      "sha256": "cf963de53576e2d69214b839f19fe64633ef29aa5370d4525cb109a2d57fd21e"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/rotor/S-skip.svg",
+      "destination": "assets/gimmicks/integrated/rotor/S-skip.svg",
+      "width": 96,
+      "height": 96,
+      "pivot": [
+        48,
+        48
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "skip",
+      "layer": "front rail",
+      "sha256": "f33a260d730e231d8491541cdbde7ec6cdbfa678853f2b2bc8ad6807fb578d25"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/rotor/W-idle.svg",
+      "destination": "assets/gimmicks/integrated/rotor/W-idle.svg",
+      "width": 96,
+      "height": 96,
+      "pivot": [
+        48,
+        48
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "idle",
+      "layer": "front rail",
+      "sha256": "49d6a2d642a19294e04c67e32e0387d4d3dbdd8c4237650a5c068adf94f43289"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/rotor/W-ready.svg",
+      "destination": "assets/gimmicks/integrated/rotor/W-ready.svg",
+      "width": 96,
+      "height": 96,
+      "pivot": [
+        48,
+        48
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "ready",
+      "layer": "front rail",
+      "sha256": "e88064881fe4ef48547747e66e59e393264a521c453faa20cccc005b0586370e"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 4,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v4/assets/rotor/W-skip.svg",
+      "destination": "assets/gimmicks/integrated/rotor/W-skip.svg",
+      "width": 96,
+      "height": 96,
+      "pivot": [
+        48,
+        48
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "skip",
+      "layer": "front rail",
+      "sha256": "f33a260d730e231d8491541cdbde7ec6cdbfa678853f2b2bc8ad6807fb578d25"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 1,
+      "source": "output/design-handoff/stage-gimmicks-21-50/assets/board/corner-inner-E.svg",
+      "destination": "assets/gimmicks/integrated/board/corner-inner-E.svg",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "mask/segment",
+      "layer": "floor",
+      "sha256": "d779bd792c275275a3361b74a65712ea313d8f82a95a709848550b23a51643c7"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 1,
+      "source": "output/design-handoff/stage-gimmicks-21-50/assets/board/corner-inner-N.svg",
+      "destination": "assets/gimmicks/integrated/board/corner-inner-N.svg",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "mask/segment",
+      "layer": "floor",
+      "sha256": "1998f05bce93b71319d5d56252a3279288f740927bd111f3d2814671839ef4ba"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 1,
+      "source": "output/design-handoff/stage-gimmicks-21-50/assets/board/corner-inner-S.svg",
+      "destination": "assets/gimmicks/integrated/board/corner-inner-S.svg",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "mask/segment",
+      "layer": "floor",
+      "sha256": "cbe52050f1e387f3936ecad4cc063187fc37ac0ba3f35ecf6cc048d89737470b"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 1,
+      "source": "output/design-handoff/stage-gimmicks-21-50/assets/board/corner-inner-W.svg",
+      "destination": "assets/gimmicks/integrated/board/corner-inner-W.svg",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "mask/segment",
+      "layer": "floor",
+      "sha256": "78933c05b2b9ab414bde7d033997e6ffe7269563c9e2d61877aac3c4180755f5"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 1,
+      "source": "output/design-handoff/stage-gimmicks-21-50/assets/board/corner-outer-E.svg",
+      "destination": "assets/gimmicks/integrated/board/corner-outer-E.svg",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "mask/segment",
+      "layer": "floor",
+      "sha256": "df0bde7fe2e630586b2174430035c7189ed5045b7c6121fcf19d9fb852cc5360"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 1,
+      "source": "output/design-handoff/stage-gimmicks-21-50/assets/board/corner-outer-N.svg",
+      "destination": "assets/gimmicks/integrated/board/corner-outer-N.svg",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "mask/segment",
+      "layer": "floor",
+      "sha256": "d8987334c0cb39e769080b5f634d050e6afa2e9954806d62c929ba79c562a575"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 1,
+      "source": "output/design-handoff/stage-gimmicks-21-50/assets/board/corner-outer-S.svg",
+      "destination": "assets/gimmicks/integrated/board/corner-outer-S.svg",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "mask/segment",
+      "layer": "floor",
+      "sha256": "bab8da53d3ce67c652d4be768ede46c62b890798f53f1975534c3733dd77cd4a"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 1,
+      "source": "output/design-handoff/stage-gimmicks-21-50/assets/board/corner-outer-W.svg",
+      "destination": "assets/gimmicks/integrated/board/corner-outer-W.svg",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "mask/segment",
+      "layer": "floor",
+      "sha256": "20f752b4561f7c5a196f0464c2276db4a3d55e224e70867316527c23283d8f8d"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 1,
+      "source": "output/design-handoff/stage-gimmicks-21-50/assets/board/edge-E.svg",
+      "destination": "assets/gimmicks/integrated/board/edge-E.svg",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "mask/segment",
+      "layer": "floor",
+      "sha256": "cc9212d9574150234eb9108413f2809fcb6c51e129b897cdf3d7aad3e21e34dc"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 1,
+      "source": "output/design-handoff/stage-gimmicks-21-50/assets/board/edge-N.svg",
+      "destination": "assets/gimmicks/integrated/board/edge-N.svg",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "mask/segment",
+      "layer": "floor",
+      "sha256": "fd97774b816ae5f509b89e5b7d754a91677296dfc2978bf08c237c6d63f5249f"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 1,
+      "source": "output/design-handoff/stage-gimmicks-21-50/assets/board/edge-S.svg",
+      "destination": "assets/gimmicks/integrated/board/edge-S.svg",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "mask/segment",
+      "layer": "floor",
+      "sha256": "19a363e96a9efe713120fec95618ac01b9829e43c7e99510c7e0a298f1a6b2c3"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 1,
+      "source": "output/design-handoff/stage-gimmicks-21-50/assets/board/edge-W.svg",
+      "destination": "assets/gimmicks/integrated/board/edge-W.svg",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "mask/segment",
+      "layer": "floor",
+      "sha256": "511967170e22d316c30b41a7778a162ab26b1bbf18b99db90827720d18afce14"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 1,
+      "source": "output/design-handoff/stage-gimmicks-21-50/assets/board/floor.svg",
+      "destination": "assets/gimmicks/integrated/board/floor.svg",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "mask/segment",
+      "layer": "floor",
+      "sha256": "8b4c3d3ccee9423b21076a7b7c7cc318f59134d54071f42230a1c91761e9e95e"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 1,
+      "source": "output/design-handoff/stage-gimmicks-21-50/assets/board/refill-entry.svg",
+      "destination": "assets/gimmicks/integrated/board/refill-entry.svg",
+      "width": 128,
+      "height": 32,
+      "pivot": [
+        64,
+        16
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "mask/segment",
+      "layer": "floor",
+      "sha256": "bf616c73e23a2b3cadfca2cbe334685d8fed506142b03ccdda26fa9d8b867ef7"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 1,
+      "source": "output/design-handoff/stage-gimmicks-21-50/assets/board/void-inset.svg",
+      "destination": "assets/gimmicks/integrated/board/void-inset.svg",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "mask/segment",
+      "layer": "floor",
+      "sha256": "0d4aad5a8e6e7166127d4cdbf7904b85fc858121190ec2c7fbee80574d01cf73"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 1,
+      "source": "output/design-handoff/stage-gimmicks-21-50/assets/constellation/connection.svg",
+      "destination": "assets/gimmicks/integrated/constellation/connection.svg",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "connection",
+      "layer": "floor",
+      "sha256": "4a32343b99d26692c561acb604fdc4367afe86211c0096b2c6c1b0ec363cd1e8"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 1,
+      "source": "output/design-handoff/stage-gimmicks-21-50/assets/constellation/complete.svg",
+      "destination": "assets/gimmicks/integrated/constellation/complete.svg",
+      "width": 128,
+      "height": 128,
+      "pivot": [
+        64,
+        64
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "complete",
+      "layer": "floor",
+      "sha256": "bc37cd2f0551b1653d94effbc2bf0daef538e78516f4c0e3060db6a69811c40d"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 8,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v8/assets/vine-cover.png",
+      "destination": "assets/gimmicks/vine-cover-v8.png",
+      "width": 1024,
+      "height": 1024,
+      "pivot": [
+        512,
+        512
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "sealed/releasing",
+      "layer": "sealed cube",
+      "sha256": "e209aff30720ceb53f904f30713257961e92a521b56ef9cc83c7f2b0ce0f0e42"
+    },
+    {
+      "manifestHashProvided": true,
+      "version": 8,
+      "source": "output/design-handoff/stage-gimmicks-21-50-v8/assets/goal-vine.png",
+      "destination": "assets/gimmicks/goal-vine-v8.png",
+      "width": 256,
+      "height": 256,
+      "pivot": [
+        128,
+        128
+      ],
+      "registration": "full untrimmed canvas",
+      "state": "vines remaining",
+      "layer": "HUD",
+      "sha256": "47746c9309f9624cc49c35d7a47b1ee5f6053aa1f2530349f0218de09f1d4c9d"
+    }
+  ]
+}

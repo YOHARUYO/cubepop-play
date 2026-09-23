@@ -3,6 +3,14 @@
   'use strict';
   if(root.__SIM)return;
   const $=id=>document.getElementById(id),app=document.querySelector('.app');
+  const hud=document.querySelector('.goalsCard'),scorePanel=document.querySelector('.scorePanel'),controls=document.querySelector('.controls');
+  hud.append(scorePanel);document.querySelector('.gameBrand').append(controls);
+  const scoreLine=document.createElement('div');scoreLine.className='hudScoreLine';
+  scoreLine.append(document.querySelector('.scoreLabel'),$('scoreV'));scorePanel.prepend(scoreLine);
+  for(const button of controls.querySelectorAll('button')){
+    button.setAttribute('aria-label',button.classList.contains('gearBtn')?'도움말 및 설정':'다시');
+    for(const child of [...button.childNodes])if(child.nodeType===3)child.remove();
+  }
   const overlay=$('overlay'),layer=document.createElement('div');
   layer.className='coreResultLayer';layer.hidden=true;document.body.append(layer);layer.append(overlay);
   overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');
@@ -14,7 +22,11 @@
   const buttonSizes=new WeakMap();
   function paintButtons(){
     for(const button of document.querySelectorAll('.app .controls button,.app .topBack,#skipBtn,.tutorialActions button:not(#exitLesson),#ovBtns button')){
+      if(button.closest('.controls'))continue;
       if(!button.offsetWidth||!button.offsetHeight)continue;
+      // During viewport/style transitions an unlaid-out horizontal button may
+      // briefly be narrower than its unscaled image caps. Retry on the next fit.
+      if(!button.classList.contains('topBack')&&button.offsetWidth<700*(button.offsetHeight+7)/452+16)continue;
       button.classList.add('cpButton');
       if(!button.querySelector('.cpLabel')){
         const label=document.createElement('span');label.className='cpLabel';
@@ -33,13 +45,17 @@
     }
   }
   function layoutGoals(){
-    const row=$('goals'),items=[...row.children];if(!row.clientWidth||!items.length)return;
-    const compact=root.innerWidth<=340,icon=compact?16:20;
-    document.querySelector('.goalsCard').dataset.compact=String(compact);
-    const measure=Math.max(...items.map(el=>el.querySelector('.goalMeasure').getBoundingClientRect().width));
-    const min=Math.max(compact?64:72,measure+icon+(compact?16:20));
-    let columns=3;while(columns>1&&(row.clientWidth-8*(columns-1))/columns<min)columns--;
-    row.style.gridTemplateColumns=`repeat(${columns},minmax(0,1fr))`;row.dataset.checkBelow='false';
+    const compact=root.innerWidth<=340;hud.dataset.compact=String(compact);
+    for(const row of [$('goals'),document.querySelector('.gmCards')]){
+      if(!row?.clientWidth||!row.children.length)continue;
+      const gap=compact?7:10,items=[...row.children];
+      // Reserve the completion mark even while incomplete; never shift values.
+      const needed=Math.max(60,...items.map(el=>{const value=el.querySelector('.hudCount');return (value?.scrollWidth||0)+20+(compact?3:5)+(el.dataset.goal==='color'?0:13);}));
+      let columns=4;while(columns>1&&(row.clientWidth-gap*(columns-1))/columns<needed)columns--;
+      const slot=Math.min(Math.max(120,needed),(row.clientWidth-gap*(columns-1))/columns);
+      row.style.gridTemplateColumns=`repeat(${Math.min(columns,items.length)},${slot}px)`;
+      row.dataset.checkBelow='false';
+    }
   }
   function positionResult(){
     if(layer.hidden)return;
@@ -49,17 +65,23 @@
   }
   function fit(){
     if(!document.body.classList.contains('mPlay'))return true;
-    const vw=document.documentElement.clientWidth,wide=vw>=768;
-    // Mobile preserves readable cubes and scrolls; wide layouts use the spare height.
-    const width=Math.min(704,vw-(vw<=340?8:16));
-    const size=wide?Math.min(width,Math.max(280,root.innerHeight-340)):width;
-    app.style.maxWidth=Math.max(size,wide?460:0)+'px';
-    $('board').style.zoom=size/704;layoutGoals();
-    // Large real scores can wrap without shrinking the font or touching the stars.
-    const scoreHeight=Math.max(30,$('scoreV').offsetHeight);
-    document.querySelector('.scorePanel').style.height=(100+scoreHeight-30)+'px';
-    document.querySelector('.scorePanel').style.flexBasis=(100+scoreHeight-30)+'px';
-    paintButtons();positionResult();root.TutorialUI?.refresh();return true;
+    const vw=document.documentElement.clientWidth,wide=vw>=768,padding=getComputedStyle(document.body);
+    const width=Math.min(704,vw-parseFloat(padding.paddingLeft)-parseFloat(padding.paddingRight));
+    const height=Math.min(root.innerHeight,root.visualViewport?.height||root.innerHeight);
+    app.style.maxWidth=width+'px';$('board').style.zoom=width/704;
+    for(let pass=0;pass<3;pass++){
+      layoutGoals();
+      const extra=Math.max(0,scoreLine.offsetHeight-22),counter=scorePanel.querySelector('.gmTools:not([hidden])');
+      scorePanel.style.height=((counter?64:60)+extra)+'px';scorePanel.style.flexBasis='auto';
+      scorePanel.style.setProperty('--score-line-extra',extra+'px');
+      const reserved=app.offsetHeight-$('board').getBoundingClientRect().height;
+      const available=height-reserved-parseFloat(padding.paddingTop)-parseFloat(padding.paddingBottom)-1;
+      // Only the complete board box scales. If the viewport is exceptionally
+      // short, readable text and a 160px board take precedence over hiding content.
+      const fitted=Math.min(width,Math.max(160,Math.floor(available)));
+      app.style.maxWidth=Math.max(fitted,wide?460:width)+'px';$('board').style.zoom=fitted/704;
+    }
+    paintButtons();positionResult();root.TutorialUI?.refresh();root.GimmickPlay?.positionHelp();return true;
   }
   function schedule(){if(!pending)pending=requestAnimationFrame(()=>{pending=0;fit();});}
   function close(){
@@ -113,6 +135,9 @@
   new MutationObserver(schedule).observe($('scoreV'),{childList:true,characterData:true,subtree:true});
   new ResizeObserver(schedule).observe(app);
   root.addEventListener('scroll',positionResult,{passive:true});
+  root.addEventListener('resize',schedule,{passive:true});
+  root.visualViewport?.addEventListener('resize',schedule,{passive:true});
+  new ResizeObserver(schedule).observe(hud);
   root.PastelGarden.layoutGoals=layoutGoals;
   root.CorePlay={fit,result,close,paintButtons};
   document.fonts.ready.then(schedule);schedule();

@@ -21,6 +21,10 @@
       frame:{rear:'assets/themes/'+id+'/board-frame-rear.png',front:'assets/themes/'+id+'/board-frame-front.png'},
       nodes:{...catalog.sandstone.nodes}};
   }
+  for(const [id,c] of Object.entries(catalog)){
+    c.revision='theme-mobile-frame-v2';
+    c.background.mobile='assets/themes/'+id+'/'+id+'-mobile.webp';
+  }
   root.CubePopThemeCatalog=catalog;
   if(typeof module==='object')module.exports=catalog;
 })(typeof window==='object'?window:globalThis);

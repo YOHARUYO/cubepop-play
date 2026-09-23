@@ -2,6 +2,14 @@
 body.mPlay[data-play-theme]{position:relative;}
 body.mPlay[data-play-theme]::before{position:absolute;min-height:100dvh;background-image:var(--theme-background);background-position:center top;background-size:cover;}
 body.mPlay[data-play-theme]::after{display:none;}
+/* Only the mobile landscape plane moves; document flow and board registration do not. */
+/* The loader sets this attribute only for the selected <=599px portrait image.
+   Use the same decision for geometry, including fractional CSS viewport widths. */
+body.mPlay[data-play-background="mobile"]::before{
+  --mobile-scenery-upshift:max(0px,calc((100vw - 390px) * .42));
+  top:calc(-1 * var(--mobile-scenery-upshift));bottom:0;height:auto;
+  min-height:calc(100dvh + var(--mobile-scenery-upshift));
+}
 .themeMapEnvironment{position:fixed;left:0;width:100%;z-index:-1;pointer-events:none;overflow:hidden;}
 body:not(.mMap) .themeMapEnvironment{display:none;}
 .themeMapRegion{position:absolute;inset:0;background-size:cover;background-position:center top;pointer-events:none;}

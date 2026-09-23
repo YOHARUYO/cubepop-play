@@ -39,6 +39,7 @@ function showRollPreview(cube){
   }
   $('rollPreview').setAttribute('aria-label','현재 큐브의 면 배치. 가운데 윗면 '+faces.U+', 위쪽 옆면 '+faces.N+', 아래쪽 옆면 '+faces.S+', 왼쪽 옆면 '+faces.W+', 오른쪽 옆면 '+faces.E);
   $('rollPreview').hidden=false;
+  window.GimmickArt?.preview(cube,$('rollPreview'));
   if(teaching)window.TutorialUI?.showFacePreview();else positionRollPreview();
 }
 function positionRollPreview(){
@@ -67,6 +68,11 @@ function cancelBoardPointers(){
   const gesture=boardPointer;boardPointer=null;
   if(gesture)try{gesture.cube.el.releasePointerCapture(gesture.pointerId);}catch(_){}
 }
+// Removed capture targets and releases outside the board finish at document level.
+// Bubble phase lets the cube's own tap handler run first; another finger is ignored.
+for(const type of ['pointerup','pointercancel','lostpointercapture'])document.addEventListener(type,e=>{
+  if(boardPointer?.pointerId===e.pointerId)cancelBoardPointers();
+});
 let lessonState=null;
 const directionArrows={N:'↑',S:'↓',E:'→',W:'←'};
 function beginLesson(){

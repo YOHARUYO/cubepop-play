@@ -68,3 +68,60 @@ body.mPlay #ovBtns .cpButton{width:100%;height:44px;flex:0 0 44px}
 @media(max-width:340px){body.mPlay{padding:7px max(4px,env(safe-area-inset-right)) 10px max(4px,env(safe-area-inset-left))}body.mPlay .gameBrand{height:91px;flex-basis:91px}body.mPlay .stageHead h1{width:106px;height:70px}body.mPlay .stageHead{gap:3px}body.mPlay .goalsCard.card{margin-top:9px}body.mPlay .boardWrap{margin-top:11px}body.mPlay .goalsCard.card{gap:8px}body.mPlay .movesBadge,body.mPlay .goalsCard[data-compact=true] .movesBadge{flex-basis:62px;width:62px;padding-right:6px}body.mPlay .gchip .dot{width:16px;height:16px;flex-basis:16px}body.mPlay .scorePanel{width:276px;max-width:calc(100% - 36px)}body.mPlay .controls{width:calc(100% - 32px);height:44px;flex-basis:44px;margin-top:15px}body.mPlay .controls button{width:130px;height:44px;flex-basis:130px;font-size:19px}body.mPlay #overlay{padding:18px 16px 22px}}
 @media(prefers-reduced-motion:reduce){body.mPlay .cpButton :is(.cpSurface,.cpLabel){transition:none;transform:none!important}}
 @media(max-width:340px){body.mPlay .gchip .cnt,body.mPlay .goalMeasure{font-size:13px}body.mPlay .goalsCard[data-compact=true] .gchip .dot{width:16px;height:16px;flex-basis:16px}body.mPlay .goalTop{gap:3px;padding-right:13px}}
+
+/* Approved v10 layout: one shared top HUD, landscape logo and icon controls. */
+body.mPlay .gameBrand .controls{position:absolute;right:0;top:4px;width:88px!important;max-width:88px;height:44px!important;margin:0!important;gap:0;flex:none}
+body.mPlay .gameBrand .controls button{width:44px!important;height:44px!important;flex:0 0 44px;min-width:44px;min-height:44px;padding:0;border:0;background:none!important;box-shadow:none!important;border-radius:10px;font-size:0}
+body.mPlay .gameBrand .controls img{width:22px;height:22px}
+body.mPlay .goalsCard.card{display:grid!important;grid-template-columns:68px minmax(0,1fr);grid-template-rows:auto auto;gap:8px 16px!important;margin:8px auto 0!important;width:calc(100% - 16px)!important;max-width:560px!important;min-height:0!important;padding:0!important;align-items:start}
+body.mPlay .goalsCard .movesBadge{grid-row:1;grid-column:1;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;width:68px!important;height:64px!important;min-height:64px!important;padding:0 10px 0 0!important;border:0!important;border-right:1px solid #bba88d!important;background:none!important;gap:0!important}
+body.mPlay .goalsCard .movesBadge b{font:34px/36px 'CP Jua',sans-serif!important}
+body.mPlay .goalsCard .movesBadge span{font:13px/18px 'CP Noto',sans-serif!important;white-space:nowrap}
+body.mPlay .goalsCard .scorePanel{grid-row:1;grid-column:2;position:relative;align-self:start;width:100%;max-width:none;min-height:76px;margin:0;border:0;border-radius:0;background:none;box-shadow:none;text-align:center;padding:0 18px;box-sizing:border-box}
+body.mPlay .goalsCard .scoreLabel{position:static;display:inline;font-size:10px;line-height:24px;letter-spacing:0;margin-right:6px}
+body.mPlay .goalsCard #scoreV{position:static;display:inline;font:20px/24px 'CP Jua',sans-serif;overflow-wrap:anywhere}
+body.mPlay .goalsCard .scorePanel .gaugeRow{bottom:25px;height:5px;width:calc(100% - 44px)}
+body.mPlay .goalsCard .gaugeBar{height:5px}
+body.mPlay .goalsContent,body.mPlay #gimmickHud{grid-row:2;grid-column:1/-1;width:100%;margin:0;border-top:1px solid #ccb99666;padding:6px 0 0!important}
+body.mPlay .goalsContent h2{display:none}
+body.mPlay .gchip{background:none!important;border:0!important;box-shadow:none!important}
+body.mPlay .goalTrack{height:3px;margin-top:5px}
+body.mPlay .gmCards{gap:8px}
+body.mPlay .gmCards .gmGoal{border:0;border-radius:0;box-shadow:none;background:none;height:50px;min-width:60px;max-width:120px;padding:0 0 8px;flex:1 1 calc(25% - 8px)}
+body.mPlay .gmCards .gmValue b{font-size:18px}
+body.mPlay .gmProgress{left:0;right:0;bottom:1px}
+body.mPlay .gmTools{position:static;justify-content:flex-end;margin-top:3px;height:auto;min-height:0;gap:4px}
+body.mPlay .gmTools .gmHelpButton{border:0;background:none;box-shadow:none;font-size:20px}
+body.mPlay .boardWrap{margin-top:8px}
+@media(max-width:340px){body.mPlay .goalsCard.card{grid-template-columns:60px minmax(0,1fr);gap:8px!important}body.mPlay .goalsCard .movesBadge{width:60px!important}body.mPlay .gmCards{gap:5px}}
+
+/* Shared final HUD: the two rule adapters use these same visual primitives. */
+body.mPlay{padding-bottom:max(8px,env(safe-area-inset-bottom))}
+body.mPlay .goalsCard .movesBadge{height:56px!important;min-height:56px!important}
+body.mPlay .goalsCard .scorePanel{min-height:60px;height:60px;padding:0 18px}
+body.mPlay .hudScoreLine{display:flex;justify-content:center;align-items:baseline;gap:6px;min-height:22px;line-height:22px}
+body.mPlay .goalsCard .scoreLabel{margin:0;line-height:22px;flex:none}
+body.mPlay .goalsCard #scoreV{display:block;min-width:0;font:400 20px/22px 'CP Jua',sans-serif}
+body.mPlay .goalsCard .scorePanel .gaugeRow{top:calc(34.5px + var(--score-line-extra,0px));bottom:auto;height:5px;width:calc(100% - 36px)}
+body.mPlay .goalsCard .gPin{width:18px;height:18px}
+body.mPlay .goalsCard .gPin img{width:100%;height:100%}
+body.mPlay .scorePanel .gmTools{position:absolute;right:0;top:auto;bottom:0;margin:0;height:14px;line-height:14px}
+body.mPlay .scorePanel .gmCountdown{font:400 12px/14px 'CP Jua',sans-serif;white-space:nowrap;color:#725b83}
+body.mPlay .scorePanel .gmTools[hidden]{display:none}
+body.mPlay :is(#goals,.gmCards){display:grid;justify-content:center;gap:6px 10px;width:100%;margin:0}
+body.mPlay :is(.goalsContent,#gimmickHud){padding-top:6px!important}
+body.mPlay :is(#goals,.gmCards) .hudGoal{position:relative;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;box-sizing:border-box;width:100%;min-width:0;max-width:none;height:46px;min-height:46px;padding:0 0 8px;margin:0;flex:none;border:0;border-radius:0;background:none;box-shadow:none;white-space:normal}
+body.mPlay :is(#goals,.gmCards) .hudValue{position:relative;display:flex;justify-content:center;align-items:center;gap:5px;height:26px;min-height:26px;padding:0 13px 0 0;line-height:26px}
+body.mPlay :is(#goals,.gmCards) .hudIcon{display:inline-flex;align-items:center;justify-content:center;flex:0 0 20px;width:20px;height:20px;margin:0}
+body.mPlay :is(#goals,.gmCards) .hudIcon>svg{width:20px;height:20px}
+body.mPlay :is(#goals,.gmCards) .hudIcon>img{width:24px;height:24px;object-fit:contain}
+body.mPlay :is(#goals,.gmCards) .hudCount{font:400 18px/26px 'CP Jua',sans-serif;white-space:nowrap;min-width:0;margin:0}
+body.mPlay :is(#goals,.gmCards) .hudCaption{display:block;text-align:center;font:400 12px/16px 'CP Jua',sans-serif;white-space:nowrap;color:#243E61}
+body.mPlay :is(#goals,.gmCards) .hudTrack{position:absolute;left:0;right:0;bottom:0;top:auto;margin:0;height:3px;border-radius:3px;background:#d5cbb966;box-shadow:none}
+body.mPlay :is(#goals,.gmCards) .hudTrack>i,body.mPlay :is(#goals,.gmCards) .hudTrack>.goalFill{height:100%;border-radius:3px}
+body.mPlay :is(#goals,.gmCards) .hudCheck{position:absolute;right:0;top:6px;width:12px;height:12px;margin:0;transform:none}
+body.mPlay :is(#goals,.gmCards) .hudCheck[hidden]{display:none}
+body.mPlay :is(#goals,.gmCards) [data-goal=color] .hudValue{padding-right:0}
+body.mPlay :is(#goals,.gmCards) [data-goal=color] .hudCheck{top:28px}
+body.mPlay .gameBrand .controls button:focus-visible{outline:2px solid #147A96;outline-offset:2px}
+@media(max-width:340px){body.mPlay :is(#goals,.gmCards){column-gap:7px}body.mPlay :is(#goals,.gmCards) .hudCount{font-size:17px}body.mPlay :is(#goals,.gmCards) .hudValue{gap:3px}}

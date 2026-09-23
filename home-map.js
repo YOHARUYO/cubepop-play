@@ -44,7 +44,7 @@
   function visualBounds(p,l,n,cur){
     const G=window.InteractionLayout,top=p.y-l.face/2;
     const rs=[G.rect(p.x-l.face/2,top,l.face,l.face+7),G.rect(p.x-37,top+l.face+12,74,24)];
-    if(n>cur||Object.hasOwn(progress.stars,n))rs.push(G.rect(p.x+l.face/2-17,top-12,28,30.625));
+    if(!isStageUnlocked(n)||Object.hasOwn(progress.stars,n))rs.push(G.rect(p.x+l.face/2-17,top-12,28,30.625));
     // Reserve the entire idle float envelope; connector dots remain stationary.
     if(n===cur)rs.push(G.rect(p.x-26,top-36+56.33-52*859/863,52,52*859/863+4),G.rect(p.x-18,top+20.2,36,7.6));
     if([1,7,10,15].includes(n))rs.push(G.rect(0,top+l.face+45,l.W,20));
@@ -76,7 +76,7 @@
     const paths=l.links.map((line,i)=>'<g data-from="'+(i+1)+'" data-to="'+(i+2)+'" data-gap="'+line.gap+'" fill="'+(i+1<cur?'#d1ac4d':'#c4aa86')+'">'+line.points.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="2.8"/>').join('')+'</g>').join('');
     let html='<svg class="hmPath" width="'+l.W+'" height="'+l.height+'" viewBox="0 0 '+l.W+' '+l.height+'" aria-hidden="true">'+paths+'</svg>';
     for(let n=1;n<=TOTAL_STAGES;n++){
-      const p=mapPos[n],complete=Object.hasOwn(progress.stars,n),stars=Math.max(0,Math.min(3,progress.stars[n]||0)),un=n<=cur,current=n===cur;
+      const p=mapPos[n],complete=Object.hasOwn(progress.stars,n),stars=Math.max(0,Math.min(3,progress.stars[n]||0)),un=isStageUnlocked(n),current=n===cur;
       const state=!un?'locked':current?'next':complete?'complete':'open';
       html+='<button class="pnode hmButton '+(!un?'locked ':'')+(current?'cur':'')+'" data-n="'+n+'" data-state="'+state+'" data-complete="'+complete+'" data-square="true" data-gold="'+current+'" style="left:'+p.x+'px;top:'+p.y+'px" aria-label="스테이지 '+n+', '+(!un?'잠김':(complete?'완료, 별 '+stars+'개':'미완료'))+(current?', '+(complete&&n===50?'마지막 스테이지':'다음 도전'):'')+'" '+(!un?'disabled':'onclick="selectStage('+(n-1)+')"')+'>'+S.svg(l.face,l.face,true,current&&un,window.CubePopThemes?.forStage(n)||'sandstone')+'<span class="hmLabel">'+n+'</span><span class="hmStars" aria-hidden="true">'+[1,2,3].map(i=>'<img src="assets/pastel-garden/score-star-'+(i<=stars?'earned':'unearned')+'.png" alt="">').join('')+'</span>'+(!un?'<span class="hmBadge lock"><img src="assets/interaction/stage-lock.svg" alt=""></span>':complete?'<span class="hmBadge"><img src="assets/interaction/stage-clear.svg" alt=""></span>':'')+'</button>';
     }
@@ -143,7 +143,7 @@
     });
   };
   selectStage=function(idx){
-    if(mapAnim||!Number.isInteger(idx)||idx<0||idx>=Math.min(progress.unlocked,TOTAL_STAGES))return;
+    if(mapAnim||!isStageUnlocked(idx+1))return;
     if(reduced()){startStage(idx);return;}
     mapAnim=true;avatarEl.classList.remove('idle');const target=idx+1;
     const arrive=()=>{avatarStage=target;enterFx(target,()=>launchStage(idx,target));};

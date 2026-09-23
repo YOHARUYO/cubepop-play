@@ -1,0 +1,108 @@
+{
+  "version": "key-v13-ice-v10",
+  "entries": [
+    {
+      "path": "assets/keys/key-horizontal-A.png",
+      "width": 768,
+      "height": 448,
+      "hasAlpha": true,
+      "space": "srgb",
+      "alpha": {
+        "min": 0,
+        "max": 255
+      },
+      "alphaBounds": {
+        "x": 59,
+        "y": 20,
+        "width": 649,
+        "height": 408
+      },
+      "alphaSha256": "40001e871e3311ade75ae7a47ce2b8d14c841664d46cba9ddefe488ea15fa28c",
+      "sha256": "e6b285cba251d66ddd97a9c711c85b81deffc0e8d206e01c5781196aa8e3b296",
+      "source": "output/design-handoff/key-ui-image-v12/assets/keys/key-horizontal-A.png",
+      "destination": "assets/gimmicks/polish-v13/keys/key-horizontal-A.png"
+    },
+    {
+      "path": "assets/keys/key-horizontal-B.png",
+      "width": 768,
+      "height": 448,
+      "hasAlpha": true,
+      "space": "srgb",
+      "alpha": {
+        "min": 0,
+        "max": 255
+      },
+      "alphaBounds": {
+        "x": 59,
+        "y": 20,
+        "width": 649,
+        "height": 408
+      },
+      "alphaSha256": "40001e871e3311ade75ae7a47ce2b8d14c841664d46cba9ddefe488ea15fa28c",
+      "sha256": "e107b9e7a07b837f35201d3e7492d4c30c0a33781100ae945e0e675340c7b234",
+      "source": "output/design-handoff/key-ui-image-v12/assets/keys/key-horizontal-B.png",
+      "destination": "assets/gimmicks/polish-v13/keys/key-horizontal-B.png"
+    },
+    {
+      "path": "assets/keys/key-horizontal-C.png",
+      "width": 768,
+      "height": 448,
+      "hasAlpha": true,
+      "space": "srgb",
+      "alpha": {
+        "min": 0,
+        "max": 255
+      },
+      "alphaBounds": {
+        "x": 59,
+        "y": 20,
+        "width": 649,
+        "height": 408
+      },
+      "alphaSha256": "40001e871e3311ade75ae7a47ce2b8d14c841664d46cba9ddefe488ea15fa28c",
+      "sha256": "b9a1f2ceedf0f121274e51a636230ff2873ba28b6eb09d927907d11239dd06fb",
+      "source": "output/design-handoff/key-ui-image-v12/assets/keys/key-horizontal-C.png",
+      "destination": "assets/gimmicks/polish-v13/keys/key-horizontal-C.png"
+    },
+    {
+      "path": "assets/ice/rim-1.png",
+      "width": 512,
+      "height": 512,
+      "hasAlpha": true,
+      "space": "srgb",
+      "sha256": "550cca5c030c6dfc2695fd98fe317d22c540f49be713bf8dfb63e1a22e3b416f",
+      "source": "output/design-handoff/gimmick-ui-polish-v10/assets/ice/rim-1.png",
+      "destination": "assets/gimmicks/polish-v13/ice/rim-1.png"
+    },
+    {
+      "path": "assets/ice/rim-2.png",
+      "width": 512,
+      "height": 512,
+      "hasAlpha": true,
+      "space": "srgb",
+      "sha256": "a1bbe308a9597536868ea02b61a616bbb0cd9f13e1cc6b41d78c217d1132e2ef",
+      "source": "output/design-handoff/gimmick-ui-polish-v10/assets/ice/rim-2.png",
+      "destination": "assets/gimmicks/polish-v13/ice/rim-2.png"
+    },
+    {
+      "path": "assets/ice/frost-30.png",
+      "width": 512,
+      "height": 512,
+      "hasAlpha": true,
+      "space": "srgb",
+      "sha256": "532b775ddf753058b2a30c072bb1ef1bcc5f34c6c7f467577f0c38ea2fbbfeb6",
+      "source": "output/design-handoff/gimmick-ui-polish-v10/assets/ice/frost-30.png",
+      "destination": "assets/gimmicks/polish-v13/ice/frost-30.png"
+    },
+    {
+      "path": "assets/ice/frost-50.png",
+      "width": 512,
+      "height": 512,
+      "hasAlpha": true,
+      "space": "srgb",
+      "sha256": "0ed0efffba463ffe910930e7e45501996d22ccba9f13494d6f9abb4b85719106",
+      "source": "output/design-handoff/gimmick-ui-polish-v10/assets/ice/frost-50.png",
+      "destination": "assets/gimmicks/polish-v13/ice/frost-50.png"
+    }
+  ]
+}

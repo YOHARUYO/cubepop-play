@@ -59,8 +59,8 @@
     const fresh=signature!==goalSignature,container=$('goals');
     if(fresh){
       container.innerHTML='';goalItems=goals.map(()=>{
-        const chip=document.createElement('div');chip.className='gchip';
-        chip.innerHTML='<div class="goalTop"><div class="dot" aria-hidden="true"></div><span class="cnt" aria-hidden="true"></span></div><span class="goalMeasure" aria-hidden="true"></span><div class="goalTrack" role="progressbar"><div class="goalFill"></div></div><img class="goalCheck" src="assets/pastel-garden/icons/check.svg" alt="" aria-hidden="true">';
+        const chip=document.createElement('div');chip.className='gchip hudGoal';chip.dataset.goal='color';
+        chip.innerHTML='<div class="goalTop hudValue"><div class="dot hudIcon" aria-hidden="true"></div><span class="cnt hudCount" aria-hidden="true"></span></div><span class="goalMeasure" aria-hidden="true"></span><span class="hudCaption">모은 수</span><div class="goalTrack hudTrack" role="progressbar"><div class="goalFill"></div></div><img class="goalCheck hudCheck" src="assets/pastel-garden/icons/check.svg" alt="" aria-hidden="true">';
         container.appendChild(chip);
         return {chip,dot:chip.querySelector('.dot'),count:chip.querySelector('.cnt'),measure:chip.querySelector('.goalMeasure'),track:chip.querySelector('.goalTrack'),fill:chip.querySelector('.goalFill'),check:chip.querySelector('.goalCheck')};
       });goalSignature=signature;

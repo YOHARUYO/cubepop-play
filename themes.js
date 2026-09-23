@@ -2,7 +2,11 @@
 (function(root){
   'use strict';
   function create(catalog,assignments,loadImage){
-    const loaded=new Set(),pending=new Map(),errors=new Map();
+    const loaded=new Set(),mobileLoaded=new Set(),pending=new Map(),errors=new Map();
+    const assetUrl=path=>{
+      const c=Object.values(catalog).find(c=>[...Object.values(c.background),...Object.values(c.frame),c.banner,c.fallbackBackground].includes(path));
+      return c?.revision?path+(path.includes('?')?'&':'?')+'v='+encodeURIComponent(c.revision):path;
+    };
     for(let i=0;i<assignments.length;i++){
       const a=assignments[i];
       if(!Number.isInteger(a.from)||!Number.isInteger(a.to)||a.from<1||a.to>50||a.from>a.to||!catalog[a.theme])throw Error('Invalid stage theme assignment');
@@ -15,15 +19,26 @@
       const c=catalog[effective(id)];
       // The original courtyard stays usable while the new orientation pair loads,
       // and remains the fallback if either new background fails.
-      return c===catalog.sandstone&&!loaded.has('sandstone')&&c.fallbackBackground
-        ?{...c,banner:c.fallbackBackground,background:{portrait:c.fallbackBackground,landscape:c.fallbackBackground}}:c;
+      if(c===catalog.sandstone&&!loaded.has('sandstone')&&c.fallbackBackground)
+        return {...c,banner:c.fallbackBackground,background:{portrait:c.fallbackBackground,landscape:c.fallbackBackground}};
+      if(c.background.mobile&&!mobileLoaded.has(effective(id))){
+        const {mobile,...background}=c.background;return {...c,background};
+      }
+      return c;
     };
+    function backgroundFor(id,width,height){
+      const c=resource(id),kind=width>height?'landscape':width<height&&width<=599&&c.background.mobile?'mobile':'portrait';
+      return {kind,path:c.background[kind]};
+    }
     async function preload(id){
       if(!catalog[id]?.ready)return 'sandstone';
       if(loaded.has(id))return id;
       if(!pending.has(id)){
-        const c=catalog[id],paths=[...new Set([...Object.values(c.background),...Object.values(c.frame),...Object.values(c.nodes),c.banner].filter(Boolean))];
-        pending.set(id,Promise.all(paths.map(loadImage)).then(()=>{loaded.add(id);return id;}).catch(error=>{errors.set(id,String(error));return 'sandstone';}));
+        const c=catalog[id],paths=[...new Set([c.background.portrait,c.background.landscape,...Object.values(c.frame),...Object.values(c.nodes),c.banner].filter(Boolean))];
+        const required=Promise.all(paths.map(path=>loadImage(path,c.revision)));
+        // A mobile-only failure must not discard an otherwise valid theme set.
+        const optional=c.background.mobile?loadImage(c.background.mobile,c.revision).then(()=>mobileLoaded.add(id)).catch(error=>errors.set(id+':mobile',String(error))):Promise.resolve();
+        pending.set(id,Promise.all([required,optional]).then(()=>{loaded.add(id);return id;}).catch(error=>{errors.set(id,String(error));return 'sandstone';}));
       }
       return pending.get(id);
     }
@@ -43,10 +58,10 @@
       const theme=effective(id),c=catalog[theme],state=gold?'gold':'ivory';
       return {theme,state,path:c.nodes[state],window:c.nodeWindow,key:[theme,c.revision,state,c.nodes[state]].join(':')};
     }
-    return {assigned,effective,forStage,resource,preload,regions,node,errors};
+    return {assigned,effective,forStage,resource,preload,backgroundFor,assetUrl,regions,node,errors};
   }
-  function loadImage(path){return new Promise((resolve,reject)=>{
-    const img=new root.Image();img.onload=()=>{if(img.decode)img.decode().then(()=>resolve(img),reject);else resolve(img);};img.onerror=()=>reject(Error('Theme asset failed: '+path));img.src=path;
+  function loadImage(path,revision){return new Promise((resolve,reject)=>{
+    const img=new root.Image();img.onload=()=>{if(img.decode)img.decode().then(()=>resolve(img),reject);else resolve(img);};img.onerror=()=>reject(Error('Theme asset failed: '+path));img.src=path+(path.includes('?')?'&':'?')+'v='+encodeURIComponent(revision);
   });}
   root.CubePopThemes=create(root.CubePopThemeCatalog||{},root.CubePopStageThemes||[],loadImage);
   if(typeof module==='object')module.exports={create};
