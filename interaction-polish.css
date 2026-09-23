@@ -52,9 +52,10 @@ body.mMap .hmAvatarText{position:absolute!important;width:1px;height:1px;overflo
 #tutorialOverlay #tutorialArrow{position:absolute;width:44px;height:22px;left:50%;top:50%;margin-left:-22px;margin-top:-11px;transform-origin:center;}
 #tutorialDirection strong{display:block;font-size:14px;line-height:20px;}
 #tutorialDirection small{display:block;font-size:12px;line-height:18px;color:#886e59;}
-#tutorialOverlay #tutorialHand{width:40px;height:40px;transform-origin:17.25px 6px;z-index:2;}
-#tutorialHandLink{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;}
-#tutorialHandLink path{fill:none;stroke:#ffdb76;stroke-width:2;stroke-linecap:round;}
+#tutorialOverlay #tutorialHand,#gimmickHelpHand{width:40px;height:40px;transform-origin:17.25px 6px;}
+#tutorialOverlay #tutorialHand{z-index:2;}
+#tutorialHandLink,#gimmickHandLink{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;}
+#tutorialHandLink path,#gimmickHandLink path{fill:none;stroke:#ffdb76;stroke-width:2;stroke-linecap:round;}
 #tutorialOverlay[data-observing=true] #guideTitle{padding-right:70px;}
 @media(prefers-reduced-motion:reduce){#tutorialOverlay #exitLesson:active:not(:disabled){transform:none;}}
 

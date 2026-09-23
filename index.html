@@ -1191,6 +1191,15 @@ function winStage(){
   $('ovTitle').textContent='STAGE '+stN+' 클리어!';
   $('ovTitle').style.color='#367a62';
   $('ovSub').innerHTML='이번 스테이지 <b>'+sc+'</b>점'+(cfgPar?' (별 3개 '+cfgPar+'점)':'');
+  const gardenBonus=window.GimmickPlay?.active()?window.GimmickPlay.snapshot().finaleBreakdown:null;
+  if(gardenBonus){
+    const breakdown=document.createElement('dl');breakdown.className='scoreBreakdown';
+    for(const [label,value] of [['플레이 점수',gardenBonus.playScore],['남은 '+gardenBonus.remainingMoves+'회 × 120',gardenBonus.moveBonus],['효율 클리어 보너스',gardenBonus.efficiencyBonus],['폭발·연쇄 보너스',gardenBonus.explosionScore]]){
+      const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=Number(value).toLocaleString()+'점';breakdown.append(dt,dd);
+    }
+    const criterion=document.createElement('p');criterion.className='efficiencyResult';criterion.textContent='사용 '+gardenBonus.actions+'회 · '+gardenBonus.efficientActions+'회 이내 완료 시 3별 보장';
+    $('ovSub').append(breakdown,criterion);
+  }
   $('ovBtns').innerHTML=(stN<TOTAL_STAGES?'<button class="primary" onclick="nextStage()">다음 스테이지 →</button>':'')+
     '<button onclick="exitToMap()">맵으로</button>';
   $('overlay').classList.add('show');

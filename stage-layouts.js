@@ -1,4 +1,5 @@
-/* Explicit authored coordinates: row/column are zero based. M/par retained pending policy and human play. */
+/* Explicit coordinates: row/column are zero based. Puzzle/RNG versions are
+ * separate from rating revisions so score tuning never changes a saved board. */
 (function(root){
  const stages=[
   {
@@ -2875,6 +2876,14 @@
     }
   }
 ];
- const api={version:"gardens-gimmicks-2.2-astral",stages,get:n=>stages.find(d=>d.stage===n)};
+ // First playable efficiency balance, 2026-09-23. See docs/design/stage-balance-v1.md.
+ // Authored targets, not a solver median or a fraction of the move budget.
+ const efficiencyActions={
+  21:8,22:8,23:10,24:10,25:11,26:12,27:11,28:12,29:14,30:16,
+  31:7,32:8,33:8,34:7,35:8,36:10,37:9,38:10,39:10,40:12,
+  41:8,42:9,43:10,44:9,45:10,46:10,47:10,48:12,49:11,50:14
+ };
+ for(const d of stages)d.rating={version:'efficiency-1',efficientActions:efficiencyActions[d.stage],par:d.par};
+ const api={version:"gardens-gimmicks-2.2-astral",ratingVersion:'efficiency-1',stages,get:n=>stages.find(d=>d.stage===n)};
  if(typeof module==="object"&&module.exports)module.exports=api;else root.CubePopStages=api;
 })(typeof window==="object"?window:globalThis);

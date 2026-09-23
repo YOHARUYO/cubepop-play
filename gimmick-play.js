@@ -14,7 +14,7 @@
   rotor:['정원이 함께 돌아요','표시된 행동 수마다 회전판의 큐브가 동시에 돌아요. 작은 도형은 다음 윗면이에요. 폭탄은 돌지 않고, 자동 회전은 횟수를 쓰지 않아요.']
  };
  let state=null,shown=null,epoch=0,base=0,entities=new Map(),history=[],openedHelp=false;
- let hud=null,layer=null,help=null,feedbackTimer=0,helpTargets=[],dim=null,hand=null,helpAction=null,observing=false;
+ let hud=null,layer=null,help=null,feedbackTimer=0,helpTargets=[],dim=null,hand=null,handLink=null,helpAction=null,observing=false;
  const active=()=>!!state&&stageNo>=20;
  const vineAsset='assets/gimmicks/vine-cover-v8.png',vineIcon='assets/gimmicks/goal-vine-v8.png';
  const goalMark=type=>root.GimmickArt.icon(type);
@@ -52,12 +52,14 @@
   vineLayer=document.createElementNS('http://www.w3.org/2000/svg','svg');vineLayer.id='gimmickVines';vineLayer.setAttribute('viewBox','0 0 1536 1536');vineLayer.setAttribute('aria-hidden','true');$('board').append(vineLayer);
   help=document.createElement('section');help.id='gimmickHelp';help.hidden=true;help.setAttribute('role','dialog');help.setAttribute('aria-label','정원 기믹 안내');document.body.append(help);
   dim=document.createElementNS('http://www.w3.org/2000/svg','svg');dim.id='gimmickHelpDim';dim.setAttribute('aria-hidden','true');dim.style.display='none';document.body.append(dim);
-  hand=document.createElement('img');hand.id='gimmickHelpHand';hand.src='assets/pastel-garden/tutorial/gesture-tap.svg';hand.alt='';hand.hidden=true;document.body.append(hand);
-  hand.src='assets/interaction/gesture-roll-hand.svg';
+  hand=document.createElement('img');hand.id='gimmickHelpHand';hand.src=$('tutorialHand').getAttribute('src');hand.alt='';hand.hidden=true;document.body.append(hand);
+  handLink=document.createElementNS('http://www.w3.org/2000/svg','svg');handLink.id='gimmickHandLink';handLink.setAttribute('aria-hidden','true');handLink.innerHTML='<path/>';handLink.setAttribute('hidden','');document.body.append(handLink);
+  root.TutorialUI.handReady.then(positionHelp);
   const rulesButton=document.createElement('button');rulesButton.id='gardenRulesSetting';rulesButton.className='tutorialReplay';rulesButton.textContent='정원 규칙 보기';rulesButton.onclick=()=>{closeSettings();openHelp();};$('setModal').querySelector('.modalInner').append(rulesButton);
+  const ratingHint=document.createElement('p');ratingHint.id='gardenRatingHint';ratingHint.className='tutorialReplayHint';$('setModal').querySelector('.modalInner').append(ratingHint);
   if(!root.__SIM&&root.ResizeObserver){new root.ResizeObserver(positionHelp).observe(help);document.fonts?.ready.then(positionHelp);}
  }
- function closeHelp(){openedHelp=false;observing=false;helpTargets=[];helpAction=null;if(help)help.hidden=true;if(dim)dim.style.display='none';if(hand)hand.hidden=true;document.querySelectorAll('.gimmickFocus').forEach(e=>e.classList.remove('gimmickFocus'));}
+ function closeHelp(){openedHelp=false;observing=false;helpTargets=[];helpAction=null;if(help)help.hidden=true;if(dim)dim.style.display='none';if(hand)hand.hidden=true;if(handLink)handLink.setAttribute('hidden','');document.querySelectorAll('.gimmickFocus').forEach(e=>e.classList.remove('gimmickFocus'));}
  function positionHelp(){if(root.__SIM)return;if(observing){positionObservation();return;}if(!openedHelp)return;const boxes=helpTargets.filter(e=>e?.isConnected).map(e=>e.getBoundingClientRect());if(!boxes.length)return;
   const top=Math.min(...boxes.map(r=>r.top)),bottom=Math.max(...boxes.map(r=>r.bottom)),height=Math.ceil(help.getBoundingClientRect().height),vh=root.innerHeight;
   const above=top-height-14,below=bottom+14;
@@ -68,10 +70,18 @@
   for(const el of helpTargets){const entity=Array.from(entities.values()).find(e=>e.el===el);if(entity?.vined)continue;const hull=entity&&root.CubePopVisual?.outline?.(entity);if(hull?.length)paths.push('M'+hull.map(p=>(board.x+p.x*scale)+','+(board.y+p.y*scale)).join('L')+'Z');
    else {const r=el.getBoundingClientRect(),b=Math.min(r.width,r.height)*.085;paths.push('M'+[ [r.left+b,r.top],[r.right-b,r.top],[r.right,r.top+b],[r.right,r.bottom-b],[r.right-b,r.bottom],[r.left+b,r.bottom],[r.left,r.bottom-b],[r.left,r.top+b]].map(p=>p.join(',')).join('L')+'Z');}}
   dim.setAttribute('viewBox','0 0 '+root.innerWidth+' '+vh);dim.innerHTML='<defs><mask id="gmHelpMask"><rect width="100%" height="100%" fill="white"/>'+paths.map(d=>'<path d="'+d+'" fill="black"/>').join('')+'</mask></defs><rect width="100%" height="100%" fill="#24354A" fill-opacity=".58" mask="url(#gmHelpMask)"/>';dim.style.display='block';
-  hand.hidden=!helpAction||!canUse(helpAction);if(!hand.hidden){const r=helpAction.el.getBoundingClientRect(),d=D.get(stageNo+1).intro.direction;const right=d==='W'||r.left<70;hand.style.left=(right?r.right-15:r.left-40)+'px';hand.style.top=(r.bottom-14)+'px';hand.style.transform=right?'none':'scaleX(-1)';}
+  hand.hidden=true;handLink.setAttribute('hidden','');
+  if(helpAction&&canUse(helpAction)){
+   const T=root.TutorialUI,G=root.InteractionLayout,cubes=[helpAction,...Array.from(entities.values()).filter(e=>e!==helpAction&&!e.vined&&helpTargets.includes(e.el))];
+   const projections=cubes.map(e=>T.cubeProjection(e,board)),bubble={...G.rect(hb.x,hb.y,hb.width,hb.height),tail:help.dataset.tail};
+   const cue=T.handCue(projections,bubble,G.rect(0,0,root.innerWidth,vh));
+   if(cue){hand.hidden=false;hand.style.left=(cue.anchor.x-17.25)+'px';hand.style.top=(cue.anchor.y-6)+'px';hand.style.transform='rotate('+cue.angle+'deg)';
+    if(cue.line){handLink.removeAttribute('hidden');handLink.setAttribute('viewBox','0 0 '+root.innerWidth+' '+vh);handLink.querySelector('path').setAttribute('d','M'+cue.anchor.x+' '+cue.anchor.y+'L'+cue.line.x+' '+cue.line.y);}
+   }
+  }
  }
  function positionObservation(){help.dataset.tail='none';const b=$('board').getBoundingClientRect(),h=help.getBoundingClientRect().height,vh=root.innerHeight;help.style.top=Math.max(8,b.top-h-12>=8?b.top-h-12:Math.min(vh-h-8,b.bottom+12))+'px';help.style.bottom='auto';dim.setAttribute('viewBox','0 0 '+root.innerWidth+' '+vh);dim.innerHTML='<defs><mask id="gmHelpMask"><rect width="100%" height="100%" fill="white"/><rect x="'+b.x+'" y="'+b.y+'" width="'+b.width+'" height="'+b.height+'" fill="black"/></mask></defs><rect width="100%" height="100%" fill="#24354A" fill-opacity=".58" mask="url(#gmHelpMask)"/>';dim.style.display='block';}
- function observation(type){if(!observing)return;hand.hidden=true;help.hidden=false;help.innerHTML='<p></p>';help.querySelector('p').textContent=({roll:'큐브가 제자리에서 돌아가요.',auto:'회전판이 함께 돌아가요.',clear:'보호층과 매치가 어떻게 바뀌는지 살펴보세요.',fall:'빈 구간에 큐브가 채워져요.'}[type])||'변화를 살펴보세요.';positionHelp();}
+ function observation(type){if(!observing)return;hand.hidden=true;handLink.setAttribute('hidden','');help.hidden=false;help.innerHTML='<p></p>';help.querySelector('p').textContent=({roll:'큐브가 제자리에서 돌아가요.',auto:'회전판이 함께 돌아가요.',clear:'보호층과 매치가 어떻게 바뀌는지 살펴보세요.',fall:'빈 구간에 큐브가 채워져요.'}[type])||'변화를 살펴보세요.';positionHelp();}
  function openHelp(){if(!active())return;ensure();openedHelp=true;const d=D.get(stageNo+1),kind=d.onboarding||({alps:'ice',royal:state.locks.length?'key':'vine',astral:state.period?'rotor':'star'}[d.region]),[title,body]=teaching[kind];
   hideRollPreview();help.innerHTML='<small>기믹 안내</small><button type="button" class="gmHelpExit" aria-label="기믹 안내 종료"><img src="assets/interaction/tutorial-close.svg" alt=""><span>종료</span></button><h2></h2><p></p>';help.querySelector('h2').textContent=title;help.querySelector('p').textContent=body;help.querySelector('button').onclick=closeHelp;help.hidden=false;
   const helpIcon=kind==='rock'?'<img class="gmVineIcon" src="'+root.GimmickArt.base+'objects/rock.png" alt="">':kind==='rotor'?'<img class="gmVineIcon" src="'+root.GimmickArt.base+'rotor/'+d.intro.direction+'-idle.svg" alt="">':goalMark(kind==='thick'?'ice':kind);
@@ -176,6 +186,7 @@
   boardInner.querySelectorAll('.cube,.gmFallClip').forEach(e=>e.remove());vineLayer.innerHTML='';entities=new Map();history=[];stageNo=n;
   root.GimmickArt.clear();state=R.create(D.get(n+1),forcedSeed??seed(n),comparisonOptions);shown=state;stageColors=[0,1,2,3,4,5];faceColorIdx=[0,1,2,3,4,5];
   cfgMoves=state.moves;cfgPar=D.get(n+1).par;if(!keepScore)score=0;stageStartScore=score;busy=false;over=false;skipReq=false;lastRolled=null;
+  $('gardenRatingHint').textContent='이번 단계는 '+state.rating.efficientActions+'회 이내에 목표를 완료하면 확정 보너스로 3별을 받을 수 있어요. 그 이후에도 높은 점수를 얻으면 3별을 받을 수 있어요.';
   $('skipBtn').classList.remove('show');$('overlay').classList.remove('show');document.body.classList.add('gimmickGame');
   beginLesson();sync(state);
   if(D.get(n+1).onboarding&&!root.__SIM)openHelp();
@@ -197,5 +208,5 @@
  function stop(){epoch++;root.GimmickArt.clear();closeHelp();root.CubePopEffects?.clear();for(const e of entities.values())e.el.remove();entities.clear();if(layer)layer.innerHTML='';if(vineLayer)vineLayer.innerHTML='';if(hud)hud.hidden=true;state=shown=null;document.body.classList.remove('gimmickGame');}
  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHelp();});
  root.addEventListener('resize',positionHelp);root.addEventListener('scroll',positionHelp,{passive:true});
- root.GimmickPlay={displayState:()=>shown||state,active,start,stop,config,play,tap,pick,canUse,reject,hud:renderHud,closeHelp,openHelp,positionHelp,repaint:()=>active()&&terrain(shown||state),done:()=>!!state&&R.complete(state),snapshot:()=>R.copy(state),replay:()=>({version:state?.version,stage:stageNo+1,seed:state?.seed,actions:history.slice()}),sync:()=>state&&sync(state)};
+ root.GimmickPlay={displayState:()=>shown||state,active,start,stop,config,play,tap,pick,canUse,reject,hud:renderHud,closeHelp,openHelp,positionHelp,repaint:()=>active()&&terrain(shown||state),done:()=>!!state&&R.complete(state),snapshot:()=>R.copy(state),replay:()=>({version:state?.version,ratingVersion:state?.rating?.version,stage:stageNo+1,seed:state?.seed,actions:history.slice()}),sync:()=>state&&sync(state)};
 })(window);

@@ -62,6 +62,9 @@ body.mPlay #ovSub{width:100%;color:#6F625D}
 body.mPlay .cpRemaining{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 18px;margin:12px 0 6px}
 body.mPlay .cpRemainingItem{display:flex;align-items:center;gap:7px;font-weight:700;color:#243E61;overflow-wrap:anywhere;max-width:100%}
 body.mPlay .cpRemainingItem .gchip{width:20px;height:20px;min-height:0;flex:none}
+body.mPlay .scoreBreakdown{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 10px;margin:12px 0 8px;font:400 14px/21px 'CP Noto',sans-serif;text-align:left;color:#243e61}
+body.mPlay .scoreBreakdown dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+body.mPlay .efficiencyResult{margin:0;font:400 14px/21px 'CP Noto',sans-serif;color:#367a62}
 body.mPlay #ovBtns{display:flex;flex-direction:column;gap:17px;margin-top:8px;width:100%;padding-bottom:0}
 body.mPlay #ovBtns .cpButton{width:100%;height:44px;flex:0 0 44px}
 @media(min-width:768px){body.mPlay{padding-top:max(4px,env(safe-area-inset-top));padding-bottom:max(11px,env(safe-area-inset-bottom))}body.mPlay .gameBrand{height:87px;flex-basis:87px}body.mPlay .stageHead h1{width:100px;height:67px}body.mPlay .stageHead{gap:2px}body.mPlay .goalsCard.card{width:max(460px,82%);max-width:100%;margin-top:7px;min-height:60px}body.mPlay .movesBadge{min-height:60px}body.mPlay .boardWrap{margin-top:0}body.mPlay .scorePanel{width:296px;margin-top:12px}body.mPlay .controls{width:310px;height:44px;flex-basis:44px;margin-top:15px}body.mPlay .controls button{width:140px;height:44px;flex-basis:140px}}

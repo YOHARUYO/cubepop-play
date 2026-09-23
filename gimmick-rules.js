@@ -45,10 +45,11 @@
   // Each trial uses the same stream. Hard bound; a deterministic construction is
   // the fallback, not an unbounded reroll or a change to legacy random calls.
   const s=base(def,seed);let made=false;
+  if(def.rating)s.rating=copy(def.rating);
   const requestedPolicy=options.icePolicy||'legacy-unconfirmed';
   if(!['legacy-unconfirmed','match-qa','adjacent-qa'].includes(requestedPolicy))throw Error('Unknown ice comparison policy');
   s.icePolicy='legacy-unconfirmed'; // identical initial boards for policy A/B
-  s.policyStatus='I-01 release trigger / B-01 pending; thaw rematch confirmed';
+  s.policyStatus='I-01 release trigger pending; thaw rematch confirmed; rating '+(s.rating?.version||'legacy');
   s.thawRule='rematch-after-thaw';
   for(const g of s.locks){g.keyState='pending';g.carrierCubeId=null;}
   const applyIce=()=>{for(const p of def.ice){const e=s.cells[key(p.r,p.c)];if(!e)throw Error('Ice on blocked terrain');e.ice=p.layers;}};
@@ -220,11 +221,18 @@
  function finale(s,options={}){
   if(s.status!=='won'||s.finale)return [];s.finale=true;s.damaged=[];
   const events=[],emit=(type,detail={})=>{s.event++;if(options.events!==false)events.push({type,id:s.event,action:s.action,...detail,state:copy(s)});};
-  const n=s.moves;s.moves=0;s.score+=n*120;
+  const n=s.moves,playScore=s.score,moveBonus=n*120;
+  // Keep the ordinary point target meaningful for slower clears. Efficient
+  // completion receives only the missing guaranteed points, before random FX.
+  const efficient=!!s.rating&&s.action<=s.rating.efficientActions;
+  const efficiencyBonus=efficient?Math.max(0,s.rating.par-playScore-moveBonus):0;
+  s.finaleBreakdown={version:s.rating?.version||'legacy',actions:s.action,efficientActions:s.rating?.efficientActions??null,efficient,playScore,remainingMoves:n,moveBonus,efficiencyBonus,explosionScore:0};
+  s.moves=0;s.score+=moveBonus+efficiencyBonus;
   const candidates=s.cells.filter(e=>e&&!e.bomb).map(e=>e.k);
   for(let i=candidates.length-1;i>0;i--){const j=Math.floor(random(s)*(i+1));[candidates[i],candidates[j]]=[candidates[j],candidates[i]];}
   const fresh=[];for(const k of candidates.slice(0,n)){const old=s.cells[k],e={id:++s.seq,k,ci:color(old),bomb:random(s)<.62?(random(s)<.5?'H':'V'):'A',ice:0};s.cells[k]=e;fresh.push(copy(e));emit('bonus-spawn',{fresh:[copy(e)]});}
   if(fresh.length){emit('bonus',{count:fresh.length});hit(s,fresh.map(e=>e.k),new Map(),1,emit);let mult=1;for(let i=0;i<256;i++){const rs=runs(s);if(!rs.length)break;hit(s,rs.flatMap(r=>r.cells),new Map(),mult++,emit);}}
+  s.finaleBreakdown.explosionScore=s.score-playScore-moveBonus-efficiencyBonus;
   emit('settled');return events;
  }
  const api={create,action,actions,finale,remaining,complete,segments,runs,spawnPlan,validate,color,pull,dirs,orientations,copy,key,rc,playable,canRotate,canMatch,canFall,bindKeys,iceAccess,gravity};

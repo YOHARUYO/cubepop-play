@@ -10,7 +10,7 @@
   for(const el of [...card.children])if(!['exitLesson','guideCount'].includes(el.id))guideContent.append(el);card.append(guideContent);
   guideContent.setAttribute('aria-label','튜토리얼 설명');
   let handPixels=[];
-  if(!root.__SIM){const img=$('tutorialHand');const ready=()=>{const c=document.createElement('canvas');c.width=c.height=40;const ctx=c.getContext('2d');ctx.drawImage(img,0,0,40,40);const data=ctx.getImageData(0,0,40,40).data;for(let y=0;y<40;y++)for(let x=0;x<40;x++)if(data[(y*40+x)*4+3]>16)handPixels.push({x:x+.5,y:y+.5});refresh();};if(img.complete&&img.naturalWidth)Promise.resolve().then(ready);else img.addEventListener('load',ready,{once:true});}
+  const handReady=new Promise(resolve=>{if(root.__SIM){resolve();return;}const img=$('tutorialHand');const ready=()=>{const c=document.createElement('canvas');c.width=c.height=40;const ctx=c.getContext('2d');ctx.drawImage(img,0,0,40,40);const data=ctx.getImageData(0,0,40,40).data;for(let y=0;y<40;y++)for(let x=0;x<40;x++)if(data[(y*40+x)*4+3]>16)handPixels.push({x:x+.5,y:y+.5});refresh();resolve();};if(img.complete&&img.naturalWidth)Promise.resolve().then(ready);else img.addEventListener('load',ready,{once:true});});
   let observing=false,observer=null,raf=0,completed=null,lastLesson=null;
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
   const box=(x,y,width,height)=>({x,y,width,height,right:x+width,bottom:y+height});
@@ -23,6 +23,17 @@
     return {silhouette:G.hull(points),top:G.hull(top),bounds:G.union(points.map(p=>box(p.x,p.y,0,0)))};
   }
   function cubeBounds(cube,board){return cubeProjection(cube,board).bounds;}
+  // Both introductory and garden lessons use the same silhouette, fingertip
+  // anchor and collision-aware rotation. Never mirror or stretch the hand.
+  function handCue(projections,b,viewport){
+    if(!projections.length||!handPixels.length)return null;
+    const top=projections[0].top,center={x:top.reduce((s,p)=>s+p.x,0)/4,y:top.reduce((s,p)=>s+p.y,0)/4};
+    const edges=top.map(p=>({x:p.x+(center.x-p.x)*.03,y:p.y+(center.y-p.y)*.03})).sort((a,b)=>(b.x+b.y)-(a.x+a.y));
+    const glyphs=projections.map(p=>{const r=G.union(p.top.map(q=>box(q.x,q.y,0,0)));return box(r.x+r.width*.23,r.y+r.height*.23,r.width*.54,r.height*.54);});
+    const focus=projections[0].bounds,cx=focus.x+focus.width/2;
+    const tailBox=b.tail==='bottom'?box(b.x+clamp(cx-b.x,22,b.width-22)-10,b.bottom,20,11):b.tail==='top'?box(b.x+clamp(cx-b.x,22,b.width-22)-10,b.y-11,20,11):b.tail==='left'?box(b.x-11,b.y,11,b.height):b.tail==='right'?box(b.right,b.y,11,b.height):box(0,0,0,0);
+    return G.chooseHand(edges,handPixels,[...glyphs,b,tailBox],viewport);
+  }
   function placeBubble(targets,width,height,viewport,exit){
     const minX=viewport.x+12,maxX=viewport.right-width-12,minY=viewport.y+12,maxY=viewport.bottom-height-12;
     const t=targets.length?box(Math.min(...targets.map(t=>t.x)),Math.min(...targets.map(t=>t.y)),0,0):box(viewport.width/2,viewport.height/2,0,0);
@@ -156,11 +167,7 @@
     hand.hidden=true;$('tutorialHandLink').hidden=true;
     let cue=null;
     if(rects.length&&!observingEffect&&['roll','tap','pick'].includes(phase)&&handPixels.length){
-      const top=projections[0].top,center={x:top.reduce((s,p)=>s+p.x,0)/4,y:top.reduce((s,p)=>s+p.y,0)/4};
-      const edges=top.map(p=>({x:p.x+(center.x-p.x)*.03,y:p.y+(center.y-p.y)*.03})).sort((a,b)=>(b.x+b.y)-(a.x+a.y));
-      const glyphs=projections.map(p=>{const r=G.union(p.top.map(q=>box(q.x,q.y,0,0)));return box(r.x+r.width*.23,r.y+r.height*.23,r.width*.54,r.height*.54);});
-      const tailBox=b.tail==='bottom'?box(b.x+clamp(cx-b.x,22,b.width-22)-10,b.bottom,20,11):b.tail==='top'?box(b.x+clamp(cx-b.x,22,b.width-22)-10,b.y-11,20,11):b.tail==='left'?box(b.x-11,b.y,11,b.height):b.tail==='right'?box(b.right,b.y,11,b.height):box(0,0,0,0);
-      cue=G.chooseHand(edges,handPixels,[...glyphs,b,tailBox],viewport);
+      cue=handCue(projections,b,viewport);
       if(cue){hand.hidden=false;hand.style.left=(cue.anchor.x-17.25)+'px';hand.style.top=(cue.anchor.y-6)+'px';hand.style.transform=`rotate(${cue.angle}deg)`;
         if(cue.line){const link=$('tutorialHandLink');link.hidden=false;link.setAttribute('viewBox',`0 0 ${root.innerWidth} ${root.innerHeight}`);link.querySelector('path').setAttribute('d',`M${cue.anchor.x} ${cue.anchor.y}L${cue.line.x} ${cue.line.y}`);}
       }
@@ -183,5 +190,5 @@
     if(lessonState?.phase==='roll'&&!busy)$('guideText').textContent=previewCopy;
     refresh();
   }
-  root.TutorialUI={sync,refresh,clear,cubeBounds,placeBubble,placeTutorial,focusCells:targets,cubeProjection,showFacePreview,hideFacePreview};
+  root.TutorialUI={sync,refresh,clear,cubeBounds,placeBubble,placeTutorial,focusCells:targets,cubeProjection,handCue,handReady,showFacePreview,hideFacePreview};
 })(window);

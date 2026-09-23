@@ -51,9 +51,10 @@
       const gap=compact?7:10,items=[...row.children];
       // Reserve the completion mark even while incomplete; never shift values.
       const needed=Math.max(60,...items.map(el=>{const value=el.querySelector('.hudCount');return (value?.scrollWidth||0)+20+(compact?3:5)+(el.dataset.goal==='color'?0:13);}));
-      let columns=4;while(columns>1&&(row.clientWidth-gap*(columns-1))/columns<needed)columns--;
-      const slot=Math.min(Math.max(120,needed),(row.clientWidth-gap*(columns-1))/columns);
-      row.style.gridTemplateColumns=`repeat(${Math.min(columns,items.length)},${slot}px)`;
+      let columns=Math.min(4,items.length);while(columns>1&&(row.clientWidth-gap*(columns-1))/columns<needed)columns--;
+      // Goals share both outer edges with the moves/score row. Distribute the
+      // available width instead of centering a capped 120px block per target.
+      row.style.gridTemplateColumns=`repeat(${columns},minmax(0,1fr))`;
       row.dataset.checkBelow='false';
     }
   }
