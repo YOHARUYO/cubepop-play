@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-build="player">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -386,6 +386,8 @@
 <link rel="stylesheet" href="home-map.css">
 <link rel="stylesheet" href="themes.css">
 <link rel="stylesheet" href="core-play.css">
+<link rel="stylesheet" href="hud-feedback.css">
+<link rel="stylesheet" href="bonus-finale.css">
 <link rel="stylesheet" href="interaction-polish.css">
 <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/geometries/RoundedBoxGeometry.js":"./vendor/RoundedBoxGeometry.js","three/addons/environments/RoomEnvironment.js":"./vendor/RoomEnvironment.js"}}</script>
 <link rel="stylesheet" href="announcements.css"></head>
@@ -513,8 +515,6 @@
     <p class="settingHelp">큐브를 누르고 있으면 가운데는 현재 윗면, 주변은 실제 상하좌우 옆면을 보여줍니다. 예를 들어 왼쪽 면을 윗면으로 올리려면 오른쪽으로 굴리세요.</p>
     <button class="tutorialReplay" onclick="replayTutorial()" data-game-lock>튜토리얼 다시 해보기</button>
     <p class="settingHelp">학습 스테이지 1부터 다시 연습합니다. 기존 진행 기록은 유지됩니다.</p>
-    <label class="settingRow" for="developerToggle"><span>개발자 모드</span><input type="checkbox" id="developerToggle" role="switch" aria-describedby="developerHelp"></label>
-    <p class="settingHelp" id="developerHelp">켜면 50단계 모두 플레이할 수 있습니다. 테스트 플레이의 클리어·별은 진행 기록에 저장하지 않습니다. 끄면 기존 해금 상태로 돌아갑니다.</p>
   </div>
 </div>
 
@@ -869,6 +869,7 @@ async function doClearStep(clearSet,spawns,mult,epicenter,bursts=[],announcement
   function prepareFall(cube,rows){
     // Give a one-cell drop time to read, and longer columns time to enter.
     const duration=70+Math.min(ROWS,rows)*30;
+    window.CubePopFall?.begin(cube,rows,duration);
     cube.el.classList.add('falling');cube.el.style.setProperty('--fall-duration',duration+'ms');
     falling.push(cube);fallDuration=Math.max(fallDuration,duration);
   }
@@ -1142,41 +1143,34 @@ function starCount(){
 }
 // stage-clear finale: each remaining move turns a random cube into a bomb (line/area mix), then all fire — scored
 async function stageFinale(){
-  const announcementToken=window.CubePopAnnouncements?.token();
-  const n=movesLeft;movesLeft=0;
-  // leftover moves -> guaranteed points (rewards efficient clears; reduces finale luck)
-  const moveBonus=n*MOVE_BONUS;
-  if(moveBonus){score+=moveBonus;}
-  updateHUD();if(typeof updateStarGauge==='function')updateStarGauge();
+  const announcementToken=window.CubePopAnnouncements?.token(),fx=window.BonusFinale,n=movesLeft,initialScore=score-stageStartScore;
   const cells=[];
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const e=grid[r][c];if(e&&!e.bomb)cells.push([r,c]);}
   shuffle(cells);
-  const take=Math.min(n,cells.length),converted=[];
-  for(let i=0;i<take;i++){
-    const [r,c]=cells[i],e=grid[r][c],ci=matchColor(e);
-    e.el.remove();
-    const type=gameplayRandom()<0.62?(gameplayRandom()<.5?'H':'V'):'A';
-    const nb=makeBomb(r,c,ci,type);grid[r][c]=nb;
-    nb.el.style.transition='none';place(nb);nb.el.getBoundingClientRect();nb.el.style.transition='';
-    nb.el.classList.add('spawning');converted.push(nb);
-    spawnEffects([nb]);
-    await sleep(48);
-  }
-  if(!converted.length)return;
-  showFloat({kind:'bonus',count:converted.length,token:announcementToken,id:'bonus:'+ ++announcementEventSeq});
-  await sleep(200);
-  // fire the bombs, then let the board refill and auto-cascade (no new bombs) until nothing more clears
-  const cs=new Set();converted.forEach(b=>cs.add(b.r+','+b.c));
-  lastRolled=null;
-  await resolve({clearSet:cs,wildColors:null,finale:true,epicenter:{r:(ROWS-1)/2,c:(COLS-1)/2}},announcementToken);
+  const take=Math.min(n,cells.length),converted=[],targets=cells.slice(0,take).map(([r,c])=>({k:r*COLS+c,r,c}));
+  if(fx&&!await fx.begin({moves:n,score:initialScore,count:take}))return false;
+  if(announcementToken!==window.CubePopAnnouncements?.token())return false;
+  movesLeft=0;score+=n*MOVE_BONUS;updateHUD();
+  const commit=({r,c})=>{const e=grid[r][c],ci=matchColor(e);e.el.remove();
+    const type=gameplayRandom()<.62?(gameplayRandom()<.5?'H':'V'):'A',nb=makeBomb(r,c,ci,type);grid[r][c]=nb;
+    nb.el.style.transition='none';place(nb);nb.el.getBoundingClientRect();nb.el.style.transition='';converted.push(nb);updateHUD();
+    if(!fx){nb.el.classList.add('spawning');spawnEffects([nb]);}
+  };
+  if(fx){if(!await fx.convert(targets,commit))return false;await fx.readyBombs(targets);}
+  else{for(const t of targets){commit(t);await sleep(48);}if(take){showFloat({kind:'bonus',count:take,token:announcementToken,id:'bonus:'+ ++announcementEventSeq});await sleep(200);}}
+  if(announcementToken!==window.CubePopAnnouncements?.token())return false;
+  if(converted.length){const cs=new Set();converted.forEach(b=>cs.add(b.r+','+b.c));lastRolled=null;
+    await resolve({clearSet:cs,wildColors:null,finale:true,epicenter:{r:(ROWS-1)/2,c:(COLS-1)/2}},announcementToken);
+  }return announcementToken===window.CubePopAnnouncements?.token();
 }
 async function runFinaleThenWin(){
-  busy=true;$('skipBtn').classList.remove('show');
-  await stageFinale();
-  busy=false;
-  winStage();
+  const token=window.CubePopAnnouncements?.token();busy=true;$('skipBtn').classList.remove('show');
+  if(await stageFinale()===false||token!==window.CubePopAnnouncements?.token())return;
+  if(window.BonusFinale)await window.BonusFinale.settle(updateHUD);
+  if(token!==window.CubePopAnnouncements?.token())return;busy=false;winStage();
 }
 function winStage(){
+  window.GimmickFeedback?.cancelStars?.();
   window.CubePopAnnouncements?.clear();
   over=true;
   const s=starCount(),sc=score-stageStartScore;
@@ -1207,6 +1201,7 @@ function winStage(){
   window.CorePlay?.result('win');
 }
 function failStage(){
+  window.GimmickFeedback?.cancelStars?.();
   window.CubePopAnnouncements?.clear();
   over=true;
   $('ovStars').innerHTML='';
@@ -1223,7 +1218,7 @@ function updateHUD(){
   document.querySelectorAll('[data-game-lock]').forEach(button=>{button.disabled=busy;});
   $('stageV').textContent='STAGE '+(stageNo+1);
   $('colorsV').textContent=stageColors.length+'색 큐브';
-  $('movesV').textContent=movesLeft;
+  $('movesV').textContent=window.BonusFinale?.displayMoves(movesLeft)??movesLeft;
   $('movesV').classList.toggle('low',movesLeft<=4);
   window.PastelGarden.renderGoals(goals.map(g=>({...g,shape:stageColors[g.ci],hex:colHex(g.ci),symbol:colSym(g.ci)})));
   updateStarGauge();
@@ -1233,10 +1228,12 @@ function updateHUD(){
 }
 function updateStarGauge(){
   const par=cfgPar||1, sc=Math.max(0,score-stageStartScore), s1=Math.round(par*0.25), s2=Math.round(par*0.6);
-  window.PastelGarden.renderScore(sc,par,[sc>=s1,sc>=s2,sc>=par]);
+  const shownScore=window.BonusFinale?.displayScore(sc)??sc;
+  window.PastelGarden.renderScore(shownScore,par,[shownScore>=s1,shownScore>=s2,shownScore>=par]);
 }
 let announcementEventSeq=0;
 function showFloat(value){
+  if(window.BonusFinale?.active())return;
   window.CubePopAnnouncements?.emit(typeof value==='string'?{kind:'notice',text:value}:value);
 }
 function buildBoard(){
@@ -1266,6 +1263,7 @@ function buildBoard(){
   }
 }
 function setupStage(n,keepScore){
+  window.BonusFinale?.cancel();
   developerAttempt=developerMode;
   if(n>=20&&window.GimmickPlay)return window.GimmickPlay.start(n,keepScore);
   window.GimmickPlay?.stop();
@@ -1300,10 +1298,12 @@ function resetRun(){setupStage(0,false);}
 
 /* ================= 게임 플로우: 홈 → 스테이지 선택 → 플레이 ================= */
 const TOTAL_STAGES=50;
+const PLAYER_BUILD=document.documentElement.getAttribute('data-build')==='player';
 let developerMode=false,developerAttempt=false;
-try{developerMode=localStorage.getItem('cubepop_v2_developer')==='1';}catch(_){}
+try{if(!PLAYER_BUILD)developerMode=localStorage.getItem('cubepop_v2_developer')==='1';}catch(_){}
 function isStageUnlocked(n){return Number.isInteger(n)&&n>=1&&n<=TOTAL_STAGES&&(developerMode||n<=progress.unlocked);}
 function setDeveloperMode(on){
+  if(PLAYER_BUILD)return;
   developerMode=!!on;
   // A test run cannot become a recorded run by turning the switch off mid-game.
   if(developerMode&&document.body.classList.contains('mPlay'))developerAttempt=true;
@@ -1311,14 +1311,16 @@ function setDeveloperMode(on){
   try{localStorage.setItem('cubepop_v2_developer',developerMode?'1':'0');}catch(_){}
   if(document.body.classList.contains('mMap'))renderMap();
 }
-$('developerToggle').checked=developerMode;
-$('developerToggle').addEventListener('change',e=>setDeveloperMode(e.target.checked));
+if($('developerToggle')){
+  $('developerToggle').checked=developerMode;
+  $('developerToggle').addEventListener('change',e=>setDeveloperMode(e.target.checked));
+}
 let progress={unlocked:1,stars:{}};
 try{const p=JSON.parse(localStorage.getItem('cubepop_v2_prog')||'null');if(p&&Number.isInteger(p.unlocked)&&p.unlocked>=1&&p.unlocked<=TOTAL_STAGES&&p.stars&&typeof p.stars==='object')progress=p;}catch(_){}
 function saveProg(){try{localStorage.setItem('cubepop_v2_prog',JSON.stringify(progress));}catch(_){}}
-function setMode(m){window.GimmickPlay?.closeHelp();if(m!=='mPlay')window.GimmickPlay?.stop();window.CubePopAnnouncements?.clear();cancelBoardPointers();window.TutorialUI?.clear();window.CubePopEffects?.clear();document.body.classList.remove('mHome','mMap','mPlay');document.body.classList.add(m);}
+function setMode(m){window.BonusFinale?.cancel();window.GimmickPlay?.closeHelp();if(m!=='mPlay')window.GimmickPlay?.stop();window.CubePopAnnouncements?.clear();cancelBoardPointers();window.TutorialUI?.clear();window.CubePopEffects?.clear();document.body.classList.remove('mHome','mMap','mPlay');document.body.classList.add(m);}
 function goHome(){setMode('mHome');}
-function goMap(){if(busy)return;unarmWild();renderMap();setMode('mMap');}
+function goMap(){if(busy)return;window.HudFeedback?.reset();unarmWild();renderMap();setMode('mMap');}
 // 아바타 큐브 — 6면 각각 설정 가능 (추후 유저 커스터마이징: faces의 팔레트 인덱스/심볼 교체 지점)
 const AVATAR={faces:[0,1,2,3,4,5]};
 let avMat=null; // 아바타의 3D 방향(누적 회전 행렬)
@@ -1588,6 +1590,8 @@ window.addEventListener('orientationchange',()=>setTimeout(fitBoard,150));
 <script src="interaction-layout.js"></script>
 <script src="improvements.js"></script>
 <script src="pastel-garden.js"></script>
+<script src="hud-feedback.js"></script>
+<script src="bonus-finale.js"></script>
 <script src="tutorial-ui.js"></script>
 <script src="render/effects-plan.js"></script>
 <script src="render/game-effects.js"></script>
@@ -1598,6 +1602,8 @@ window.addEventListener('orientationchange',()=>setTimeout(fitBoard,150));
 <script src="home-map.js"></script>
 <script src="core-play.js"></script>
 <script src="gimmick-art.js"></script>
+<script src="render/gimmick-feedback-plan.js"></script>
+<script src="render/fall-motion.js"></script>
 <script src="gimmick-play.js"></script>
 <script>
 sizeBoard();

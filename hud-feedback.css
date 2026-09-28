@@ -1,0 +1,23 @@
+/* v8 changes only goal contents and transient feedback, not HUD geometry. */
+body.mPlay :is(#goals,.gmCards) .hudCaption,body.mPlay :is(#goals,.gmCards) .hudCheck{display:none}
+body.mPlay :is(#goals,.gmCards) .hudValue{padding-right:0}
+body.mPlay :is(#goals,.gmCards) .goalMeasure{font:400 18px/26px 'CP Jua',sans-serif}
+@media(max-width:340px){body.mPlay :is(#goals,.gmCards) .goalMeasure{font-size:17px}}
+.hudCompletion{position:absolute;inset:0;z-index:3;pointer-events:none;display:grid;place-items:center}
+.hudCompletion[hidden]{display:none}
+.hudDim{position:absolute;inset:0;border-radius:8px;background:rgba(36,53,74,.46)}
+.hudClearHalo{position:absolute;inset:0;overflow:hidden;border-radius:8px}
+body.mPlay :is(#goals,.gmCards) .hudClearWord{position:relative;z-index:2;width:min(116px,calc(100% - 12px),calc(100% / 1.12));height:auto;max-width:none;filter:none}
+body.mPlay :is(#goals,.gmCards) .hudTrack{overflow:visible}
+.hudFx{position:absolute;pointer-events:none;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1}
+.hudTrack .HUD_PROGRESS_TIP{left:var(--hud-progress,0%)}
+body.mPlay .gPin .hudFx{z-index:0}
+body.mPlay .gPin>img{position:relative;z-index:1}
+body.mPlay .hudScoreLine,body.mPlay .scorePanel .gmTools{position:relative;z-index:2}
+body.mPlay .scorePanel .gmTools{position:absolute}
+/* The 96px halo is clipped by the score region, never by the 18px star box.
+   The star's 1.14x silhouette remains fully inside this existing region. */
+body.mPlay .goalsCard .scorePanel{isolation:isolate;overflow:clip}
+body.mPlay .goalsCard .scorePanel .gaugeRow{z-index:1}
+body.mPlay :is(#goals,.gmCards){position:relative;z-index:2}
+@media(prefers-reduced-motion:reduce){.hudFx{display:none}}

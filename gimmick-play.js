@@ -34,7 +34,7 @@
  async function revealVines(event,run){
   const released=(event.released||[]).map(k=>({k,e:entities.get(event.state.cells[k]?.id),art:vineLayer.querySelector('[data-cell="'+k+'"]')}));
   if(!released.length)return;
-  for(const {art}of released)art?.classList.add('releasing');
+  for(const {art,e}of released){art?.classList.add('releasing');if(root.GimmickFeedback?.handles('VINE_FRONT')){if(art){art.dataset.feedback='v6';art.style.visibility='hidden';}if(e){e.vined=false;e.el.classList.remove('gimmickVine');root.CubePopVisual?.paint?.(e);}}}
   root.CubePopVisual?.wake(240);
   if(!root.matchMedia?.('(prefers-reduced-motion: reduce)').matches)await sleep(200);
   if(run!==epoch)return;
@@ -96,7 +96,7 @@
  function feedback(text){ensure();let out=$('gimmickFeedback');if(!out){out=document.createElement('div');out.id='gimmickFeedback';out.setAttribute('role','status');document.querySelector('.app').append(out);}out.textContent=text;out.hidden=false;clearTimeout(feedbackTimer);feedbackTimer=setTimeout(()=>{out.hidden=true;},1400);}
  function canUse(cube){const s=shown||state,k=R.key(cube.r,cube.c);return !active()||(R.playable(s,k)&&!s.cells[k]?.ice);}
  function reject(cube){const s=shown||state,k=R.key(cube.r,cube.c);if(s?.vines.includes(k)){const art=vineLayer?.querySelector('[data-cell="'+k+'"]');if(art){art.classList.remove('rejected');art.getBoundingClientRect();art.classList.add('rejected');root.CubePopVisual?.wake(180);}}feedback(s?.cells[k]?.ice?'얼음 큐브는 고정돼 있어요. 주변의 일반 큐브를 돌려보세요.':s?.vines.includes(k)?'덩굴 옆 큐브를 지우거나 폭탄으로 풀어주세요.':'이 칸은 회전할 수 없어요.');}
- function sync(s){shown=s;const keep=new Set(s.cells.filter(Boolean).map(e=>e.id));
+ function sync(s){shown=R.copy(s);root.GimmickFeedback?.observeState?.(s);const keep=new Set(s.cells.filter(Boolean).map(e=>e.id));
   for(const [id,e] of entities)if(!keep.has(id)){e.el.remove();entities.delete(id);}
   grid=Array.from({length:6},()=>Array(6).fill(null));
   for(const item of s.cells){if(!item)continue;const [r,c]=R.rc(item.k);let e=entities.get(item.id);
@@ -128,15 +128,17 @@
  function renderHud(){if(!active()){if(hud)hud.hidden=true;document.querySelectorAll('.scorePanel .gmTools').forEach(el=>el.remove());return;}ensure();hud.hidden=false;const s=shown||state;
   const values=R.remaining(s),signature=values.map(g=>g.type+':'+g.ci).join('|');
   if(hud.dataset.signature!==signature){hud.dataset.signature=signature;hud.innerHTML='<div class="gmTools"><span class="gmCountdown"></span></div><div class="gmCards"></div>';
-   for(const g of values){const card=document.createElement('div');card.className='gmGoal hudGoal';card.dataset.goal=g.type;card.innerHTML='<div class="gmValue hudValue"><span class="gmIcon hudIcon"></span><b class="hudCount"></b><img class="gmDone hudCheck" src="'+root.GimmickArt.base+'ui/complete.png" alt="완료"></div><span class="gmCaption hudCaption"></span>'+(g.type==='color'?'<div class="gmProgress hudTrack" role="progressbar"><i></i></div>':'');hud.querySelector('.gmCards').append(card);}
+   const totals=R.remaining(state);
+   for(const g of values){const card=document.createElement('div');card.className='gmGoal hudGoal';card.dataset.goal=g.type;card.dataset.total=g.need??totals.find(t=>t.type===g.type)?.left??g.left;card.innerHTML='<div class="gmValue hudValue"><span class="gmIcon hudIcon"></span><b class="hudCount"></b></div><span class="goalMeasure" aria-hidden="true"></span><div class="gmProgress hudTrack" role="progressbar"><i></i></div>';card.querySelector('.goalMeasure').textContent=g.type==='color'?g.need+'/'+g.need:card.dataset.total;hud.querySelector('.gmCards').append(card);}
   }
-  values.forEach((g,i)=>{const card=hud.querySelector('.gmCards').children[i],done=g.left===0;card.classList.toggle('done',done);card.querySelector('.gmDone').hidden=!done;
+  values.forEach((g,i)=>{const card=hud.querySelector('.gmCards').children[i],done=g.left===0;card.classList.toggle('done',done);
    card.querySelector('.gmIcon').innerHTML=g.type==='color'?root.CubePopSymbols.svg(stageColors[g.ci]).replace('-.5 -.5 1 1','-.26 -.26 .52 .52'):goalMark(g.type);
    if(g.type==='color')card.querySelector('.gmIcon').style.color=colHex(g.ci);
    card.querySelector('b').textContent=g.type==='color'?Math.min(g.got,g.need)+'/'+g.need:String(g.left);
-   card.querySelector('.gmCaption').textContent=g.type==='color'?'모은 수':({ice:'얼음층 남음',vine:'덩굴 남음',door:'문 그룹 남음',star:'별자리 남음'}[g.type]);
-   card.setAttribute('aria-label',g.type==='color'?colSym(g.ci)+' '+Math.min(g.got,g.need)+'/'+g.need:names[g.type]+' '+g.left+' 남음');
-   if(g.type==='color'){const bar=card.querySelector('.gmProgress');bar.setAttribute('aria-label',colSym(g.ci)+' 수집');bar.setAttribute('aria-valuemin','0');bar.setAttribute('aria-valuemax',g.need);bar.setAttribute('aria-valuenow',Math.min(g.got,g.need));bar.querySelector('i').style.width=(Math.max(0,Math.min(1,g.got/g.need))*100)+'%';bar.querySelector('i').style.background=colHex(g.ci);}
+   const label=(g.type==='color'?colSym(g.ci)+' '+Math.min(g.got,g.need)+'/'+g.need+'개 수집':names[g.type]+' '+g.left+' 남음')+(done?', 목표 완료':'');card.setAttribute('aria-label',label);
+   const total=Number(card.dataset.total),ratio=g.type==='color'?Math.max(0,Math.min(1,g.got/g.need)):total?1-g.left/total:done?1:0;
+   const bar=card.querySelector('.gmProgress');bar.setAttribute('aria-label',label);bar.setAttribute('aria-valuemin','0');bar.setAttribute('aria-valuemax',String(total||1));bar.setAttribute('aria-valuenow',String(g.type==='color'?Math.min(g.got,g.need):Math.max(0,total-g.left)));bar.setAttribute('aria-valuetext',label);bar.querySelector('i').style.background=g.type==='color'?colHex(g.ci):'#638E99';
+   if(root.HudFeedback)root.HudFeedback.goal(card,ratio,done);else bar.querySelector('i').style.width=ratio*100+'%';
   });
   const tools=hud.querySelector('.gmTools');
   if(tools){document.querySelectorAll('.scorePanel .gmTools').forEach(el=>el.remove());document.querySelector('.scorePanel').append(tools);}
@@ -147,12 +149,29 @@
 
  function fxCells(items){return items.map(item=>{const entity=entities.get(item.id);return entity?effectCell(entity):null;}).filter(Boolean);}
  function bursts(items){return (items||[]).map(b=>({id:base+b.id,type:b.type,r:R.rc(b.k)[0],c:R.rc(b.k)[1],hex:colHex(b.ci??0),targets:b.targets.map(id=>base+id)}));}
- async function animate(events,run){for(const event of events){if(run!==epoch)return;root.GimmickPlay?.onPhase?.(event);observation(event.type);
+ // Consume only the engine's fusion event: visual movement never relocates cells.
+ // Match the legacy 120ms attraction + 150ms collapse in the shared cube renderer.
+ async function fuse(event,run){
+  const pair=event.ids.map(id=>entities.get(id)),target=pair.find(e=>e&&R.key(e.r,e.c)===event.k),other=pair.find(e=>e&&e!==target);
+  const reduced=root.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if(target&&other&&!reduced){
+   pair.forEach(e=>root.CubePopFall?.cancel(e));
+   const at=`translate(${target.c*STEP}px,${target.r*STEP}px)`;
+   other.el.style.transition='transform .12s cubic-bezier(.55,0,.9,.35)';other.el.style.transform=at+' scale(1.05)';other.el.style.zIndex=21;
+   target.el.style.transition='transform .12s ease-out';target.el.style.transform=at+' scale(1.22)';target.el.style.zIndex=22;
+   root.CubePopVisual?.wake(300);await sleep(120);if(run!==epoch)return;
+   for(const e of pair){e.el.style.transition='transform .15s cubic-bezier(.3,1.3,.5,1),opacity .15s';e.el.style.transform=at+' scale(.1)';e.el.style.opacity=0;}
+  }
+  showFloat({kind:'fusion',id:'garden:'+base+':'+event.id});
+  if(target&&other&&!reduced)await sleep(150);
+ }
+ async function animate(events,run){let bonusConverted=false;for(const event of events){if(run!==epoch)return;root.GimmickPlay?.onPhase?.(event);observation(event.type);
   if(event.type==='roll'||event.type==='auto'){
    if(event.type==='auto'){feedback('회전판이 함께 돌아요');root.GimmickArt.autoCue(event.turns);}
    await Promise.all(event.turns.map(async t=>{const e=entities.get(t.id);if(!e)return;if(root.CubePopVisual)await root.CubePopVisual.roll(e,t.dir);else{e.wrap.style.transform=ROLL_T[t.dir];await sleep(root.matchMedia?.('(prefers-reduced-motion: reduce)').matches?1:265);e.wrap.style.transform=REST;}}));
    if(run!==epoch)return;sync(event.state);
   }else if(event.type==='clear'){
+   root.GimmickFeedback?.event(shown,event);
    const reveal=revealVines(event,run);
    const token=root.CubePopAnnouncements?.token(),cells=fxCells(event.consumed);
    const fx=root.CubePopEffects?.enabled?root.CubePopEffects.play({id:'garden:'+base+':'+event.id,cells,bursts:bursts(event.bursts),level:event.mult}):null;
@@ -166,6 +185,7 @@
   }else if(event.type==='fall'){
    sync(event.state);let duration=0;const falling=[],clips=[];
    for(const move of event.falls){const e=entities.get(move.id);if(!e)continue;const [r,c]=R.rc(move.to),fromR=Math.floor(move.from/6),d=70+Math.min(6,r-fromR)*30;duration=Math.max(duration,d);
+    root.CubePopFall?.begin(e,r-fromR,d);
     e.el.classList.add('falling');e.el.style.setProperty('--fall-duration',d+'ms');e.entryRow=Math.floor(move.entry/6);
     // The fallback DOM also clips replenishment to the segment's own mouth.
     // Coordinates stay board-relative, as required by the WebGL bridge.
@@ -173,18 +193,23 @@
     e.el.style.transition='none';e.el.style.transform=`translate(${c*STEP}px,${fromR*STEP}px)`;e.el.getBoundingClientRect();e.el.style.transition='';place(e);falling.push(e);
    }
    root.CubePopVisual?.wake(duration+80);await sleep(duration?duration+40:0);if(run!==epoch){clips.forEach(e=>e.remove());return;}for(const e of falling){e.el.classList.remove('falling');e.el.style.removeProperty('--fall-duration');delete e.entryRow;boardInner.append(e.el);}clips.forEach(e=>e.remove());
+  }else if(event.type==='bonus-spawn'&&root.BonusFinale?.active()){
+   if(bonusConverted)continue;bonusConverted=true;
+   const targets=events.filter(e=>e.type==='bonus-spawn').map(e=>({k:e.fresh[0].k,event:e}));
+   await root.BonusFinale.convert(targets,item=>{if(run===epoch)sync(item.event.state);});
   }else if(event.type==='spawn'||event.type==='convert'||event.type==='bonus-spawn'){
    sync(event.state);const fresh=(event.fresh||[]).map(e=>entities.get(e.id)).filter(Boolean);spawnEffects(fresh);
    if(event.type==='bonus-spawn')await sleep(48);
    if(event.type==='convert')await sleep(900);
-  }else if(event.type==='fusion')showFloat({kind:'fusion',id:'garden:'+base+':'+event.id});
+  }else if(event.type==='fusion')await fuse(event,run);
+  else if(event.type==='bonus'&&root.BonusFinale?.active()){await root.BonusFinale.readyBombs(events.filter(e=>e.type==='bonus-spawn').map(e=>({k:e.fresh[0].k})));}
   else if(event.type==='bonus'){showFloat({kind:'bonus',count:event.count,id:'garden:'+base+':'+event.id});await sleep(200);}
   else sync(event.state);
  }}
  function start(n,keepScore,forcedSeed,comparisonOptions={}){
-  ensure();epoch++;base+=100000;root.CubePopAnnouncements?.clear();root.CubePopEffects?.clear();root.PastelGarden.reset();cancelBoardPointers();closeHelp();unarmWild();
+  ensure();epoch++;root.BonusFinale?.cancel();base+=100000;root.CubePopAnnouncements?.clear();root.CubePopEffects?.clear();root.PastelGarden.reset();cancelBoardPointers();closeHelp();unarmWild();
   boardInner.querySelectorAll('.cube,.gmFallClip').forEach(e=>e.remove());vineLayer.innerHTML='';entities=new Map();history=[];stageNo=n;
-  root.GimmickArt.clear();state=R.create(D.get(n+1),forcedSeed??seed(n),comparisonOptions);shown=state;stageColors=[0,1,2,3,4,5];faceColorIdx=[0,1,2,3,4,5];
+  root.GimmickArt.clear();state=R.create(D.get(n+1),forcedSeed??seed(n),comparisonOptions);shown=state;root.GimmickFeedback?.prepare(state);stageColors=[0,1,2,3,4,5];faceColorIdx=[0,1,2,3,4,5];
   cfgMoves=state.moves;cfgPar=D.get(n+1).par;if(!keepScore)score=0;stageStartScore=score;busy=false;over=false;skipReq=false;lastRolled=null;
   $('gardenRatingHint').textContent='이번 단계는 '+state.rating.efficientActions+'회 이내에 목표를 완료하면 확정 보너스로 3별을 받을 수 있어요. 그 이후에도 높은 점수를 얻으면 3별을 받을 수 있어요.';
   $('skipBtn').classList.remove('show');$('overlay').classList.remove('show');document.body.classList.add('gimmickGame');
@@ -194,8 +219,14 @@
  async function play(input){if(!active()||busy||over||movesLeft<=0)return false;const began=root.performance?.now()||Date.now(),result=R.action(state,input);root.GimmickPlay.lastResolveMs=(root.performance?.now()||Date.now())-began;if(!result.valid){feedback('이 칸에서는 그 조작을 할 수 없어요.');return false;}
   const run=epoch,watch=openedHelp;history.push({...input});closeHelp();observing=watch;cancelBoardPointers();unarmWild();busy=true;root.GimmickArt.phase(true);movesLeft=state.moves;updateHUD();
   try{await animate(result.events,run);if(run!==epoch)return false;sync(state);
-   if(state.status==='won'){over=true;await animate(R.finale(state),run);if(run!==epoch)return false;sync(state);busy=false;winStage();}
-   else if(state.status==='lost'){busy=false;failStage();const extra=R.remaining(state).filter(g=>g.type!=='color'&&g.left);const p=document.createElement('p');p.className='gmRemaining';p.innerHTML=extra.map(g=>goalMark(g.type)+' '+names[g.type]+' '+g.left+' 남음').join(' · ');$('ovSub').append(p);}
+   if(state.status==='won'){
+    over=true;const remainingMoves=state.moves,initialScore=state.score,events=R.finale(state),count=events.filter(e=>e.type==='bonus-spawn').length;
+    await root.GimmickFeedback?.waitForStarPeak?.();if(run!==epoch)return false;
+    if(root.BonusFinale&&!await root.BonusFinale.begin({moves:remainingMoves,score:initialScore,count}))return false;
+    if(run!==epoch)return false;await animate(events,run);if(run!==epoch)return false;sync(state);
+    if(root.BonusFinale)await root.BonusFinale.settle(updateHUD);if(run!==epoch)return false;busy=false;winStage();
+   }
+   else if(state.status==='lost'){await root.GimmickFeedback?.waitForStarPeak?.();if(run!==epoch)return false;busy=false;failStage();const extra=R.remaining(state).filter(g=>g.type!=='color'&&g.left);const p=document.createElement('p');p.className='gmRemaining';p.innerHTML=extra.map(g=>goalMark(g.type)+' '+names[g.type]+' '+g.left+' 남음').join(' · ');$('ovSub').append(p);}
   }finally{if(run===epoch){if(observing)closeHelp();busy=false;root.GimmickArt.phase(false);terrain(state);updateHUD();}}
   return true;
  }
@@ -205,7 +236,7 @@
  }
  function arm(e){armWild(e);for(const row of grid)for(const x of row)if(x&&!R.playable(shown||state,R.key(x.r,x.c))){x.el.classList.remove('pickable');pickableCells.delete(x.r+','+x.c);}}
  function pick(ci){const e=armedWild;unarmWild();if(e)return play({type:'bomb',k:R.key(e.r,e.c),color:ci});}
- function stop(){epoch++;root.GimmickArt.clear();closeHelp();root.CubePopEffects?.clear();for(const e of entities.values())e.el.remove();entities.clear();if(layer)layer.innerHTML='';if(vineLayer)vineLayer.innerHTML='';if(hud)hud.hidden=true;state=shown=null;document.body.classList.remove('gimmickGame');}
+ function stop(){epoch++;root.BonusFinale?.cancel();root.GimmickFeedback?.reset();root.GimmickArt.clear();closeHelp();root.CubePopEffects?.clear();for(const e of entities.values())e.el.remove();entities.clear();if(layer)layer.innerHTML='';if(vineLayer)vineLayer.innerHTML='';if(hud)hud.hidden=true;state=shown=null;document.body.classList.remove('gimmickGame');}
  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHelp();});
  root.addEventListener('resize',positionHelp);root.addEventListener('scroll',positionHelp,{passive:true});
  root.GimmickPlay={displayState:()=>shown||state,active,start,stop,config,play,tap,pick,canUse,reject,hud:renderHud,closeHelp,openHelp,positionHelp,repaint:()=>active()&&terrain(shown||state),done:()=>!!state&&R.complete(state),snapshot:()=>R.copy(state),replay:()=>({version:state?.version,ratingVersion:state?.rating?.version,stage:stageNo+1,seed:state?.seed,actions:history.slice()}),sync:()=>state&&sync(state)};

@@ -59,7 +59,7 @@
   }
   // The engine snapshot is the sole source for a gate opening, including groups
   // with multiple cells. Decorative callbacks cannot award or consume anything.
-  if(previous){for(const lock of s.locks.filter(g=>g.open&&!previous.locks.find(p=>p.id===g.id)?.open)){
+  if(previous&&!root.GimmickFeedback?.handles('GATE_BODY')){for(const lock of s.locks.filter(g=>g.open&&!previous.locks.find(p=>p.id===g.id)?.open)){
    for(const [r,c]of lock.doors){const b=at(r*6+c),gate=art(terrain,'gate-'+lock.id+'.png',b,{'data-opening':lock.id,class:'gmGateOpening'});
     if(reduced())gate.remove();else{const run=generation;later(()=>{if(run===generation)gate.remove();},180);}
    }
@@ -74,11 +74,12 @@
    let left,right,bottom,hull=null;
    if(key.hasAttribute('data-carrier')){
     const e=grid.flat().find(e=>e?.logicId===Number(key.getAttribute('data-carrier')));
-    if(!e||e.vined||!e.el.isConnected){key.setAttribute('visibility','hidden');continue;}
+    const gatePose=e&&root.GimmickFeedback?.gatePose?.(e,root.performance?.now()||Date.now());
+    if(!e||e.vined||!e.el.isConnected||gatePose?.opacity===0){key.setAttribute('visibility','hidden');continue;}
     hull=root.CubePopVisual?.outline?.(e);
     if(hull?.length){left=Math.min(...hull.map(p=>p.x));right=Math.max(...hull.map(p=>p.x));bottom=Math.max(...hull.map(p=>p.y))-3/scale;}
     else{const b=at(e.r*6+e.c);left=b.x;right=b.x+b.w;bottom=b.y+b.w-3/scale;}
-    key.style.opacity=getComputedStyleSafe(e.el).opacity||'1';
+    key.style.opacity=String(Number(getComputedStyleSafe(e.el).opacity||1)*(gatePose?.opacity??1));
    }else{
     const b=at(Number(key.getAttribute('data-key-cell')));left=b.x+b.w*.18;right=b.x+b.w*.82;bottom=b.y+b.w*.80;
    }
@@ -97,7 +98,7 @@
   if(lock)extra.insertAdjacentHTML('beforeend','<span>'+image('groups/crest-'+lock.id+'.png')+' 이 문양의 문을 열어요</span>');bubble.append(extra);
  }
  function phase(on){moving=on;document.getElementById('board')?.classList.toggle('gmMoving',on);if(on)marks?.querySelectorAll('[data-rotor]').forEach(e=>e.remove());}
- function iceDamage(damages){if(reduced())return;ensure();for(const damage of damages){const b=at(damage.k);for(const [x,y]of [[.12,.16],[.85,.18],[.13,.78],[.84,.78]]){if(particles.childElementCount>=24)break;const chip=node('path',{d:'M-5 -4L6 -2L3 6L-4 3Z',fill:'#d7f6ff',stroke:'#8ec2d0','stroke-width':1,transform:'translate('+(b.x+b.w*x)+','+(b.y+b.w*y)+')',class:'gmIceChip'},particles);later(()=>chip.remove(),220);}}}
+ function iceDamage(damages){if(reduced()||root.GimmickFeedback?.handles('ICE_CHIPS_1_TO_0'))return;ensure();for(const damage of damages){const b=at(damage.k);for(const [x,y]of [[.12,.16],[.85,.18],[.13,.78],[.84,.78]]){if(particles.childElementCount>=24)break;const chip=node('path',{d:'M-5 -4L6 -2L3 6L-4 3Z',fill:'#d7f6ff',stroke:'#8ec2d0','stroke-width':1,transform:'translate('+(b.x+b.w*x)+','+(b.y+b.w*y)+')',class:'gmIceChip'},particles);later(()=>chip.remove(),220);}}}
  function autoCue(turns){if(reduced())return;ensure();for(const t of turns){const b=faceAt(t.k),cue=node('path',{d:`M${b.x+b.w*.04} ${b.y+b.h*.20}v-${b.h*.18}h${b.w*.18}M${b.right-b.w*.04} ${b.y+b.h*.20}v-${b.h*.18}h-${b.w*.18}`,fill:'none',stroke:'#e1b861','stroke-width':6,'data-auto-cue':t.id},particles);later(()=>cue.remove(),80);}}
  function clear(){generation++;for(const t of timers)clearTimeout(t);timers.clear();previous=null;terrain?.replaceChildren();marks?.replaceChildren();particles?.replaceChildren();phase(false);}
  // One decoded resource cache per document. Individual load failures are reported

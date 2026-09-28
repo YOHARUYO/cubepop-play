@@ -1,0 +1,20 @@
+.bonusFinaleDim{position:fixed;inset:0;z-index:30;background:#24354a;pointer-events:none}
+.bonusFinaleTitle{position:fixed;z-index:32;pointer-events:none;text-align:center}
+.bonusFinaleTitle img{width:100%;height:auto;display:block}
+.bonusFinaleDim[hidden],.bonusFinaleTitle[hidden]{display:none}
+/* An already-running POPPED/COMBO cannot compete with the finale title. */
+body[data-bonus-finale] .gameAnnouncement{visibility:hidden}
+/* Keep actual score stars above the local, clipped settlement fanfare. */
+body.mPlay .goalsCard .scorePanel{overflow:visible}
+body.mPlay .gPin>img{z-index:33}
+body.mPlay .gameBrand .controls{top:10px;right:4px;width:94px!important;max-width:94px;gap:6px}
+body.mPlay .gameBrand .controls .cpSurface{width:44px;height:51px}
+body.mPlay .gameBrand .controls .cpLabel{display:flex;width:44px;height:44px;align-items:center;justify-content:center}
+body.mPlay .gameBrand .controls .cpLabel img{width:21px;height:21px;max-width:none;flex:0 0 21px}
+body.mPlay .gameBrand .controls button:disabled .cpSurface{opacity:.45}
+body.mPlay :is(#goals,.gmCards) .hudGoal{isolation:isolate;overflow:visible}
+body.mPlay :is(#goals,.gmCards) .hudCompletion{inset:calc(-1 * var(--clear-y,5px)) calc(-1 * var(--clear-x,3px));z-index:4;border-radius:10px;isolation:isolate;overflow:hidden}
+body.mPlay :is(#goals,.gmCards) .hudDim{inset:0;border-radius:inherit;background:rgba(36,53,74,.58)}
+body.mPlay :is(#goals,.gmCards) .hudClearHalo{inset:0;border-radius:inherit}
+body.mPlay :is(#goals,.gmCards) .hudClearWord{width:min(116px,calc(100% - 16px));max-height:calc(100% - 10px);object-fit:contain}
+@media(max-width:340px){body.mPlay :is(#goals,.gmCards) .hudGoal{--clear-x:1.5px}}

@@ -32,8 +32,11 @@
  }return issues;}
  function cube(s,k,o){return {id:++s.seq,k,o:o?{...o}:{...orientations[Math.floor(random(s)*24)]},ice:0};}
  function runs(s){const found=[];for(const dir of ['H','V'])for(let fixed=0;fixed<6;fixed++){
-  let cells=[],ci=-1;const flush=()=>{if(ci>=0&&cells.length>=3)found.push({dir,ci,cells:cells.slice()});};
-  for(let i=0;i<6;i++){const k=dir==='H'?key(fixed,i):key(i,fixed),e=s.cells[k],next=e&&canMatch(s,k)&&!(e.ice&&s.damaged.includes(e.id))?color(e):-1;
+  // Damage immunity is not a gap in the visible color line. A protected ice
+  // cube can connect normal cubes, while hit() still caps its layer damage.
+  // An entirely protected line has nothing to resolve until the next action.
+  let cells=[],ci=-1;const flush=()=>{if(ci>=0&&cells.length>=3&&cells.some(k=>!s.cells[k].ice||!s.damaged.includes(s.cells[k].id)))found.push({dir,ci,cells:cells.slice()});};
+  for(let i=0;i<6;i++){const k=dir==='H'?key(fixed,i):key(i,fixed),e=s.cells[k],next=e&&canMatch(s,k)?color(e):-1;
    if(next!==ci||next<0){flush();cells=[];ci=next;}if(next>=0)cells.push(k);
   }flush();
  }return found;}

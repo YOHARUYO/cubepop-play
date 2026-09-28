@@ -22,17 +22,18 @@
   const buttonSizes=new WeakMap();
   function paintButtons(){
     for(const button of document.querySelectorAll('.app .controls button,.app .topBack,#skipBtn,.tutorialActions button:not(#exitLesson),#ovBtns button')){
-      if(button.closest('.controls'))continue;
       if(!button.offsetWidth||!button.offsetHeight)continue;
+      // Establish the 44px layout before measuring. The legacy result button
+      // has a 144px flex basis, which otherwise fails this guard on 320px screens.
+      button.classList.add('cpButton');
       // During viewport/style transitions an unlaid-out horizontal button may
       // briefly be narrower than its unscaled image caps. Retry on the next fit.
-      if(!button.classList.contains('topBack')&&button.offsetWidth<700*(button.offsetHeight+7)/452+16)continue;
-      button.classList.add('cpButton');
+      if(!button.classList.contains('topBack')&&!button.closest('.controls')&&button.offsetWidth<700*(button.offsetHeight+7)/452+16)continue;
       if(!button.querySelector('.cpLabel')){
         const label=document.createElement('span');label.className='cpLabel';
         while(button.firstChild)label.append(button.firstChild);button.append(label);
       }
-      const w=button.offsetWidth,h=button.offsetHeight,square=button.classList.contains('topBack'),gold=button.classList.contains('primary');
+      const w=button.offsetWidth,h=button.offsetHeight,square=button.classList.contains('topBack')||!!button.closest('.controls'),gold=button.classList.contains('primary');
       const key=[w,h,square,gold,root.devicePixelRatio].join(':');
       if(buttonSizes.get(button)===key)continue;
       buttonSizes.set(button,key);button.querySelector('.cpSurface')?.remove();
@@ -50,12 +51,15 @@
       if(!row?.clientWidth||!row.children.length)continue;
       const gap=compact?7:10,items=[...row.children];
       // Reserve the completion mark even while incomplete; never shift values.
-      const needed=Math.max(60,...items.map(el=>{const value=el.querySelector('.hudCount');return (value?.scrollWidth||0)+20+(compact?3:5)+(el.dataset.goal==='color'?0:13);}));
+      const needed=Math.max(88,...items.map(el=>{const value=el.querySelector('.hudCount'),maximum=el.querySelector('.goalMeasure');return Math.max(value?.scrollWidth||0,maximum?.scrollWidth||0)+20+(compact?3:5);}));
       let columns=Math.min(4,items.length);while(columns>1&&(row.clientWidth-gap*(columns-1))/columns<needed)columns--;
       // Goals share both outer edges with the moves/score row. Distribute the
       // available width instead of centering a capped 120px block per target.
       row.style.gridTemplateColumns=`repeat(${columns},minmax(0,1fr))`;
       row.dataset.checkBelow='false';
+      const style=getComputedStyle(row),multi=items.length>columns;
+      row.style.setProperty('--clear-x',Math.min(compact?1.5:3,Math.max(0,(gap-4)/2))+'px');
+      row.style.setProperty('--clear-y',(multi?Math.min(5,Math.max(0,((parseFloat(style.rowGap)||gap)-4)/2)):5)+'px');
     }
   }
   function positionResult(){

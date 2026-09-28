@@ -5,6 +5,7 @@
   const reduced=()=>root.__SIM||root.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   function stopNumber(){if(frame)root.cancelAnimationFrame(frame);frame=0;}
   function reset(){
+    root.HudFeedback?.reset();
     goalSignature=null;
     stopNumber();initialized=false;target=null;
     for(let i=1;i<=3;i++){
@@ -21,10 +22,13 @@
       if(immediate)write(score);
       else{
         const from=displayed,start=root.performance.now();
-        const tick=now=>{const t=Math.min(1,(now-start)/180);write(from+(score-from)*(1-(1-t)**3));if(t<1)frame=root.requestAnimationFrame(tick);else frame=0;};
+        const tick=now=>{const t=Math.max(0,Math.min(1,(now-start)/180));write(from+(score-from)*(1-(1-t)**3));if(t<1)frame=root.requestAnimationFrame(tick);else frame=0;};
         frame=root.requestAnimationFrame(tick);
       }
     }
+    if(root.HudFeedback){
+      root.HudFeedback.score(Math.max(0,Math.min(1,score/par)),states,[Math.round(par*.25)/par,Math.round(par*.6)/par,1],immediate);
+    }else{
     // A loaded state lands immediately; only subsequent changes interpolate.
     if(immediate)fill.style.transition='none';
     fill.style.width=Math.max(0,Math.min(100,score/par*100))+'%';
@@ -41,6 +45,7 @@
         img.dataset.bursts=String(Number(img.dataset.bursts||0)+1);
       }
     });
+    }
     earned=states.slice();initialized=true;
     const accessible='점수 '+score.toLocaleString('ko-KR')+' / '+par.toLocaleString('ko-KR')+', 별 '+states.filter(Boolean).length+'개';
     if($('gScore').textContent!==accessible)$('gScore').textContent=accessible;
@@ -60,7 +65,7 @@
     if(fresh){
       container.innerHTML='';goalItems=goals.map(()=>{
         const chip=document.createElement('div');chip.className='gchip hudGoal';chip.dataset.goal='color';
-        chip.innerHTML='<div class="goalTop hudValue"><div class="dot hudIcon" aria-hidden="true"></div><span class="cnt hudCount" aria-hidden="true"></span></div><span class="goalMeasure" aria-hidden="true"></span><span class="hudCaption">모은 수</span><div class="goalTrack hudTrack" role="progressbar"><div class="goalFill"></div></div><img class="goalCheck hudCheck" src="assets/pastel-garden/icons/check.svg" alt="" aria-hidden="true">';
+        chip.innerHTML='<div class="goalTop hudValue"><div class="dot hudIcon" aria-hidden="true"></div><span class="cnt hudCount" aria-hidden="true"></span></div><span class="goalMeasure" aria-hidden="true"></span><div class="goalTrack hudTrack" role="progressbar"><div class="goalFill"></div></div>';
         container.appendChild(chip);
         return {chip,dot:chip.querySelector('.dot'),count:chip.querySelector('.cnt'),measure:chip.querySelector('.goalMeasure'),track:chip.querySelector('.goalTrack'),fill:chip.querySelector('.goalFill'),check:chip.querySelector('.goalCheck')};
       });goalSignature=signature;
@@ -71,10 +76,10 @@
       item.chip.classList.toggle('done',s.done);
       item.dot.dataset.shape=g.shape;item.dot.style.background=g.hex;item.dot.textContent=g.symbol;
       item.count.textContent=s.value+'/'+s.total;item.measure.textContent=s.total+'/'+s.total;
-      item.check.style.visibility=s.done?'visible':'hidden';
+      item.chip.setAttribute('aria-label',name+' '+s.value+'/'+s.total+'개 수집'+(s.done?', 목표 완료':''));
       item.fill.style.background=goalFills[g.shape]||'#6F625D';
-      item.fill.style.transition=fresh||reduced()?'none':'';
-      item.fill.style.width=(s.ratio*100)+'%';
+      if(root.HudFeedback)root.HudFeedback.goal(item.chip,s.ratio,s.done,{immediate:fresh||!!root.GimmickPlay?.active()});
+      else item.fill.style.width=(s.ratio*100)+'%';
       item.track.setAttribute('aria-label',name+' 수집');
       item.track.setAttribute('aria-valuemin','0');item.track.setAttribute('aria-valuemax',String(s.total||1));
       item.track.setAttribute('aria-valuenow',String(s.value));

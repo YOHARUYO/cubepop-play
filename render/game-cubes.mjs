@@ -5,6 +5,7 @@ import {drawFace} from './face-art.mjs';
 import {screenUprightAngle} from './screen-glyph.mjs';
 import {createIceRenderer} from './gimmick-ice.mjs';
 import {createVineRenderer} from './gimmick-vines.mjs';
+import {createGimmickFeedback} from './gimmick-feedback.mjs';
 const prototypeModule=window.CubePopFrame?.prototype?await import('./board-prototype.mjs'):null;
 
 // One world, camera and transparent board canvas. DOM elements retain gameplay
@@ -31,7 +32,8 @@ export function createCubeVisuals(bridge){
   // entire cube into view halfway through its last cell of travel.
   renderer.localClippingEnabled=true;
   let scheduled=false,until=0,lost=false,active=0,side=0;
-  const stats={ready:true,contextCount:1,projection:'shared-board',renders:0,rolls:0,maxFrameMs:0};
+  const gimmickFeedback=createGimmickFeedback(scene,camera,board,d=>wake(d),renderer);
+  const stats={ready:true,contextCount:1,projection:'shared-board',renders:0,rolls:0,maxFrameMs:0,landingFrames:0,maxLandingRecoil:0};
   const output=document.createElement('output');output.id='cubeRenderState';output.hidden=true;document.body.append(output);
   const shadowCanvas=document.createElement('canvas');shadowCanvas.width=shadowCanvas.height=64;
   const ctx=shadowCanvas.getContext('2d'),gradient=ctx.createRadialGradient(32,32,6,32,32,32);
@@ -54,7 +56,7 @@ export function createCubeVisuals(bridge){
   function clearTurn(record){record.turn=null;record.turnMaps.forEach(t=>t.dispose());record.turnMaps=[];record.key='';}
   function sync(record,now){
     // A sealed cube stays in the game and render cache, but contributes no face or shadow.
-    if(record.entity.vined){record.mesh.visible=record.shadow.visible=false;if(record.ice)record.ice.visible=false;return;}
+    if(record.entity.vined||gimmickFeedback.conceals(record.entity.logicId,now)){record.mesh.visible=record.shadow.visible=false;if(record.ice)record.ice.visible=false;return;}
     const {entity,mesh,materials,shadow}=record,style=getComputedStyle(entity.el),matrix=new DOMMatrix(style.transform==='none'?undefined:style.transform);
     const position=layout.world(matrix.m41,matrix.m42);let scale=Math.hypot(matrix.m11,matrix.m12)||.001,opacity=Number(style.opacity);
     // Only replenishment uses the entry boundary; approved in-place rolls
@@ -64,8 +66,13 @@ export function createCubeVisuals(bridge){
     if(spawning&&!record.spawning)record.spawnStart=now;
     record.spawning=spawning;
     const fxPose=window.CubePopEffects?.sample(entity,now);
+    const gatePose=gimmickFeedback.gatePose(entity,now);
+    if(gatePose||(fxPose&&!spawning)||record.turn)window.CubePopFall?.cancel(entity);
+    record.recoil=window.CubePopFall?.offset(entity,now)||0;
+    position.z+=record.recoil/64;
     if(fxPose){scale*=fxPose.scale;opacity*=fxPose.opacity;}
-    if(spawning&&!fxPose&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+    if(gatePose){scale*=gatePose.scale;opacity*=gatePose.opacity;}
+    if(spawning&&!fxPose&&!gatePose&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
       const t=Math.min(1,(now-record.spawnStart)/380),points=[[0,.05],[.55,1.32],[.78,.92],[1,1]];
       const i=points.findIndex((p,i)=>i>0&&t<=p[0]),a=points[Math.max(0,i-1)],b=points[Math.max(1,i)];
       const u=(t-a[0])/(b[0]-a[0]);scale*=a[1]+(b[1]-a[1])*u*u*(3-2*u);opacity*=Math.min(1,.15+t*2);
@@ -90,7 +97,9 @@ export function createCubeVisuals(bridge){
       if(!entity.el.isConnected){iceRenderer.dispose(record);scene.remove(record.mesh,record.shadow);clearTurn(record);record.fixedMaps.forEach(map=>map.dispose());record.materials.forEach(m=>m.dispose());record.shadow.material.dispose();records.delete(entity);continue;}
       sync(record,now);
     }
-    vineRenderer.sync();stats.vines=vineRenderer.stats();
+    const landing=[...records.values()].filter(r=>r.mesh.visible&&r.recoil>0);
+    if(landing.length){stats.landingFrames++;stats.maxLandingRecoil=Math.max(stats.maxLandingRecoil,...landing.map(r=>r.recoil));}
+    vineRenderer.sync();stats.vines=vineRenderer.stats();gimmickFeedback.sync(now);
     renderer.render(scene,camera);stats.renders++;stats.maxFrameMs=Math.max(stats.maxFrameMs,performance.now()-start);
     window.GimmickArt?.positionKeys();
     bridge.onFrame?.({time:performance.now(),canvas:renderer.domElement,cubes:[...records.values()].map(r=>({el:r.entity.el,row:r.entity.r,col:r.entity.c,visible:r.mesh.visible&&r.mesh.position.z+r.mesh.scale.z/2>=-layout.side/2,y:r.mesh.position.y,z:r.mesh.position.z,scale:r.mesh.scale.x}))});
@@ -107,6 +116,7 @@ export function createCubeVisuals(bridge){
     record.turn={direction,...extra};
   }
   function roll(entity,direction){
+    window.CubePopFall?.cancel(entity);
     const record=ensure(entity),duration=matchMedia('(prefers-reduced-motion: reduce)').matches?1:300;
     setTurn(record,direction,{start:performance.now(),duration});active++;entity.el.classList.add('rolling3d');wake(duration);
     // The state machine still awaits the visual turn. End frame is upright already.

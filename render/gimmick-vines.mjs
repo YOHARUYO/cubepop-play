@@ -10,6 +10,7 @@ export function createVineRenderer(scene,camera,board,wake){
  function sync(){
   const live=new Set();
   for(const art of document.querySelectorAll('#gimmickVines image')){
+   if(art.dataset.feedback==='v6')continue;
    live.add(art);let mesh=records.get(art);
    if(!mesh){mesh=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({map,transparent:true,alphaTest:1/255,depthTest:true,depthWrite:true,toneMapped:false}));scene.add(mesh);records.set(art,mesh);}
    const k=Number(art.dataset.cell),F=window.CubePopFrame,w=F.world(k%6*72,Math.floor(k/6)*72);
