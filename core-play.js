@@ -21,7 +21,7 @@
   let previousFocus=null,inertState=[],active=false,pending=0;
   const buttonSizes=new WeakMap();
   function paintButtons(){
-    for(const button of document.querySelectorAll('.app .controls button,.app .topBack,#skipBtn,.tutorialActions button:not(#exitLesson),#ovBtns button')){
+    for(const button of document.querySelectorAll('.app .controls button,.app .topBack,#skipBtn,.tutorialActions button:not(#exitLesson),#ovBtns button,#restartConfirm button')){
       if(!button.offsetWidth||!button.offsetHeight)continue;
       // Establish the 44px layout before measuring. The legacy result button
       // has a 144px flex basis, which otherwise fails this guard on 320px screens.
@@ -49,27 +49,36 @@
     const compact=root.innerWidth<=340;hud.dataset.compact=String(compact);
     for(const row of [$('goals'),document.querySelector('.gmCards')]){
       if(!row?.clientWidth||!row.children.length)continue;
-      const gap=compact?7:10,items=[...row.children];
-      // Reserve the completion mark even while incomplete; never shift values.
-      const needed=Math.max(88,...items.map(el=>{const value=el.querySelector('.hudCount'),maximum=el.querySelector('.goalMeasure');return Math.max(value?.scrollWidth||0,maximum?.scrollWidth||0)+20+(compact?3:5);}));
-      let columns=Math.min(4,items.length);while(columns>1&&(row.clientWidth-gap*(columns-1))/columns<needed)columns--;
-      // Goals share both outer edges with the moves/score row. Distribute the
-      // available width instead of centering a capped 120px block per target.
-      row.style.gridTemplateColumns=`repeat(${columns},minmax(0,1fr))`;
+      const gap=6,items=[...row.children],count=items.length;
+      const stacked=count>=5||(compact&&count>=4);
+      row.dataset.stacked=String(stacked);
+      // Measure with the final font/layout, including the largest goal value.
+      const needed=Math.ceil(Math.max(stacked?34:58,...items.map(el=>{
+        const value=el.querySelector('.hudCount'),maximum=el.querySelector('.goalMeasure');
+        return Math.max(value?.scrollWidth||0,maximum?.scrollWidth||0)+(stacked?8:30);
+      })));
+      const available=(row.clientWidth-gap*(count-1))/count,scroll=needed>available;
+      const slot=scroll?needed:count<=3?Math.min(110,available):available;
+      row.style.gridTemplateColumns=`repeat(${count},${slot}px)`;
+      row.dataset.scroll=String(scroll);row.tabIndex=scroll?0:-1;
+      row.style.justifyContent=scroll?'start':'center';
+      row.setAttribute('aria-label',scroll?'스테이지 목표, 좌우로 스크롤하여 확인':'스테이지 목표');
+      const ends=()=>{row.dataset.moreLeft=String(row.scrollLeft>1);row.dataset.moreRight=String(row.scrollWidth-row.clientWidth-row.scrollLeft>1);};
+      row.onscroll=ends;ends();
       row.dataset.checkBelow='false';
-      const style=getComputedStyle(row),multi=items.length>columns;
-      row.style.setProperty('--clear-x',Math.min(compact?1.5:3,Math.max(0,(gap-4)/2))+'px');
-      row.style.setProperty('--clear-y',(multi?Math.min(5,Math.max(0,((parseFloat(style.rowGap)||gap)-4)/2)):5)+'px');
+      row.style.setProperty('--clear-x','0px');row.style.setProperty('--clear-y','0px');
     }
   }
   function positionResult(){
     if(layer.hidden)return;
+    if(overlay.classList.contains("stageClear")){overlay.style.top="0px";return;}
     const board=$('board').getBoundingClientRect(),height=overlay.offsetHeight;
     const y=Math.max(16,Math.min(root.innerHeight-height-16,board.y+board.height/2-height/2));
     overlay.style.top=(y-(root.innerHeight-height)/2)+'px';
   }
   function fit(){
     if(!document.body.classList.contains('mPlay'))return true;
+    if(root.visualViewport?.scale>1.02)return true;
     const vw=document.documentElement.clientWidth,wide=vw>=768,padding=getComputedStyle(document.body);
     const width=Math.min(704,vw-parseFloat(padding.paddingLeft)-parseFloat(padding.paddingRight));
     const height=Math.min(root.innerHeight,root.visualViewport?.height||root.innerHeight);
@@ -106,6 +115,7 @@
   }
   function result(kind,remaining){
     overlay.dataset.kind=kind;
+    if(kind==='fail')overlay.setAttribute('aria-describedby','ovSub');
     for(const button of $('ovBtns').querySelectorAll('button')){
       const action=button.getAttribute('onclick')||'',name=action.includes('restartStage')?'retry':action.includes('exitToMap')?'back':null;
       if(name&&!button.querySelector('img'))button.insertAdjacentHTML('afterbegin','<img src="assets/pastel-garden/icons/'+name+'.svg" alt=""> ');
@@ -129,7 +139,7 @@
   }
   layer.addEventListener('keydown',event=>{
     if(event.key!=='Tab')return;
-    const buttons=[...overlay.querySelectorAll('button:not(:disabled)')],first=buttons[0]||overlay,last=buttons.at(-1)||overlay;
+    const buttons=[...overlay.querySelectorAll('summary,button:not(:disabled)')],first=buttons[0]||overlay,last=buttons.at(-1)||overlay;
     if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
     else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
   });

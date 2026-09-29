@@ -7,7 +7,8 @@
     play:'<path d="m7 3 14 9-14 9Z" fill="currentColor" stroke="none"/>',
     lock:'<rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V6a4 4 0 0 1 8 0v4M12 14v3"/>'
   }[name]||'')+'</svg>';
-  home.innerHTML='<img class="hmArt" src="assets/home-map/home-title-pop.png" alt="" decoding="async"><img class="hmLogo" src="assets/home-map/cubepop-logo-mobile.png" alt="CUBEPOP"><p class="homeSub">굴리고 맞추는 큐브 매치 퍼즐</p><button class="hmButton hmStart" data-gold="true" onclick="goMap()"><span class="hmLabel">'+icon('play')+'게임 시작</span></button><button class="hmButton hmSettings" onclick="openSettings()"><span class="hmLabel">'+icon('settings')+'설정</span></button>';
+  home.innerHTML='<img class="hmArt" src="assets/home-map/home-title-pop.png" alt="" decoding="async"><img class="hmLogo" src="assets/home-map/cubepop-logo-mobile.png" alt="CUBEPOP"><p class="homeSub">굴리고, 맞추고, <span class="homeTaglinePop">팡!</span></p><button class="hmButton hmStart" data-gold="true" onclick="goMap()"><span class="hmLabel">'+icon('play')+'게임 시작</span></button><button class="hmButton hmSettings" onclick="openSettings()"><span class="hmLabel">'+icon('settings')+'설정</span></button>';
+  const artWindow=document.createElement('div');artWindow.className='hmArtWindow';home.prepend(artWindow);artWindow.append(home.querySelector('.hmArt'));
   const back=document.querySelector('#mapScr .backBtn');
   back.innerHTML='<span class="hmLabel"><img class="hmIcon" src="assets/pastel-garden/icons/back.svg" alt=""></span>';
   back.setAttribute('aria-label','홈으로');back.classList.add('hmButton');back.dataset.square='true';
@@ -21,6 +22,12 @@
   }
   const sizeCache=new WeakMap();
   function paintButton(button){
+    if(button.classList.contains('pnode')){
+      const theme=button.dataset.theme||'sandstone',n=Number(button.dataset.n),src=window.GardenMap.asset(theme,'node-0'+window.GardenMap.variant(n));
+      const surface=button.querySelector('.gardenStone');
+      if(surface&&surface.getAttribute('src')!==src)surface.src=src;
+      return;
+    }
     const rect=button.getBoundingClientRect?.(),w=rect?.width||0,h=rect?.height||0;if(!w||!h)return;
     const square=button.dataset.square==='true',gold=!button.disabled&&(button.dataset.gold==='true'||button.classList.contains('on'));
     const theme=button.classList.contains('pnode')?(button.dataset.theme||'sandstone'):'sandstone';
@@ -36,7 +43,12 @@
   function watch(button){resizeObserver?.observe(button);paintButton(button);}
   function layoutHome(){const {w,h}=dims(),p=profile(),s=home.style;
     const extra=Math.max(0,h-p[11])/2;
-    const pairs={'logo-w':Math.min(w,p[0]),'logo-y':p[1]+extra,'art-w':Math.min(w,p[2]),'art-y':p[3]+extra,'sub-y':p[4]-16+extra,'start-w':Math.min(w-32,p[5]),'start-h':p[6],'start-y':p[7]+extra,'settings-w':p[8],'settings-h':p[9],'settings-y':p[10]+extra,'home-height':Math.max(h,p[11])};
+    // Alpha >= 32 ink bounds of the approved logo (not its transparent canvas).
+    const logoWidth=Math.min(w,p[0]),inkBottom=w>=1024?934/1536:1067/1254;
+    const subY=p[1]+extra+logoWidth*inkBottom+12;
+    // Keep the first cube row (y≈310 in the 1024px-wide art) below the tagline.
+    const artWidth=Math.min(w,p[2]),artY=Math.max(p[3]+extra,subY+(w>=768?32:28)+12-artWidth*310/1024);
+    const pairs={'logo-w':logoWidth,'logo-y':p[1]+extra,'art-w':artWidth,'art-y':artY,'sub-y':subY,'start-w':Math.min(w-32,p[5]),'start-h':p[6],'start-y':p[7]+extra,'settings-w':p[8],'settings-h':p[9],'settings-y':p[10]+extra,'home-height':Math.max(h,p[11])};
     for(const [key,value] of Object.entries(pairs))s.setProperty('--hm-'+key,value+'px');
     home.querySelector('.hmLogo').src='assets/home-map/cubepop-logo-'+(w>=1024?'master':'mobile')+'.png';
     home.querySelectorAll('button').forEach(watch);watch(back);
@@ -63,6 +75,36 @@
     return l;
   }
   let lastMapViewportHeight=0;
+  let gardenLayout=null;
+  function updateGardenFade(){
+    const gradient=$('garden-scenery-fade'),top=$('mapScroll').scrollTop;
+    gradient?.setAttribute('y1',String(top));gradient?.setAttribute('y2',String(top+36));
+  }
+  function paintGarden(l){
+    const cv=$('mapCanvas');
+    const resolve=n=>window.CubePopThemes?.forStage(n)||'sandstone';
+    gardenLayout=window.GardenMap.plan(l,dims().w,resolve);
+    cv.querySelector('.gardenWorld')?.remove();
+    cv.insertAdjacentHTML('afterbegin',window.GardenMap.svg(gardenLayout));
+    updateGardenFade();
+    document.body.dataset.gardenReady='false';
+    window.GardenMap.preload().then(()=>{document.body.dataset.gardenReady='true';});
+  }
+  function centerNumbers(){
+    const measure=document.createElement('canvas').getContext?.('2d');
+    if(measure){measure.font='400 25px "CP Jua"';measure.textAlign='center';}
+    $('mapCanvas').querySelectorAll('.gardenNumber').forEach(label=>{
+      const text=label.querySelector('text');
+      // Measure ink after CP Jua has loaded. White fill + stroke stay centered
+      // identically for one/two digits, independent of the line box baseline.
+      if(measure){
+        const ink=measure.measureText(text.textContent);
+        text.setAttribute('x',String(41+(ink.actualBoundingBoxLeft-ink.actualBoundingBoxRight)/2));
+        text.setAttribute('y',String(37+(ink.actualBoundingBoxAscent-ink.actualBoundingBoxDescent)/2));
+      }else if(text?.getBBox){text.setAttribute('y','0');const b=text.getBBox();text.setAttribute('y',String(37-b.y-b.height/2));}
+      label.classList.add('ready');
+    });
+  }
   function render(keepScroll=false){
     const cv=$('mapCanvas'),sc=$('mapScroll');
     const oldHeight=lastMapViewportHeight||sc.clientHeight;
@@ -73,15 +115,16 @@
     cv.querySelectorAll('.hmButton').forEach(b=>resizeObserver?.unobserve(b));
     document.body.style.setProperty('--hm-map-w',l.W+'px');document.body.style.setProperty('--hm-node-size',l.face+'px');
     mapPos=l.points;avatarStage=cur;avatarRot=0;mapAnim=false;
-    const paths=l.links.map((line,i)=>'<g data-from="'+(i+1)+'" data-to="'+(i+2)+'" data-gap="'+line.gap+'" fill="'+(i+1<cur?'#d1ac4d':'#c4aa86')+'">'+line.points.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="2.8"/>').join('')+'</g>').join('');
-    let html='<svg class="hmPath" width="'+l.W+'" height="'+l.height+'" viewBox="0 0 '+l.W+' '+l.height+'" aria-hidden="true">'+paths+'</svg>';
+    let html='';
     for(let n=1;n<=TOTAL_STAGES;n++){
       const p=mapPos[n],complete=Object.hasOwn(progress.stars,n),stars=Math.max(0,Math.min(3,progress.stars[n]||0)),un=isStageUnlocked(n),current=n===cur;
       const state=!un?'locked':current?'next':complete?'complete':'open';
-      html+='<button class="pnode hmButton '+(!un?'locked ':'')+(current?'cur':'')+'" data-n="'+n+'" data-state="'+state+'" data-complete="'+complete+'" data-square="true" data-gold="'+current+'" style="left:'+p.x+'px;top:'+p.y+'px" aria-label="스테이지 '+n+', '+(!un?'잠김':(complete?'완료, 별 '+stars+'개':'미완료'))+(current?', '+(complete&&n===50?'마지막 스테이지':'다음 도전'):'')+'" '+(!un?'disabled':'onclick="selectStage('+(n-1)+')"')+'>'+S.svg(l.face,l.face,true,current&&un,window.CubePopThemes?.forStage(n)||'sandstone')+'<span class="hmLabel">'+n+'</span><span class="hmStars" aria-hidden="true">'+[1,2,3].map(i=>'<img src="assets/pastel-garden/score-star-'+(i<=stars?'earned':'unearned')+'.png" alt="">').join('')+'</span>'+(!un?'<span class="hmBadge lock"><img src="assets/interaction/stage-lock.svg" alt=""></span>':complete?'<span class="hmBadge"><img src="assets/interaction/stage-clear.svg" alt=""></span>':'')+'</button>';
+      const theme=window.CubePopThemes?.forStage(n)||'sandstone';
+      html+='<button class="pnode hmButton '+(!un?'locked ':'')+(current?'cur':'')+'" data-n="'+n+'" data-state="'+state+'" data-complete="'+complete+'" data-square="true" data-gold="'+current+'" data-variant="'+window.GardenMap.variant(n)+'" style="left:'+p.x+'px;top:'+p.y+'px" aria-label="스테이지 '+n+', '+(!un?'잠김':(complete?'완료, 별 '+stars+'개':'미완료'))+(current?', '+(complete&&n===50?'마지막 스테이지':'다음 도전'):'')+'" '+(!un?'disabled':'onclick="selectStage('+(n-1)+')"')+'>'+window.GardenMap.surface(n,theme)+window.GardenMap.number(n)+'<span class="hmStars" aria-hidden="true">'+[1,2,3].map(i=>'<img src="assets/pastel-garden/score-star-'+(i<=stars?'earned':'unearned')+'.png" alt="">').join('')+'</span>'+(!un?'<span class="hmBadge lock"><img src="assets/interaction/stage-lock.svg" alt=""></span>':complete?'<span class="hmBadge"><img src="assets/interaction/stage-clear.svg" alt=""></span>':'')+'</button>';
     }
-    [[1,'배우기 · 3색'],[7,'4색 구간'],[10,'5색 구간'],[15,'6색 구간']].forEach(([n,t])=>{html+='<div class="bandLbl" style="top:'+(mapPos[n].y+l.face/2+45)+'px">'+t+'</div>';});
     cv.style.height=l.height+'px';cv.innerHTML=html;
+    paintGarden(l);
+    if(document.fonts)document.fonts.load('400 25px "CP Jua"').then(centerNumbers).catch(centerNumbers);else centerNumbers();
     cv.querySelectorAll('.pnode').forEach(button=>{button.dataset.theme=window.CubePopThemes?.forStage(Number(button.dataset.n))||'sandstone';});
     window.CubePopThemeUI?.mapLayout(l);
     // Layout dimensions are known even when goMap renders before its screen is visible.
@@ -94,11 +137,11 @@
     travel.innerHTML='<span class="hmTumble">'+rotations.map((rotation,i)=>'<span class="hmTravelFace" style="transform:'+rotation+' translateZ(20px);background:'+palette[colors[i]]+';color:'+window.CubePopSymbols.inks[colors[i]]+'">'+window.CubePopSymbols.svg(colors[i])+'</span>').join('')+'</span>';
     avatarEl.querySelector('.avHop').appendChild(travel);
     avMat=typeof DOMMatrix==='function'?new DOMMatrix():null;placeAvatar(cur);cv.appendChild(avatarEl);
-    requestAnimationFrame(()=>{sc.scrollTop=Math.max(0,mapPos[keepScroll&&relative!==null?anchor:cur].y-sc.clientHeight*(keepScroll&&relative!==null?Math.max(.2,Math.min(.8,relative)):.43));lastMapViewportHeight=sc.clientHeight;updateMapFades();watch(back);});
-    if(!sc._fadeBound){sc._fadeBound=true;sc.addEventListener('scroll',updateMapFades);}
+    requestAnimationFrame(()=>{sc.scrollTop=Math.max(0,mapPos[keepScroll&&relative!==null?anchor:cur].y-sc.clientHeight*(keepScroll&&relative!==null?Math.max(.2,Math.min(.8,relative)):.43));lastMapViewportHeight=sc.clientHeight;updateMapFades();updateGardenFade();watch(back);});
+    if(!sc._fadeBound){sc._fadeBound=true;sc.addEventListener('scroll',()=>{updateMapFades();updateGardenFade();});}
     return l;
   }
-  window.HomeMap={render,mapLayout,layoutHome,avatarOffset:()=>mapLayout().face/2+32,paintButton};
+  window.HomeMap={render,mapLayout,layoutHome,avatarOffset:()=>mapLayout().face/2+32,paintButton,refreshGarden:()=>paintGarden(mapLayout())};
   const originalMode=setMode;setMode=function(mode){if(modal.dataset.homeMap&&mode==='mPlay')closeSettings();originalMode(mode);if(mode==='mHome')layoutHome();};
   function pawnAnimation(element,frames,duration,done){
     const owner=avatarEl;
@@ -119,18 +162,19 @@
       const dx=to.x-from.x,dy=to.y-from.y,len=Math.hypot(dx,dy);
       placeAvatar(n+step);
       owner.dataset.routeStage=String(n+step);
-      // Follow each consecutive node and keep the pawn centered on the dotted road.
+      // Use exactly the visible walkway curve, in either direction.
       const scroll=$('mapScroll');scroll.scrollTo({top:Math.max(0,to.y-scroll.clientHeight*.5),behavior:'smooth'});
       if(matrix&&tumble.animate){
         const frames=Array.from({length:9},(_,i)=>({transform:new DOMMatrix().rotateAxisAngle(-dy/len,dx/len,0,180*i/8).multiply(matrix).toString()}));
         matrix=new DOMMatrix().rotateAxisAngle(-dy/len,dx/len,0,180).multiply(matrix);
         tumble.style.transform=matrix.toString();tumble.animate(frames,{duration,easing:'linear'});
       }
-      pawnAnimation(owner,[
-        {transform:'translateX(-50%) translate('+(-dx)+'px,'+(-dy+(first?0:45))+'px)'},
-        {transform:'translateX(-50%) translate('+(-dx*.5)+'px,'+(-dy*.5+45)+'px)',offset:.5},
-        {transform:'translateX(-50%) translate(0,'+(last?0:45)+'px)'}
-      ],duration,()=>{n+=step;if(n!==target)next();else{owner.classList.remove('travelling');done();}});
+      const curve=window.GardenMap.route(mapPos[Math.min(n,n+step)],mapPos[Math.max(n,n+step)]);
+      const travelFrames=Array.from({length:17},(_,i)=>{
+        const t=i/16,p=window.GardenMap.point(curve,step>0?t:1-t),lift=45*Math.min(first?t*4:1,last?(1-t)*4:1,1);
+        return {transform:'translateX(-50%) translate('+(p.x-to.x)+'px,'+(p.y-to.y+lift)+'px)',offset:t};
+      });
+      pawnAnimation(owner,travelFrames,duration,()=>{n+=step;if(n!==target)next();else{owner.classList.remove('travelling');done();}});
     }
     next();
   };

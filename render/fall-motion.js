@@ -25,7 +25,7 @@
  }
  function offset(entity,now){
   const cue=entity.landingRecoil;if(!cue)return 0;
-  if(reduced()||now>=cue.start+cue.duration+settleMs-leadMs){cancel(entity);return 0;}
+  if(reduced()||now>=cue.start+(cue.duration+settleMs-leadMs)){cancel(entity);return 0;}
   return sample(cue.rows,now-cue.start,cue.duration);
  }
  const api={begin,cancel,offset,sample,distance,settleMs};

@@ -132,7 +132,7 @@ export function createGimmickFeedback(scene,camera,board,wake,renderer){
  }
  function setFrame(map,entry,frame){const [x,y,w,h]=frame.rect;map.repeat.set(w/entry.width,h/entry.height);map.offset.set(x/entry.width,1-(y+h)/entry.height);}
  function iceSample(owner,now){const i=ice.get(owner);if(!i)return null;const entry=entries.get(i.id),map=pool.get(i.id);if(!entry||!map)return null;
-  if(now-i.start>=entry.durationMs){ice.delete(owner);return null;}const frame=P.frameAt(entry,now-i.start);return frame?{map,entry,frame}:null;
+  if(now-i.start>=entry.durationMs){ice.delete(owner);return null;}const elapsed=now-i.start,frame=P.frameAt(entry,elapsed);return frame?{map,entry,frame,elapsed,duration:entry.durationMs,fromLayers:i.id==='ICE_UV_2_TO_1'?2:1,toLayers:i.id==='ICE_UV_2_TO_1'?1:0}:null;
  }
  function event(before,event){
   if(event.type!=='clear')return;

@@ -1,0 +1,36 @@
+/* Approved mobile-readability-v1: presentation only, common across rule sets. */
+body.mMap .mapHead h2{font:400 28px/1.25 'CP Jua',sans-serif;color:#fff;-webkit-text-stroke:4px #243E61;paint-order:stroke fill;text-shadow:0 2px 2px rgb(36 62 97 / .2);letter-spacing:0;font-synthesis:none}
+body.mMap .mapThemeName{font:400 17px/1.4 'CP Jua',sans-serif;margin-top:7px;color:#70747C;-webkit-text-stroke:3px #fff;paint-order:stroke fill;text-shadow:none}
+@media(max-width:599px){body.mMap .mapHead h2{font-size:26px}body.mMap .mapThemeName{font-size:16px}}
+#homeScr .homeSub{font:400 20px/28px 'CP Jua',sans-serif;letter-spacing:0;color:#FFF8E9;-webkit-text-stroke:2px #243E61;paint-order:stroke fill;text-shadow:0 2px 1px rgb(36 62 97 / .25);white-space:nowrap;font-synthesis:none}
+#homeScr .homeTaglinePop{color:#FFD15A}
+#homeScr .hmArtWindow{position:absolute;inset:0;overflow:clip;pointer-events:none}
+@media(min-width:768px){#homeScr .homeSub{font-size:24px;line-height:32px}}
+html.playScrollLocked,html.playScrollLocked body.mPlay{overflow:hidden;overscroll-behavior:none;height:100dvh;min-height:0;box-sizing:border-box}
+body.mPlay #board{touch-action:none;overscroll-behavior:none}
+@media(max-width:340px){body.mPlay{padding-top:max(7px,env(safe-area-inset-top))}}
+body.mPlay :is(#goals,.gmCards){column-gap:6px;row-gap:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;overscroll-behavior-x:contain;touch-action:pan-x;min-height:54px}
+body.mPlay :is(#goals,.gmCards)[data-more-left=true]{box-shadow:inset 5px 0 5px -5px #243E61}
+body.mPlay :is(#goals,.gmCards)[data-more-right=true]{box-shadow:inset -5px 0 5px -5px #243E61}
+body.mPlay :is(#goals,.gmCards)[data-more-left=true][data-more-right=true]{box-shadow:inset 5px 0 5px -5px #243E61,inset -5px 0 5px -5px #243E61}
+body.mPlay :is(#goals,.gmCards) .hudGoal{height:54px;min-height:54px;padding:0 0 9px}
+body.mPlay :is(#goals,.gmCards) .hudCaption{display:none}
+body.mPlay :is(#goals,.gmCards) .hudValue{height:38px;min-height:38px;gap:3px;padding:0}
+body.mPlay :is(#goals,.gmCards) .hudCount,body.mPlay :is(#goals,.gmCards) .goalMeasure{font:400 17px/20px 'CP Jua',sans-serif;white-space:nowrap}
+body.mPlay :is(#goals,.gmCards) .hudIcon,body.mPlay :is(#goals,.gmCards) .hudIcon>svg{width:22px;height:22px;flex:0 0 22px}
+body.mPlay :is(#goals,.gmCards) .hudIcon>img{width:25px;height:25px}
+body.mPlay :is(#goals,.gmCards) .hudTrack{height:4px;bottom:0}
+body.mPlay :is(#goals,.gmCards)[data-stacked=true] .hudValue{flex-direction:column;height:45px;gap:1px}
+body.mPlay :is(#goals,.gmCards)[data-stacked=true] .hudCount,body.mPlay :is(#goals,.gmCards)[data-stacked=true] .goalMeasure{font-size:14px;line-height:19px}
+.hudCompletion{overflow:hidden;border-radius:8px}
+.hudGoal{container-type:inline-size}
+.hudCompactCheck{display:none;color:#FFF8E9;font:400 24px/28px 'CP Jua',sans-serif;z-index:2}
+@container (max-width:72px){.hudCompletion:not(.hudJustCompleted) .hudClearWord{display:none}.hudCompletion:not(.hudJustCompleted) .hudCompactCheck{display:block}}
+.restartLayer{position:fixed;inset:0;z-index:200;display:grid;grid-template-columns:minmax(0,1fr);place-items:center;box-sizing:border-box;padding:16px;background:rgb(36 53 74 / .58);overflow:auto;overscroll-behavior:contain;touch-action:pan-y}
+.restartDialog{box-sizing:border-box;width:min(336px,100%);min-width:0;max-height:100%;overflow:auto;padding:22px 14px 26px;border:2px solid #243E61;border-bottom:5px solid #BEB0CB;border-radius:24px;background:#FFF8E9;color:#243E61;text-align:center}
+.restartDialog h2{margin:0 0 12px;font:400 25px/32px 'CP Jua',sans-serif}
+.restartDialog p{margin:0;font:400 14px/1.65 'CP Noto',sans-serif;word-break:keep-all}
+.restartActions{display:flex;gap:10px;margin-top:22px}
+body.mPlay .restartActions .cpButton{height:46px;flex:1 1 0;width:0;min-width:0;font-size:16px;white-space:nowrap}
+.restartActions .cpLabel{max-width:100%}
+@media(prefers-reduced-motion:reduce){.restartActions *{transition:none!important}}

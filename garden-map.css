@@ -1,0 +1,14 @@
+/* Garden map only. The 82px input boxes and live state layers remain independent. */
+body.mMap .mapView{width:100vw;position:relative;left:auto;transform:none;overflow:hidden}
+body.mMap .mapCanvas{width:var(--hm-map-w);margin:0 auto}
+body.mMap .mapCanvas>.gardenWorld{position:absolute;top:0;width:100vw;height:100%;pointer-events:none;overflow:hidden;z-index:0}
+body.mMap #mapCanvas .pnode .gardenStone{width:98px;height:98px;max-width:none;left:-8px;top:-8px;object-fit:contain;filter:none;box-shadow:none}
+body.mMap #mapCanvas .pnode:disabled .gardenStone{opacity:1}
+body.mMap #mapCanvas .pnode .gardenNumber{position:absolute;inset:0;width:82px;height:82px;line-height:normal;visibility:hidden}
+body.mMap #mapCanvas .pnode .gardenNumber.ready{visibility:visible}
+body.mMap .gardenNumber svg{width:82px;height:82px;overflow:visible}
+body.mMap .gardenNumber text{font-family:'CP Jua',sans-serif;font-size:25px;font-weight:400;font-synthesis:none}
+body.mMap #mapCanvas .pnode:is(:hover,:active,.enterFx) .gardenNumber{transform:none}
+body.mMap #mapCanvas .pnode:hover:not(:disabled) .gardenStone{transform:translateY(-1px)}
+body.mMap #mapCanvas .pnode:active:not(:disabled) .gardenStone{transform:translateY(2px)}
+@media(prefers-reduced-motion:reduce){body.mMap .gardenStone{transition:none}}

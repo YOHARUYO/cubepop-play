@@ -6,6 +6,9 @@
     const priority=e=>['stage','bonus'].includes(e.kind)?3:e.kind==='fusion'?2:1;
     function stop(){if(timer!==null)cancel(timer);timer=null;current=null;hide();}
     function clear(){session++;pending=null;seen.clear();stop();return session;}
+    // Hiding decoration is not a scene change. The engine also uses session
+    // tokens to cancel work on restart/navigation, so keep that token intact.
+    function dismiss(){pending=null;stop();}
     function finish(){stop();const next=pending;pending=null;if(next&&now()-next.at<800)display(next.event);}
     function display(e){
       if(e.token!==session||blocked())return;
@@ -30,7 +33,7 @@
       }
       pending=null;display(e);return true;
     }
-    return {emit,clear,token:()=>session,state:()=>({session,current,pending})};
+    return {emit,clear,dismiss,token:()=>session,state:()=>({session,current,pending})};
   }
   root.CubePopAnnouncementModel={create,durations};
   if(typeof module==='object')module.exports={create,durations};
@@ -107,9 +110,10 @@
   }).concat([document.fonts.load('400 46px "CP Jua"').catch(()=>{})])).then(()=>{loaded=true;layout();const e=waiting;waiting=null;if(e&&Date.now()-e.at<800)controller.emit(e.event);});
   root.CubePopAnnouncements={ready,token:controller.token,
     clear(){waiting=null;return controller.clear();},
+    dismiss(){waiting=null;controller.dismiss();},
     emit(event){const e={...event,token:event.token??controller.token()};if(!loaded){waiting={event:e,at:Date.now()};return;}controller.emit(e);},
     state:controller.state};
-  board.addEventListener('pointerdown',()=>{if(controller.state().current?.kind==='stage')controller.clear();},{capture:true,passive:true});
-  new MutationObserver(()=>{if(blocked())root.CubePopAnnouncements.clear();}).observe(preview,{attributes:true,attributeFilter:['hidden']});
+  board.addEventListener('pointerdown',()=>{if(controller.state().current?.kind==='stage')root.CubePopAnnouncements.dismiss();},{capture:true,passive:true});
+  new MutationObserver(()=>{if(!preview.hidden)root.CubePopAnnouncements.dismiss();}).observe(preview,{attributes:true,attributeFilter:['hidden']});
   new ResizeObserver(layout).observe(board);
 })(typeof window==='object'?window:globalThis);

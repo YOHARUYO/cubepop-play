@@ -2,7 +2,8 @@
 <html lang="ko" data-build="player">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="preload" href="assets/fonts/jua-400.woff2" as="font" type="font/woff2" crossorigin>
 <title>CUBE POP v2 — 굴리며 배우는 퍼즐</title>
 <link rel="stylesheet" href="improvements.css">
 <style>
@@ -389,6 +390,7 @@
 <link rel="stylesheet" href="hud-feedback.css">
 <link rel="stylesheet" href="bonus-finale.css">
 <link rel="stylesheet" href="interaction-polish.css">
+<link rel="stylesheet" href="garden-map.css">
 <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/geometries/RoundedBoxGeometry.js":"./vendor/RoundedBoxGeometry.js","three/addons/environments/RoomEnvironment.js":"./vendor/RoomEnvironment.js"}}</script>
 <link rel="stylesheet" href="announcements.css"></head>
 <body class="mHome">
@@ -406,7 +408,7 @@
     <span style="background:#4cc9f0">★</span>
   </div>
   <div class="homeTitle">CUBE POP</div>
-  <div class="homeSub">굴리고 맞추는 큐브 매치 퍼즐</div>
+  <div class="homeSub">굴리고, 맞추고, <span class="homeTaglinePop">팡!</span></div>
   <button class="bigBtn" onclick="goMap()">게임 시작</button>
   <button class="ghostBtn" onclick="openSettings()">⚙ 설정</button>
 </div>
@@ -523,6 +525,8 @@
 <script src="stage-layouts.js"></script>
 <script src="gimmick-rules.js"></script>
 <link rel="stylesheet" href="gimmicks.css">
+<link rel="stylesheet" href="mobile-readability.css">
+<link rel="stylesheet" href="stage-clear.css">
 <script>
 'use strict';
 /* ================= stage config ================= */
@@ -587,6 +591,7 @@ let goals=[];
 let cfgMoves=0,cfgPar=0,stageStartScore=0;
 let grid=[];
 let movesLeft=0,score=0,maxCombo=1;
+let resultRecorded=false,scoreLedger={playScore:0,explosionScore:0,moveBonus:0,remainingMoves:null,phase:"play"};
 let busy=false,over=false,idSeq=0;
 let gameplayRandom=Math.random;
 
@@ -838,7 +843,8 @@ async function doClearStep(clearSet,spawns,mult,epicenter,bursts=[],announcement
   for(const k of clearSet){const e=entityAt(k);if(e)cleared.push(e);}
   const fx=window.CubePopEffects?.enabled?window.CubePopEffects.play({id:++effectEventSeq,cells:cleared.map(effectCell),bursts,level:mult}):null;
   cleared.forEach(e=>{const g=goals.find(g=>g.ci===matchColor(e));if(g)g.got++;});
-  score+=cleared.length*10*mult;
+  const award=cleared.length*10*mult;score+=award;
+  scoreLedger[scoreLedger.phase==="finale"?"explosionScore":"playScore"]+=award;
   maxCombo=Math.max(maxCombo,mult);
   if(goalsDone()&&!over&&!lessonState)$('skipBtn').classList.add('show');
   if(mult>1||cleared.length>=6)showFloat({kind:mult>1?'combo':'popped',mult,count:cleared.length,ids:cleared.map(e=>e.id),token:announcementToken,id:'clear:'+ ++announcementEventSeq});
@@ -1150,6 +1156,7 @@ async function stageFinale(){
   const take=Math.min(n,cells.length),converted=[],targets=cells.slice(0,take).map(([r,c])=>({k:r*COLS+c,r,c}));
   if(fx&&!await fx.begin({moves:n,score:initialScore,count:take}))return false;
   if(announcementToken!==window.CubePopAnnouncements?.token())return false;
+  scoreLedger.phase="finale";scoreLedger.remainingMoves=n;scoreLedger.moveBonus=n*MOVE_BONUS;
   movesLeft=0;score+=n*MOVE_BONUS;updateHUD();
   const commit=({r,c})=>{const e=grid[r][c],ci=matchColor(e);e.el.remove();
     const type=gameplayRandom()<.62?(gameplayRandom()<.5?'H':'V'):'A',nb=makeBomb(r,c,ci,type);grid[r][c]=nb;
@@ -1170,6 +1177,7 @@ async function runFinaleThenWin(){
   if(token!==window.CubePopAnnouncements?.token())return;busy=false;winStage();
 }
 function winStage(){
+  if(resultRecorded)return;resultRecorded=true;
   window.GimmickFeedback?.cancelStars?.();
   window.CubePopAnnouncements?.clear();
   over=true;
@@ -1181,24 +1189,10 @@ function winStage(){
     if(stN<TOTAL_STAGES)progress.unlocked=Math.max(progress.unlocked,stN+1);
     saveProg();
   }
-  $('ovStars').innerHTML=[0,1,2].map(i=>'<img src="assets/pastel-garden/score-star-'+(i<s?'earned':'unearned')+'.png" alt="'+(i<s?'획득':'미획득')+'">').join('');
-  $('ovTitle').textContent='STAGE '+stN+' 클리어!';
-  $('ovTitle').style.color='#367a62';
-  $('ovSub').innerHTML='이번 스테이지 <b>'+sc+'</b>점'+(cfgPar?' (별 3개 '+cfgPar+'점)':'');
   const gardenBonus=window.GimmickPlay?.active()?window.GimmickPlay.snapshot().finaleBreakdown:null;
-  if(gardenBonus){
-    const breakdown=document.createElement('dl');breakdown.className='scoreBreakdown';
-    for(const [label,value] of [['플레이 점수',gardenBonus.playScore],['남은 '+gardenBonus.remainingMoves+'회 × 120',gardenBonus.moveBonus],['효율 클리어 보너스',gardenBonus.efficiencyBonus],['폭발·연쇄 보너스',gardenBonus.explosionScore]]){
-      const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=Number(value).toLocaleString()+'점';breakdown.append(dt,dd);
-    }
-    const criterion=document.createElement('p');criterion.className='efficiencyResult';criterion.textContent='사용 '+gardenBonus.actions+'회 · '+gardenBonus.efficientActions+'회 이내 완료 시 3별 보장';
-    $('ovSub').append(breakdown,criterion);
-  }
-  $('ovBtns').innerHTML=(stN<TOTAL_STAGES?'<button class="primary" onclick="nextStage()">다음 스테이지 →</button>':'')+
-    '<button onclick="exitToMap()">맵으로</button>';
-  $('overlay').classList.add('show');
+  const model=window.StageClear.data({stageNumber:stN,totalStages:TOTAL_STAGES,stars:s,total:sc,par:cfgPar,breakdown:gardenBonus,ledger:gardenBonus?null:scoreLedger});
+  window.StageClear.render(model,{next:nextStage,retry:restartStage,map:exitToMap});
   updateHUD();
-  window.CorePlay?.result('win');
 }
 function failStage(){
   window.GimmickFeedback?.cancelStars?.();
@@ -1263,6 +1257,7 @@ function buildBoard(){
   }
 }
 function setupStage(n,keepScore){
+  window.StageClear?.reset();resultRecorded=false;scoreLedger={playScore:0,explosionScore:0,moveBonus:0,remainingMoves:null,phase:"play"};
   window.BonusFinale?.cancel();
   developerAttempt=developerMode;
   if(n>=20&&window.GimmickPlay)return window.GimmickPlay.start(n,keepScore);
@@ -1368,10 +1363,6 @@ function renderMap(){
     '<path d="'+segs+'" fill="none" stroke="#2a3040" stroke-width="12" stroke-linecap="round" stroke-dasharray="0.1 19"/>'+
     (trail?'<path d="'+trail+'" fill="none" stroke="#06d6a055" stroke-width="12" stroke-linecap="round" stroke-dasharray="0.1 19"/>':'')+
     '</svg>';
-  // 난이도(색 개수) 구간 라벨
-  [[1,'배우기 · 3색'],[7,'4색 구간'],[10,'5색 구간'],[15,'6색 구간']].forEach(([n,t])=>{
-    h+='<div class="bandLbl" style="left:6px;top:'+(cy(n)+GAP*.5)+'px;">— '+t+' —</div>';
-  });
   for(let n=1;n<=TOTAL_STAGES;n++){
     const st=progress.stars[n]||0, un=isStageUnlocked(n);
     const cls=(un?'':' locked')+(n===cur?' cur':'');
@@ -1527,8 +1518,8 @@ function repaintAll(){
 }
 
 // iOS 핀치 제스처 차단 (실수로 페이지가 확대되는 것 방지)
-document.addEventListener('gesturestart',e=>e.preventDefault());
-document.addEventListener('gesturechange',e=>e.preventDefault());
+
+
 
 /* ================= responsive ================= */
 function fitBoard(){
@@ -1599,8 +1590,12 @@ window.addEventListener('orientationchange',()=>setTimeout(fitBoard,150));
 <script src="stage-themes.js"></script>
 <script src="themes.js"></script>
 <script src="home-map-surfaces.js"></script>
+<script src="garden-map-masks.js"></script>
+<script src="garden-map.js"></script>
 <script src="home-map.js"></script>
+<script src="stage-clear.js"></script>
 <script src="core-play.js"></script>
+<script src="mobile-play.js"></script>
 <script src="gimmick-art.js"></script>
 <script src="render/gimmick-feedback-plan.js"></script>
 <script src="render/fall-motion.js"></script>

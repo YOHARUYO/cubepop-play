@@ -88,9 +88,15 @@
   help.querySelector('h2').insertAdjacentHTML('afterbegin',helpIcon+' ');
   const targets=kind==='rock'?d.rocks:kind==='vine'?[d.vines[0],...d.intro.match]:kind==='key'?state.locks.filter(g=>!g.open).map(g=>{const e=state.cells.find(e=>e?.id===g.carrierCubeId);return e?R.rc(e.k):g.key;}):kind==='rotor'?d.rotors.map(p=>[p.r,p.c]):d.intro.match;
   helpTargets=[];for(const [r,c] of targets){const el=grid[r]?.[c]?.el||layer.querySelector('[data-cell="'+R.key(r,c)+'"]');el?.classList.add('gimmickFocus');if(el)helpTargets.push(el);}
-  if(state.action===0){const p=document.createElement('p');p.className='gmFirstMove';p.textContent=`첫 수: 위에서 ${d.intro.target[0]+1}번째 줄, 왼쪽 ${d.intro.target[1]+1}번째 큐브를 ${ {N:'위쪽',S:'아래쪽',E:'오른쪽',W:'왼쪽'}[d.intro.direction]}으로 굴려보세요 ${ {N:'↑',S:'↓',E:'→',W:'←'}[d.intro.direction]}`;help.querySelector('p').after(p);}
   helpAction=state.action===0?grid[d.intro.target[0]]?.[d.intro.target[1]]:null;
-  if(helpAction&&canUse(helpAction)){if(!helpTargets.includes(helpAction.el))helpTargets.push(helpAction.el);const arrow=document.createElement('img');arrow.className='gmHelpArrow';arrow.src='assets/interaction/roll-arc-right.svg';arrow.style.transform='rotate('+({E:0,S:90,W:180,N:270}[d.intro.direction])+'deg)';arrow.alt='';help.querySelector('.gmFirstMove')?.prepend(arrow);}
+  if(helpAction&&canUse(helpAction)){
+   if(!helpTargets.includes(helpAction.el))helpTargets.push(helpAction.el);
+   const cue=document.createElement('div'),angle={E:0,S:90,W:180,N:270}[d.intro.direction];
+   cue.className='gmFirstMove';cue.dataset.vertical=String(angle===90||angle===270);
+   cue.innerHTML='<span class="directionIcon"><img class="gmHelpArrow" src="assets/interaction/roll-arc-right.svg" alt=""></span><span><strong></strong><small>제자리에서 90° 회전</small></span>';
+   cue.querySelector('strong').textContent={E:'오른쪽으로 굴리기',W:'왼쪽으로 굴리기',N:'위로 굴리기',S:'아래로 굴리기'}[d.intro.direction];
+   cue.querySelector('img').style.transform='rotate('+angle+'deg)';help.querySelector('p').after(cue);
+  }
   positionHelp();
  }
  function feedback(text){ensure();let out=$('gimmickFeedback');if(!out){out=document.createElement('div');out.id='gimmickFeedback';out.setAttribute('role','status');document.querySelector('.app').append(out);}out.textContent=text;out.hidden=false;clearTimeout(feedbackTimer);feedbackTimer=setTimeout(()=>{out.hidden=true;},1400);}
@@ -142,7 +148,10 @@
   });
   const tools=hud.querySelector('.gmTools');
   if(tools){document.querySelectorAll('.scorePanel .gmTools').forEach(el=>el.remove());document.querySelector('.scorePanel').append(tools);}
-  const counter=document.querySelector('.scorePanel .gmCountdown');
+  let counter=document.querySelector('.scorePanel .gmCountdown');
+  // Leaving for an ordinary stage removes the tools but keeps the goal signature.
+  // Re-entering the same garden must restore its counter independently of goals.
+  if(!counter){const tools=document.createElement('div');tools.className='gmTools';counter=document.createElement('span');counter.className='gmCountdown';tools.append(counter);document.querySelector('.scorePanel').append(tools);}
   counter.textContent=s.period?'자동 회전까지 '+s.countdown+'회':'';counter.hidden=!s.period;counter.parentElement.hidden=!s.period;
   $('gardenRulesSetting').disabled=busy;
  }
@@ -207,6 +216,7 @@
   else sync(event.state);
  }}
  function start(n,keepScore,forcedSeed,comparisonOptions={}){
+  root.StageClear?.reset();resultRecorded=false;
   ensure();epoch++;root.BonusFinale?.cancel();base+=100000;root.CubePopAnnouncements?.clear();root.CubePopEffects?.clear();root.PastelGarden.reset();cancelBoardPointers();closeHelp();unarmWild();
   boardInner.querySelectorAll('.cube,.gmFallClip').forEach(e=>e.remove());vineLayer.innerHTML='';entities=new Map();history=[];stageNo=n;
   root.GimmickArt.clear();state=R.create(D.get(n+1),forcedSeed??seed(n),comparisonOptions);shown=state;root.GimmickFeedback?.prepare(state);stageColors=[0,1,2,3,4,5];faceColorIdx=[0,1,2,3,4,5];

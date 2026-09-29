@@ -97,6 +97,7 @@
       await Promise.all([...new Set(['sandstone',...Array.from({length:50},(_,i)=>T.assigned(i+1))])].map(T.preload));
       if(ticket!==revision||mode!=='mMap')return;
       document.querySelectorAll('.pnode').forEach(button=>{button.dataset.theme=T.forStage(Number(button.dataset.n));root.HomeMap.paintButton(button);});
+      root.HomeMap.refreshGarden?.();
       // Refresh an already selected header once its images have decoded.
       paintMap();
     }else reset();
