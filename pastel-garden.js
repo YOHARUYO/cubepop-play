@@ -5,6 +5,7 @@
   const reduced=()=>root.__SIM||root.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   function stopNumber(){if(frame)root.cancelAnimationFrame(frame);frame=0;}
   function reset(){
+    root.ScoreForecast?.reset();
     root.HudFeedback?.reset();
     goalSignature=null;
     stopNumber();initialized=false;target=null;
@@ -14,6 +15,7 @@
     }
   }
   function renderScore(score,par,states){
+    if(root.ScoreForecast){root.ScoreForecast.render(score,par,states);return;}
     const immediate=!initialized||reduced()||!root.requestAnimationFrame,value=$('scoreV'),fill=$('gFill');
     const write=n=>{displayed=n;value.textContent=Math.round(n).toLocaleString('en-US');};
     value.dataset.digits=String(Math.trunc(score)).length;

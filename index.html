@@ -527,6 +527,7 @@
 <link rel="stylesheet" href="gimmicks.css">
 <link rel="stylesheet" href="mobile-readability.css">
 <link rel="stylesheet" href="stage-clear.css">
+<link rel="stylesheet" href="score-forecast.css">
 <script>
 'use strict';
 /* ================= stage config ================= */
@@ -1313,7 +1314,7 @@ if($('developerToggle')){
 let progress={unlocked:1,stars:{}};
 try{const p=JSON.parse(localStorage.getItem('cubepop_v2_prog')||'null');if(p&&Number.isInteger(p.unlocked)&&p.unlocked>=1&&p.unlocked<=TOTAL_STAGES&&p.stars&&typeof p.stars==='object')progress=p;}catch(_){}
 function saveProg(){try{localStorage.setItem('cubepop_v2_prog',JSON.stringify(progress));}catch(_){}}
-function setMode(m){window.BonusFinale?.cancel();window.GimmickPlay?.closeHelp();if(m!=='mPlay')window.GimmickPlay?.stop();window.CubePopAnnouncements?.clear();cancelBoardPointers();window.TutorialUI?.clear();window.CubePopEffects?.clear();document.body.classList.remove('mHome','mMap','mPlay');document.body.classList.add(m);}
+function setMode(m){window.BonusFinale?.cancel();if(m!=='mPlay')window.ScoreForecast?.reset();window.GimmickPlay?.closeHelp();if(m!=='mPlay')window.GimmickPlay?.stop();window.CubePopAnnouncements?.clear();cancelBoardPointers();window.TutorialUI?.clear();window.CubePopEffects?.clear();document.body.classList.remove('mHome','mMap','mPlay');document.body.classList.add(m);}
 function goHome(){setMode('mHome');}
 function goMap(){if(busy)return;window.HudFeedback?.reset();unarmWild();renderMap();setMode('mMap');}
 // 아바타 큐브 — 6면 각각 설정 가능 (추후 유저 커스터마이징: faces의 팔레트 인덱스/심볼 교체 지점)
@@ -1583,6 +1584,7 @@ window.addEventListener('orientationchange',()=>setTimeout(fitBoard,150));
 <script src="pastel-garden.js"></script>
 <script src="hud-feedback.js"></script>
 <script src="bonus-finale.js"></script>
+<script src="score-forecast.js"></script>
 <script src="tutorial-ui.js"></script>
 <script src="render/effects-plan.js"></script>
 <script src="render/game-effects.js"></script>

@@ -1,10 +1,10 @@
 /* Bonus presentation only. The two engines own rewards, RNG, conversions and clears. */
 (function(root){
  'use strict';
- const base='assets/bonus-finale-v6/',ids=['entry-fanfare','entry-stars','move-spark','transfer-trail','conversion-burst','arrival-glints','bomb-ready','score-fanfare','score-stars'];
+ const base='assets/bonus-finale-v6/',ids=['entry-fanfare','entry-stars','move-spark','transfer-trail','conversion-burst','arrival-glints','bomb-ready'];
  const tier=root.innerWidth<1440||root.navigator?.deviceMemory<=4?'mobile':'standard',images=new Map(),specs=new Map(),sprites=new Set(),waiters=new Set(),history=[];
  const $=id=>document.getElementById(id),clock=()=>root.performance?.now()||Date.now(),reduced=()=>!!root.__SIM||root.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
- let run=null,epoch=0,frame=0,canvas=null,ctx=null,dim=null,title=null,loaded=false,lastStarAt=0;
+ let run=null,epoch=0,frame=0,canvas=null,ctx=null,dim=null,title=null,loaded=false;
  const clamp=t=>Math.max(0,Math.min(1,t)),log=(kind,data={})=>{history.push({kind,at:clock(),...data});if(history.length>180)history.shift();diagnostic();};
  function diagnostic(){if(root.__SIM)return;let el=$('bonusFinaleState');if(!el){el=document.createElement('output');el.id='bonusFinaleState';el.hidden=true;document.body.append(el);}el.textContent=JSON.stringify({active:!!run,phase:run?.phase,moves:run?.displayMoves,heldScore:run?.hold,tier,loaded,sprites:sprites.size,history});}
  const ready=root.__SIM?Promise.resolve():fetch(base+'manifest.json').then(r=>{if(!r.ok)throw Error(r.status);return r.json();}).then(async m=>{
@@ -35,7 +35,7 @@
   if(sprites.size||run.phase==='entry')wake();
  }
  function boardClip(){const b=board();return {x:b.x,y:b.y,w:b.width,h:b.height};}
- async function begin({moves,score,count}){cancel();document.body.dataset.bonusFinale='true';const id=epoch;run={id,displayMoves:moves,initialScore:score,hold:true,phase:'clear',fast:reduced()||document.hidden,count,arrived:0,earned:new Set()};log('begin',{moves,score,count});
+ async function begin({moves,score,count}){cancel();document.body.dataset.bonusFinale='true';const id=epoch;run={id,displayMoves:moves,initialScore:score,hold:false,phase:'clear',fast:reduced()||document.hidden,count,arrived:0};log('begin',{moves,score,count});
   if(count>0&&!run.fast){await Promise.race([ready,pause(1200)]);if(!run||id!==epoch)return false;if(!loaded)run.fast=true;await pause(225);if(!run||id!==epoch)return false;
    if(!run.fast){ensure();run.phase='entry';run.entryAt=clock();dim.hidden=false;title.hidden=false;title.replaceChildren();const img=images.get('title').cloneNode();img.alt='BONUS TIME!';title.append(img);
     const g=()=>{const b=board();return {x:b.x+b.width/2,y:b.y+b.height*.44,w:b.width*1.05,h:b.width*.525};};sprite('entry-fanfare',g);sprite('entry-stars',g);wake();log('entry');await pause(1000);if(!run||id!==epoch)return false;dim.hidden=title.hidden=true;run.phase='transfer';
@@ -52,13 +52,7 @@
  }
  async function convert(items,commit){const id=epoch;for(let i=0;i<items.length;){const batch=items.slice(i,i+(i<3?1:6));await Promise.all(batch.map((item,j)=>flight(item,i+j)));if(!run||id!==epoch)return false;for(const item of batch){arrival(item);commit(item);}i+=batch.length;}await pause(360);return !!run&&id===epoch;}
  async function readyBombs(items){if(!run)return;run.phase='ready';for(const item of items)sprite('bomb-ready',()=>{const p=face(item.k);return {...p,w:p.w*1.42,h:p.h*1.42};},{alpha:.86,clip:boardClip});log('ready',{count:items.length});await pause(items.length?320:0);if(run)run.phase='explode';}
- function scoreEffect(i){if(!run||run.hold||run.fast||reduced()||!loaded)return false;if(run.earned.has(i))return true;run.earned.add(i);const time=clock(),delay=Math.max(0,lastStarAt+120-time);lastStarAt=time+delay;
-  const pin=$('gPin'+(i+1)),img=pin.querySelector('img');img.getAnimations?.().forEach(a=>a.cancel());img.animate?.([{transform:'scale(1)'},{transform:'scale(1.14)',offset:.45},{transform:'scale(1)'}],{duration:320,delay,easing:'ease-out'});
-  const geometry=()=>{const p=pin.getBoundingClientRect(),panel=document.querySelector('.scorePanel').getBoundingClientRect();return {x:p.x+p.width/2,y:p.y+p.height/2,w:Math.min(190,panel.width*.58),h:Math.min(110,panel.width*.58*110/190)};};
-  const clip=()=>{const b=document.querySelector('.scorePanel').getBoundingClientRect(),pins=[1,2,3].map(n=>$('gPin'+n).getBoundingClientRect()),p=pins[i],left=i?(pins[i-1].right+p.left)/2:b.left,right=i<2?(p.right+pins[i+1].left)/2:b.right;return {x:left,y:p.top-6,w:right-left,h:b.bottom-(p.top-6),exclude:[p.x-2,p.y-2,p.width+4,p.height+4]};};
-  sprite('score-fanfare',geometry,{delay,clip});sprite('score-stars',()=>{const g=geometry();return {...g,w:g.w*160/190,h:g.h*80/110};},{delay,clip});log('score-star',{index:i,delay});return true;
- }
- async function settle(update){if(!run){update();return;}const id=epoch;run.phase='settle';run.hold=false;run.displayMoves=0;lastStarAt=clock()-120;update();log('settle');await pause(260);if(run&&id===epoch&&run.earned.size)await pause(Math.max(0,lastStarAt+900-clock()));if(run&&id===epoch){wipe();run=null;delete document.body.dataset.bonusFinale;log('finish');}}
+ async function settle(update){if(!run){update();return;}const id=epoch;run.phase='settle';run.displayMoves=0;update();log('settle');await pause(260);if(run&&id===epoch){wipe();run=null;delete document.body.dataset.bonusFinale;log('finish');}}
  root.addEventListener('resize',skip);root.visualViewport?.addEventListener?.('resize',skip);document.addEventListener('visibilitychange',()=>{if(document.hidden)skip();});
- root.BonusFinale={begin,convert,readyBombs,settle,cancel,skip,ready,scoreEffect,active:()=>!!run,displayMoves:value=>run?run.displayMoves:value,displayScore:value=>run?.hold?run.initialScore:value,stats:()=>({active:!!run,history:history.slice(),tier,loaded})};
+ root.BonusFinale={begin,convert,readyBombs,settle,cancel,skip,ready,active:()=>!!run,displayMoves:value=>run?run.displayMoves:value,displayScore:value=>value,stats:()=>({active:!!run,history:history.slice(),tier,loaded})};
 })(window);

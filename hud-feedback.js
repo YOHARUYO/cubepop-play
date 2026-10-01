@@ -10,7 +10,7 @@
  const value=(s,t)=>s.from+(s.to-s.from)*ease(clamp((t-s.start)/s.duration));
  const log=(kind,data)=>{history.push({kind,at:now(),...data});if(history.length>160)history.shift();};
  const ready=root.__SIM?Promise.resolve():fetch(base+tier+'/manifest.json').then(r=>{if(!r.ok)throw Error(r.status);return r.json();}).then(async m=>{
-  await Promise.all(m.entries.filter(e=>e.id.startsWith('HUD_')).map(async e=>{const img=new Image();img.src=base+tier+'/'+e.file;await img.decode();entries.set(e.id,e);images.set(e.id,img);}));
+  await Promise.all(m.entries.filter(e=>e.id.startsWith('HUD_')&&e.id!=='HUD_STAR_EARN').map(async e=>{const img=new Image();img.src=base+tier+'/'+e.file;await img.decode();entries.set(e.id,e);images.set(e.id,img);}));
  }).catch(e=>log('load-error',{message:String(e)}));
  function wake(){if(!frame&&!reduced())frame=root.requestAnimationFrame(tick);}
  function sprite(id,parent,start=now()){
@@ -63,7 +63,7 @@
   const pin=document.getElementById('gPin'+(i+1)),img=pin.querySelector('img'),on=score.states[i];
   pin.classList.toggle('on',on);pin.setAttribute('aria-label','별 '+(i+1)+(on?' 획득':' 미획득'));
   img.src='assets/pastel-garden/score-star-'+(on?'earned':'unearned')+'.png';
-  if(animate&&!reduced()&&!root.BonusFinale?.scoreEffect(i)){
+  if(animate&&!reduced()&&!root.ScoreForecast){
    img.getAnimations?.().forEach(a=>a.cancel());img.animate?.([{transform:'scale(1)'},{transform:'scale(1.14)',offset:.45},{transform:'scale(1)'}],{duration:320,easing:'ease-out'});
    img.dataset.bursts=String(Number(img.dataset.bursts||0)+1);sprite('HUD_STAR_EARN',pin);log('star',{index:i});
   }

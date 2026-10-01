@@ -1,0 +1,30 @@
+/* Approved v3: only score presentation and padded goal completion surfaces. */
+body.mPlay .goalsCard .scorePanel{min-height:84px;height:84px;padding:0;overflow:visible;isolation:isolate}
+body.mPlay .hudScoreLine{height:23px;min-height:23px;line-height:23px;align-items:center;white-space:nowrap;z-index:4}
+body.mPlay .goalsCard #scoreV{font:400 21px/23px 'CP Jua',sans-serif;font-variant-numeric:tabular-nums;overflow-wrap:normal}
+body.mPlay .goalsCard .scoreLabel{font-size:10px;line-height:23px;letter-spacing:.5px}
+.scoreForecastAdd{position:absolute;top:23px;left:0;right:0;height:14px;line-height:14px;text-align:center;font:400 12px/14px 'CP Jua',sans-serif;color:#946013;z-index:4;pointer-events:none}
+body.mPlay .goalsCard .scorePanel .gaugeRow{top:46px;height:12px;bottom:auto;width:calc(100% - 36px);z-index:auto}
+body.mPlay .scorePanel .gaugeBar{position:relative;width:100%;height:100%;border:1px solid #6F625D;border-radius:9px;background:#e1d5bd;box-shadow:inset 0 1px 2px #88765d4d,0 1px #fff9eb;overflow:visible}
+body.mPlay .scorePanel #gFill,.scorePending{position:absolute;left:1px;top:1px;bottom:1px;height:auto;border-radius:7px;max-width:calc(100% - 2px);transition:none;pointer-events:none}
+.scorePending{background:#f9da88 url('assets/score-forecast-v3/fill-pending.svg') left center/240px 10px repeat-x;border-right:1px solid #fffef1}
+body.mPlay .scorePanel #gFill{background:#f3bd32 url('assets/score-forecast-v3/fill-gold.svg') left center/240px 10px repeat-x;box-shadow:inset 0 -1px #c58b28}
+.scoreForecastTip{position:absolute;top:-4px;width:9px;height:19px;transform:translateX(-50%);background:url('assets/score-forecast-v3/forecast-tip.svg') center/contain no-repeat;pointer-events:none}
+.scoreForecastTip[hidden]{display:none}
+body.mPlay .goalsCard .gPin{width:20px;height:20px;top:50%;transform:translate(-50%,-50%);z-index:3}
+body.mPlay .goalsCard .gPin>img{position:relative;width:20px;height:20px;z-index:3}
+body.mPlay .goalsCard .gPin>img.scoreForecastHalo{position:absolute;inset:-9px;width:38px;height:38px;opacity:0;z-index:-1;transition:opacity 180ms ease-out}
+body.mPlay .gPin[data-forecast=true]>img.scoreForecastHalo{opacity:.7;transition-duration:120ms}
+.scoreFanfare{position:absolute;inset:0 0 auto;width:100%;height:68px;z-index:2;pointer-events:none}
+body.mPlay .scorePanel .gmTools{top:70px;bottom:auto;height:14px;z-index:4}
+body.mPlay :is(#goals,.gmCards){column-gap:8px;row-gap:8px;padding:6px 0;min-height:80px}
+body.mPlay :is(#goals,.gmCards) .hudGoal{height:68px;min-height:68px;padding:7px 8px 12px;isolation:isolate}
+body.mPlay :is(#goals,.gmCards) .hudValue{height:42px;min-height:42px;padding:0}
+body.mPlay :is(#goals,.gmCards)[data-stacked=true] .hudValue{height:42px;min-height:42px}
+body.mPlay :is(#goals,.gmCards) .hudTrack{left:8px;right:8px;bottom:7px;height:4px}
+body.mPlay :is(#goals,.gmCards) .hudCompletion{inset:0;border-radius:10px;padding:8px;box-sizing:border-box}
+body.mPlay :is(#goals,.gmCards) .hudClearWord{display:block;position:relative;width:100%;max-width:116px;max-height:calc(100% - 4px);height:auto;object-fit:contain;z-index:2}
+body.mPlay :is(#goals,.gmCards) .hudCompactCheck{display:none}
+@container(max-width:40px){body.mPlay :is(#goals,.gmCards) .hudCompletion:not(.hudJustCompleted) .hudClearWord{display:none}body.mPlay :is(#goals,.gmCards) .hudCompletion:not(.hudJustCompleted) .hudCompactCheck{display:block}}
+@media(min-width:768px){body.mPlay .goalsCard .scorePanel .gaugeRow{top:45px;height:14px}body.mPlay .goalsCard #scoreV{font-size:22px}}
+@media(prefers-reduced-motion:reduce){.scoreFanfare,.scoreForecastHalo{display:none!important}.scoreForecastAdd{transition:none}}

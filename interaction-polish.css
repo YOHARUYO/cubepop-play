@@ -47,6 +47,7 @@ body.mMap .hmAvatarText{position:absolute!important;width:1px;height:1px;overflo
 #tutorialOverlay #exitLesson:focus-visible{outline:2px solid #243e61;outline-offset:2px;}
 #tutorialOverlay #exitLesson:disabled{opacity:.5;cursor:default;}
 :is(#tutorialDirection,#gimmickHelp .gmFirstMove){display:flex;align-items:center;gap:12px;margin-top:12px;min-height:36px;}
+#tutorialOverlay #tutorialDirection[hidden],#tutorialOverlay #tutorialArrow[hidden]{display:none;}
 :is(#tutorialDirection,#gimmickHelp .gmFirstMove) .directionIcon{width:44px;height:22px;position:relative;flex:none;}
 :is(#tutorialDirection,#gimmickHelp .gmFirstMove)[data-vertical=true] .directionIcon{width:22px;height:44px;margin:0 11px;}
 #tutorialOverlay #tutorialArrow,#gimmickHelp .gmFirstMove .gmHelpArrow{position:absolute;width:44px;height:22px;left:50%;top:50%;margin: -11px 0 0 -22px;transform-origin:center;}

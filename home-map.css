@@ -1,5 +1,7 @@
 /* This sheet never changes play surfaces, geometry, tokens or effects. */
 body:is(.mHome,.mMap){padding:0;display:block;color:#24354a;}
+body.mHome{min-height:100dvh;}
+#homeScr{--hm-safe-top:env(safe-area-inset-top,0px);--hm-safe-bottom:env(safe-area-inset-bottom,0px);}
 body:is(.mHome,.mMap)::after{display:none;}
 body.mHome #homeScr{position:relative;width:100%;max-width:none;min-height:var(--hm-home-height,812px);height:var(--hm-home-height,812px);margin:0;display:block;}
 #homeScr .hmLogo,#homeScr .hmArt{position:absolute;left:50%;transform:translateX(-50%);object-fit:contain;pointer-events:none;}
@@ -9,6 +11,7 @@ body.mHome #homeScr{position:relative;width:100%;max-width:none;min-height:var(-
 #homeScr .hmStart,#homeScr .hmSettings{position:absolute;left:50%;margin:0;translate:-50% 0;z-index:3;}
 #homeScr .hmStart{top:var(--hm-start-y);width:var(--hm-start-w);height:var(--hm-start-h);font-size:18px;}
 #homeScr .hmSettings{top:var(--hm-settings-y);width:var(--hm-settings-w);height:var(--hm-settings-h);font-size:15px;}
+body.mHome #homeScr :is(.hmStart,.hmSettings){font-family:'CP Jua',sans-serif;font-weight:400;font-style:normal;font-synthesis:none;}
 body:is(.mHome,.mMap) .hmButton{position:relative;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;min-width:44px;min-height:44px;padding:0;border:0;border-radius:18px;background:none;box-shadow:none;filter:none;color:#24354a;font-weight:800;font-family:inherit;cursor:pointer;transform:none;overflow:visible;isolation:isolate;touch-action:manipulation;}
 body:is(.mHome,.mMap) .hmButton::before,body:is(.mHome,.mMap) .hmButton::after{display:none;}
 .hmSurface{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:-1;}

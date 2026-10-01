@@ -108,6 +108,10 @@
     overlay.hidden=false;overlay.dataset.phase=armedWild?'pick':lessonState.phase;
     const observingEffect=!!lessonState&&(busy||lessonState.phase==='resolving');
     overlay.dataset.observing=String(observingEffect);
+    // Remove stale roll instructions immediately; layout runs on the next frame.
+    if(observingEffect||armedWild||lessonState?.phase!=='roll'){
+      $('tutorialDirection').hidden=true;$('tutorialArrow').hidden=true;
+    }
     if(observingEffect){
       $('guideTitle').textContent='변화를 살펴보세요';
       $('guideText').textContent=lessonState.complete?'폭탄과 낙하 효과를 살펴보세요.':'제자리 회전과 매치를 살펴보세요.';

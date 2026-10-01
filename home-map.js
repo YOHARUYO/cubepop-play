@@ -42,13 +42,20 @@
   const resizeObserver=window.ResizeObserver?new window.ResizeObserver(entries=>entries.forEach(e=>paintButton(e.target))):null;
   function watch(button){resizeObserver?.observe(button);paintButton(button);}
   function layoutHome(){const {w,h}=dims(),p=profile(),s=home.style;
-    const extra=Math.max(0,h-p[11])/2;
+    const viewportHeight=Math.min(h,window.visualViewport?.height||h);
+    const css=window.getComputedStyle?.(home);
+    const safeTop=parseFloat(css?.getPropertyValue('--hm-safe-top'))||0,safeBottom=parseFloat(css?.getPropertyValue('--hm-safe-bottom'))||0;
+    // Fit decorative art and spacing to the visible viewport, never text or hit areas.
+    const available=Math.max(320,viewportHeight-safeTop-safeBottom),scale=Math.min(1,available/p[11]);
+    const extra=safeTop+Math.max(0,available-p[11])/2;
     // Alpha >= 32 ink bounds of the approved logo (not its transparent canvas).
-    const logoWidth=Math.min(w,p[0]),inkBottom=w>=1024?934/1536:1067/1254;
-    const subY=p[1]+extra+logoWidth*inkBottom+12;
+    const logoWidth=Math.min(w,p[0])*scale,inkBottom=w>=1024?934/1536:1067/1254;
+    const logoY=p[1]*scale+extra,subY=logoY+logoWidth*inkBottom+12;
     // Keep the first cube row (y≈310 in the 1024px-wide art) below the tagline.
-    const artWidth=Math.min(w,p[2]),artY=Math.max(p[3]+extra,subY+(w>=768?32:28)+12-artWidth*310/1024);
-    const pairs={'logo-w':logoWidth,'logo-y':p[1]+extra,'art-w':artWidth,'art-y':artY,'sub-y':subY,'start-w':Math.min(w-32,p[5]),'start-h':p[6],'start-y':p[7]+extra,'settings-w':p[8],'settings-h':p[9],'settings-y':p[10]+extra,'home-height':Math.max(h,p[11])};
+    const artWidth=Math.min(w,p[2])*scale,artY=Math.max(p[3]*scale+extra,subY+(w>=768?32:28)+12-artWidth*310/1024);
+    const settingsY=Math.min(p[10]*scale+extra,safeTop+available-p[9]-20);
+    const startY=Math.min(p[7]*scale+extra,settingsY-p[6]-16);
+    const pairs={'logo-w':logoWidth,'logo-y':logoY,'art-w':artWidth,'art-y':artY,'sub-y':subY,'start-w':Math.min(w-32,p[5]),'start-h':p[6],'start-y':startY,'settings-w':p[8],'settings-h':p[9],'settings-y':settingsY,'home-height':Math.max(viewportHeight,available+safeTop+safeBottom)};
     for(const [key,value] of Object.entries(pairs))s.setProperty('--hm-'+key,value+'px');
     home.querySelector('.hmLogo').src='assets/home-map/cubepop-logo-'+(w>=1024?'master':'mobile')+'.png';
     home.querySelectorAll('button').forEach(watch);watch(back);
@@ -224,6 +231,7 @@
   modal.addEventListener('keydown',e=>{if(!modal.dataset.homeMap||e.key!=='Tab')return;const items=[...modal.querySelectorAll('button:not(:disabled),input:not(:disabled)')],first=items[0],last=items[items.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}});
   if(window.MutationObserver)new window.MutationObserver(()=>{if(modal.dataset.homeMap)modal.querySelectorAll('button').forEach(paintButton);}).observe(modal,{attributes:true,subtree:true,attributeFilter:['class','disabled']});
   window.addEventListener('resize',()=>{layoutHome();if(document.body.classList.contains('mMap')&&!mapAnim)render(true);});
+  window.visualViewport?.addEventListener?.('resize',layoutHome);
   document.fonts?.ready.then(()=>{if(document.body.classList.contains('mMap')&&!mapAnim)render(true);});
   layoutHome();
 })();

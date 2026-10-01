@@ -1,0 +1,146 @@
+[
+  {
+    "file": "assets/fill-gold.svg",
+    "width": 320,
+    "height": 12,
+    "alpha": true,
+    "colorSpace": "srgb",
+    "sha256": "59558d99b443fc5085a74ff53be25521ec45c4ea2773fa1890bfe9927d3899eb",
+    "source": "editable SVG design"
+  },
+  {
+    "file": "assets/fill-gold@3x.png",
+    "width": 960,
+    "height": 36,
+    "alpha": true,
+    "colorSpace": "srgb",
+    "sha256": "07dd94642713c4de1af4a1ec0cfad39af8e4997b3a1c8abeca242c5480b7915d",
+    "source": "editable SVG design"
+  },
+  {
+    "file": "assets/fill-pending.svg",
+    "width": 320,
+    "height": 12,
+    "alpha": true,
+    "colorSpace": "srgb",
+    "sha256": "a23356e792de0f854915cda82ac47aee2b89a7d39e8e9f2ce81c0c75dc877ffd",
+    "source": "editable SVG design"
+  },
+  {
+    "file": "assets/fill-pending@3x.png",
+    "width": 960,
+    "height": 36,
+    "alpha": true,
+    "colorSpace": "srgb",
+    "sha256": "4a2aeee51880b4bf92931b4798324a7dce0da48b7479335c5825c20a09c33e89",
+    "source": "editable SVG design"
+  },
+  {
+    "file": "assets/forecast-tip.svg",
+    "width": 16,
+    "height": 32,
+    "alpha": true,
+    "colorSpace": "srgb",
+    "sha256": "c72e89c0b7a6e9c9a05647907332758f9a9a0fd94850ab801e0503d5a559f10f",
+    "source": "editable SVG design"
+  },
+  {
+    "file": "assets/forecast-tip@3x.png",
+    "width": 48,
+    "height": 96,
+    "alpha": true,
+    "colorSpace": "srgb",
+    "sha256": "387b55d3b5e365220f28219776dbdbd1be5ebbb58e6f857546c9a4028119e167",
+    "source": "editable SVG design"
+  },
+  {
+    "file": "assets/score-fanfare-mobile.png",
+    "width": 1040,
+    "height": 1056,
+    "alpha": true,
+    "colorSpace": "srgb",
+    "sha256": "c10f1eb50649d912b6646e0aea82efc97f77ca80a01590d5d7b358f9ca1509a9",
+    "source": "output/design-handoff/bonus-time-finale-v3/assets/mobile/score-fanfare.png"
+  },
+  {
+    "file": "assets/score-fanfare-standard.png",
+    "width": 2064,
+    "height": 2080,
+    "alpha": true,
+    "colorSpace": "srgb",
+    "sha256": "e61a752ce8af6b2c0879f7b3d434ca69531ec8d57bd0fed557c3bf9cde7902f0",
+    "source": "output/design-handoff/bonus-time-finale-v3/assets/standard/score-fanfare.png"
+  },
+  {
+    "file": "assets/score-star-earned.png",
+    "width": 256,
+    "height": 256,
+    "alpha": true,
+    "colorSpace": "srgb",
+    "sha256": "f1cd704fc2d639ad59df7d700c65c4023b54be0e81ee18b68b694efda207daad",
+    "source": "assets/pastel-garden/score-star-earned.png"
+  },
+  {
+    "file": "assets/score-star-unearned.png",
+    "width": 256,
+    "height": 256,
+    "alpha": true,
+    "colorSpace": "srgb",
+    "sha256": "0664c75e7b6396c139349d938b13bd043b94c913b010fee835461329de5fa7d0",
+    "source": "assets/pastel-garden/score-star-unearned.png"
+  },
+  {
+    "file": "assets/score-stars-mobile.png",
+    "width": 1040,
+    "height": 1056,
+    "alpha": true,
+    "colorSpace": "srgb",
+    "sha256": "2337637717bec2b01642f38f855e5ac6aec8dcbcc30fef22b8f9b1ad6a6bfbaa",
+    "source": "output/design-handoff/bonus-time-finale-v3/assets/mobile/score-stars.png"
+  },
+  {
+    "file": "assets/score-stars-standard.png",
+    "width": 2064,
+    "height": 2080,
+    "alpha": true,
+    "colorSpace": "srgb",
+    "sha256": "aa90d3dd9fd410ff788d4e92302ec1758a7e98b8a108c6175b1291a08a15b7bc",
+    "source": "output/design-handoff/bonus-time-finale-v3/assets/standard/score-stars.png"
+  },
+  {
+    "file": "assets/star-forecast-halo.svg",
+    "width": 96,
+    "height": 96,
+    "alpha": true,
+    "colorSpace": "srgb",
+    "sha256": "1b70813d1067a4421ba0747be30cf6277c1146c79dd458cb1a5a0c7b08b297cf",
+    "source": "editable SVG design"
+  },
+  {
+    "file": "assets/star-forecast-halo@3x.png",
+    "width": 288,
+    "height": 288,
+    "alpha": true,
+    "colorSpace": "srgb",
+    "sha256": "bdf6482eaedba17d516e792b5fef3f4e186ef3b54822b12f531c7432d3392fd9",
+    "source": "editable SVG design"
+  },
+  {
+    "file": "assets/track-empty.svg",
+    "width": 320,
+    "height": 16,
+    "alpha": true,
+    "colorSpace": "srgb",
+    "sha256": "9e972dbff4c4a0785585ff5c795a918a5e93a0e86c746fd17bcce6a256bcf767",
+    "source": "editable SVG design"
+  },
+  {
+    "file": "assets/track-empty@3x.png",
+    "width": 960,
+    "height": 48,
+    "alpha": true,
+    "colorSpace": "srgb",
+    "sha256": "917c56c205d67bc32e5fedf7a64212859f621065738f4ae83e2bd382911064cc",
+    "source": "editable SVG design"
+  }
+]

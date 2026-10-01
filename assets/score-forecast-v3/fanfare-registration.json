@@ -1,0 +1,1222 @@
+{
+  "standard": {
+    "score-stars": {
+      "atlas": "assets/standard/score-stars.png",
+      "frameWidth": 512,
+      "frameHeight": 256,
+      "columns": 4,
+      "rows": 8,
+      "durationMs": 900,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "transparentFirstAndLast": true,
+      "role": "Eight gold star particles with coherent outward trajectories",
+      "frames": [
+        {
+          "index": 0,
+          "x": 2,
+          "y": 2,
+          "w": 512,
+          "h": 256,
+          "atMs": 0,
+          "durationMs": 28
+        },
+        {
+          "index": 1,
+          "x": 518,
+          "y": 2,
+          "w": 512,
+          "h": 256,
+          "atMs": 28,
+          "durationMs": 28
+        },
+        {
+          "index": 2,
+          "x": 1034,
+          "y": 2,
+          "w": 512,
+          "h": 256,
+          "atMs": 56,
+          "durationMs": 28
+        },
+        {
+          "index": 3,
+          "x": 1550,
+          "y": 2,
+          "w": 512,
+          "h": 256,
+          "atMs": 84,
+          "durationMs": 29
+        },
+        {
+          "index": 4,
+          "x": 2,
+          "y": 262,
+          "w": 512,
+          "h": 256,
+          "atMs": 113,
+          "durationMs": 28
+        },
+        {
+          "index": 5,
+          "x": 518,
+          "y": 262,
+          "w": 512,
+          "h": 256,
+          "atMs": 141,
+          "durationMs": 28
+        },
+        {
+          "index": 6,
+          "x": 1034,
+          "y": 262,
+          "w": 512,
+          "h": 256,
+          "atMs": 169,
+          "durationMs": 28
+        },
+        {
+          "index": 7,
+          "x": 1550,
+          "y": 262,
+          "w": 512,
+          "h": 256,
+          "atMs": 197,
+          "durationMs": 28
+        },
+        {
+          "index": 8,
+          "x": 2,
+          "y": 522,
+          "w": 512,
+          "h": 256,
+          "atMs": 225,
+          "durationMs": 28
+        },
+        {
+          "index": 9,
+          "x": 518,
+          "y": 522,
+          "w": 512,
+          "h": 256,
+          "atMs": 253,
+          "durationMs": 28
+        },
+        {
+          "index": 10,
+          "x": 1034,
+          "y": 522,
+          "w": 512,
+          "h": 256,
+          "atMs": 281,
+          "durationMs": 28
+        },
+        {
+          "index": 11,
+          "x": 1550,
+          "y": 522,
+          "w": 512,
+          "h": 256,
+          "atMs": 309,
+          "durationMs": 29
+        },
+        {
+          "index": 12,
+          "x": 2,
+          "y": 782,
+          "w": 512,
+          "h": 256,
+          "atMs": 338,
+          "durationMs": 28
+        },
+        {
+          "index": 13,
+          "x": 518,
+          "y": 782,
+          "w": 512,
+          "h": 256,
+          "atMs": 366,
+          "durationMs": 28
+        },
+        {
+          "index": 14,
+          "x": 1034,
+          "y": 782,
+          "w": 512,
+          "h": 256,
+          "atMs": 394,
+          "durationMs": 28
+        },
+        {
+          "index": 15,
+          "x": 1550,
+          "y": 782,
+          "w": 512,
+          "h": 256,
+          "atMs": 422,
+          "durationMs": 28
+        },
+        {
+          "index": 16,
+          "x": 2,
+          "y": 1042,
+          "w": 512,
+          "h": 256,
+          "atMs": 450,
+          "durationMs": 28
+        },
+        {
+          "index": 17,
+          "x": 518,
+          "y": 1042,
+          "w": 512,
+          "h": 256,
+          "atMs": 478,
+          "durationMs": 28
+        },
+        {
+          "index": 18,
+          "x": 1034,
+          "y": 1042,
+          "w": 512,
+          "h": 256,
+          "atMs": 506,
+          "durationMs": 28
+        },
+        {
+          "index": 19,
+          "x": 1550,
+          "y": 1042,
+          "w": 512,
+          "h": 256,
+          "atMs": 534,
+          "durationMs": 29
+        },
+        {
+          "index": 20,
+          "x": 2,
+          "y": 1302,
+          "w": 512,
+          "h": 256,
+          "atMs": 563,
+          "durationMs": 28
+        },
+        {
+          "index": 21,
+          "x": 518,
+          "y": 1302,
+          "w": 512,
+          "h": 256,
+          "atMs": 591,
+          "durationMs": 28
+        },
+        {
+          "index": 22,
+          "x": 1034,
+          "y": 1302,
+          "w": 512,
+          "h": 256,
+          "atMs": 619,
+          "durationMs": 28
+        },
+        {
+          "index": 23,
+          "x": 1550,
+          "y": 1302,
+          "w": 512,
+          "h": 256,
+          "atMs": 647,
+          "durationMs": 28
+        },
+        {
+          "index": 24,
+          "x": 2,
+          "y": 1562,
+          "w": 512,
+          "h": 256,
+          "atMs": 675,
+          "durationMs": 28
+        },
+        {
+          "index": 25,
+          "x": 518,
+          "y": 1562,
+          "w": 512,
+          "h": 256,
+          "atMs": 703,
+          "durationMs": 28
+        },
+        {
+          "index": 26,
+          "x": 1034,
+          "y": 1562,
+          "w": 512,
+          "h": 256,
+          "atMs": 731,
+          "durationMs": 28
+        },
+        {
+          "index": 27,
+          "x": 1550,
+          "y": 1562,
+          "w": 512,
+          "h": 256,
+          "atMs": 759,
+          "durationMs": 29
+        },
+        {
+          "index": 28,
+          "x": 2,
+          "y": 1822,
+          "w": 512,
+          "h": 256,
+          "atMs": 788,
+          "durationMs": 28
+        },
+        {
+          "index": 29,
+          "x": 518,
+          "y": 1822,
+          "w": 512,
+          "h": 256,
+          "atMs": 816,
+          "durationMs": 28
+        },
+        {
+          "index": 30,
+          "x": 1034,
+          "y": 1822,
+          "w": 512,
+          "h": 256,
+          "atMs": 844,
+          "durationMs": 28
+        },
+        {
+          "index": 31,
+          "x": 1550,
+          "y": 1822,
+          "w": 512,
+          "h": 256,
+          "atMs": 872,
+          "durationMs": 28
+        }
+      ]
+    },
+    "score-fanfare": {
+      "atlas": "assets/standard/score-fanfare.png",
+      "frameWidth": 512,
+      "frameHeight": 256,
+      "columns": 4,
+      "rows": 8,
+      "durationMs": 900,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "transparentFirstAndLast": true,
+      "role": "Earned-star celebration light, behind actual star",
+      "frames": [
+        {
+          "index": 0,
+          "x": 2,
+          "y": 2,
+          "w": 512,
+          "h": 256,
+          "atMs": 0,
+          "durationMs": 28
+        },
+        {
+          "index": 1,
+          "x": 518,
+          "y": 2,
+          "w": 512,
+          "h": 256,
+          "atMs": 28,
+          "durationMs": 28
+        },
+        {
+          "index": 2,
+          "x": 1034,
+          "y": 2,
+          "w": 512,
+          "h": 256,
+          "atMs": 56,
+          "durationMs": 28
+        },
+        {
+          "index": 3,
+          "x": 1550,
+          "y": 2,
+          "w": 512,
+          "h": 256,
+          "atMs": 84,
+          "durationMs": 29
+        },
+        {
+          "index": 4,
+          "x": 2,
+          "y": 262,
+          "w": 512,
+          "h": 256,
+          "atMs": 113,
+          "durationMs": 28
+        },
+        {
+          "index": 5,
+          "x": 518,
+          "y": 262,
+          "w": 512,
+          "h": 256,
+          "atMs": 141,
+          "durationMs": 28
+        },
+        {
+          "index": 6,
+          "x": 1034,
+          "y": 262,
+          "w": 512,
+          "h": 256,
+          "atMs": 169,
+          "durationMs": 28
+        },
+        {
+          "index": 7,
+          "x": 1550,
+          "y": 262,
+          "w": 512,
+          "h": 256,
+          "atMs": 197,
+          "durationMs": 28
+        },
+        {
+          "index": 8,
+          "x": 2,
+          "y": 522,
+          "w": 512,
+          "h": 256,
+          "atMs": 225,
+          "durationMs": 28
+        },
+        {
+          "index": 9,
+          "x": 518,
+          "y": 522,
+          "w": 512,
+          "h": 256,
+          "atMs": 253,
+          "durationMs": 28
+        },
+        {
+          "index": 10,
+          "x": 1034,
+          "y": 522,
+          "w": 512,
+          "h": 256,
+          "atMs": 281,
+          "durationMs": 28
+        },
+        {
+          "index": 11,
+          "x": 1550,
+          "y": 522,
+          "w": 512,
+          "h": 256,
+          "atMs": 309,
+          "durationMs": 29
+        },
+        {
+          "index": 12,
+          "x": 2,
+          "y": 782,
+          "w": 512,
+          "h": 256,
+          "atMs": 338,
+          "durationMs": 28
+        },
+        {
+          "index": 13,
+          "x": 518,
+          "y": 782,
+          "w": 512,
+          "h": 256,
+          "atMs": 366,
+          "durationMs": 28
+        },
+        {
+          "index": 14,
+          "x": 1034,
+          "y": 782,
+          "w": 512,
+          "h": 256,
+          "atMs": 394,
+          "durationMs": 28
+        },
+        {
+          "index": 15,
+          "x": 1550,
+          "y": 782,
+          "w": 512,
+          "h": 256,
+          "atMs": 422,
+          "durationMs": 28
+        },
+        {
+          "index": 16,
+          "x": 2,
+          "y": 1042,
+          "w": 512,
+          "h": 256,
+          "atMs": 450,
+          "durationMs": 28
+        },
+        {
+          "index": 17,
+          "x": 518,
+          "y": 1042,
+          "w": 512,
+          "h": 256,
+          "atMs": 478,
+          "durationMs": 28
+        },
+        {
+          "index": 18,
+          "x": 1034,
+          "y": 1042,
+          "w": 512,
+          "h": 256,
+          "atMs": 506,
+          "durationMs": 28
+        },
+        {
+          "index": 19,
+          "x": 1550,
+          "y": 1042,
+          "w": 512,
+          "h": 256,
+          "atMs": 534,
+          "durationMs": 29
+        },
+        {
+          "index": 20,
+          "x": 2,
+          "y": 1302,
+          "w": 512,
+          "h": 256,
+          "atMs": 563,
+          "durationMs": 28
+        },
+        {
+          "index": 21,
+          "x": 518,
+          "y": 1302,
+          "w": 512,
+          "h": 256,
+          "atMs": 591,
+          "durationMs": 28
+        },
+        {
+          "index": 22,
+          "x": 1034,
+          "y": 1302,
+          "w": 512,
+          "h": 256,
+          "atMs": 619,
+          "durationMs": 28
+        },
+        {
+          "index": 23,
+          "x": 1550,
+          "y": 1302,
+          "w": 512,
+          "h": 256,
+          "atMs": 647,
+          "durationMs": 28
+        },
+        {
+          "index": 24,
+          "x": 2,
+          "y": 1562,
+          "w": 512,
+          "h": 256,
+          "atMs": 675,
+          "durationMs": 28
+        },
+        {
+          "index": 25,
+          "x": 518,
+          "y": 1562,
+          "w": 512,
+          "h": 256,
+          "atMs": 703,
+          "durationMs": 28
+        },
+        {
+          "index": 26,
+          "x": 1034,
+          "y": 1562,
+          "w": 512,
+          "h": 256,
+          "atMs": 731,
+          "durationMs": 28
+        },
+        {
+          "index": 27,
+          "x": 1550,
+          "y": 1562,
+          "w": 512,
+          "h": 256,
+          "atMs": 759,
+          "durationMs": 29
+        },
+        {
+          "index": 28,
+          "x": 2,
+          "y": 1822,
+          "w": 512,
+          "h": 256,
+          "atMs": 788,
+          "durationMs": 28
+        },
+        {
+          "index": 29,
+          "x": 518,
+          "y": 1822,
+          "w": 512,
+          "h": 256,
+          "atMs": 816,
+          "durationMs": 28
+        },
+        {
+          "index": 30,
+          "x": 1034,
+          "y": 1822,
+          "w": 512,
+          "h": 256,
+          "atMs": 844,
+          "durationMs": 28
+        },
+        {
+          "index": 31,
+          "x": 1550,
+          "y": 1822,
+          "w": 512,
+          "h": 256,
+          "atMs": 872,
+          "durationMs": 28
+        }
+      ]
+    }
+  },
+  "mobile": {
+    "score-stars": {
+      "atlas": "assets/mobile/score-stars.png",
+      "frameWidth": 256,
+      "frameHeight": 128,
+      "columns": 4,
+      "rows": 8,
+      "durationMs": 900,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "transparentFirstAndLast": true,
+      "role": "Eight gold star particles with coherent outward trajectories",
+      "frames": [
+        {
+          "index": 0,
+          "x": 2,
+          "y": 2,
+          "w": 256,
+          "h": 128,
+          "atMs": 0,
+          "durationMs": 28
+        },
+        {
+          "index": 1,
+          "x": 262,
+          "y": 2,
+          "w": 256,
+          "h": 128,
+          "atMs": 28,
+          "durationMs": 28
+        },
+        {
+          "index": 2,
+          "x": 522,
+          "y": 2,
+          "w": 256,
+          "h": 128,
+          "atMs": 56,
+          "durationMs": 28
+        },
+        {
+          "index": 3,
+          "x": 782,
+          "y": 2,
+          "w": 256,
+          "h": 128,
+          "atMs": 84,
+          "durationMs": 29
+        },
+        {
+          "index": 4,
+          "x": 2,
+          "y": 134,
+          "w": 256,
+          "h": 128,
+          "atMs": 113,
+          "durationMs": 28
+        },
+        {
+          "index": 5,
+          "x": 262,
+          "y": 134,
+          "w": 256,
+          "h": 128,
+          "atMs": 141,
+          "durationMs": 28
+        },
+        {
+          "index": 6,
+          "x": 522,
+          "y": 134,
+          "w": 256,
+          "h": 128,
+          "atMs": 169,
+          "durationMs": 28
+        },
+        {
+          "index": 7,
+          "x": 782,
+          "y": 134,
+          "w": 256,
+          "h": 128,
+          "atMs": 197,
+          "durationMs": 28
+        },
+        {
+          "index": 8,
+          "x": 2,
+          "y": 266,
+          "w": 256,
+          "h": 128,
+          "atMs": 225,
+          "durationMs": 28
+        },
+        {
+          "index": 9,
+          "x": 262,
+          "y": 266,
+          "w": 256,
+          "h": 128,
+          "atMs": 253,
+          "durationMs": 28
+        },
+        {
+          "index": 10,
+          "x": 522,
+          "y": 266,
+          "w": 256,
+          "h": 128,
+          "atMs": 281,
+          "durationMs": 28
+        },
+        {
+          "index": 11,
+          "x": 782,
+          "y": 266,
+          "w": 256,
+          "h": 128,
+          "atMs": 309,
+          "durationMs": 29
+        },
+        {
+          "index": 12,
+          "x": 2,
+          "y": 398,
+          "w": 256,
+          "h": 128,
+          "atMs": 338,
+          "durationMs": 28
+        },
+        {
+          "index": 13,
+          "x": 262,
+          "y": 398,
+          "w": 256,
+          "h": 128,
+          "atMs": 366,
+          "durationMs": 28
+        },
+        {
+          "index": 14,
+          "x": 522,
+          "y": 398,
+          "w": 256,
+          "h": 128,
+          "atMs": 394,
+          "durationMs": 28
+        },
+        {
+          "index": 15,
+          "x": 782,
+          "y": 398,
+          "w": 256,
+          "h": 128,
+          "atMs": 422,
+          "durationMs": 28
+        },
+        {
+          "index": 16,
+          "x": 2,
+          "y": 530,
+          "w": 256,
+          "h": 128,
+          "atMs": 450,
+          "durationMs": 28
+        },
+        {
+          "index": 17,
+          "x": 262,
+          "y": 530,
+          "w": 256,
+          "h": 128,
+          "atMs": 478,
+          "durationMs": 28
+        },
+        {
+          "index": 18,
+          "x": 522,
+          "y": 530,
+          "w": 256,
+          "h": 128,
+          "atMs": 506,
+          "durationMs": 28
+        },
+        {
+          "index": 19,
+          "x": 782,
+          "y": 530,
+          "w": 256,
+          "h": 128,
+          "atMs": 534,
+          "durationMs": 29
+        },
+        {
+          "index": 20,
+          "x": 2,
+          "y": 662,
+          "w": 256,
+          "h": 128,
+          "atMs": 563,
+          "durationMs": 28
+        },
+        {
+          "index": 21,
+          "x": 262,
+          "y": 662,
+          "w": 256,
+          "h": 128,
+          "atMs": 591,
+          "durationMs": 28
+        },
+        {
+          "index": 22,
+          "x": 522,
+          "y": 662,
+          "w": 256,
+          "h": 128,
+          "atMs": 619,
+          "durationMs": 28
+        },
+        {
+          "index": 23,
+          "x": 782,
+          "y": 662,
+          "w": 256,
+          "h": 128,
+          "atMs": 647,
+          "durationMs": 28
+        },
+        {
+          "index": 24,
+          "x": 2,
+          "y": 794,
+          "w": 256,
+          "h": 128,
+          "atMs": 675,
+          "durationMs": 28
+        },
+        {
+          "index": 25,
+          "x": 262,
+          "y": 794,
+          "w": 256,
+          "h": 128,
+          "atMs": 703,
+          "durationMs": 28
+        },
+        {
+          "index": 26,
+          "x": 522,
+          "y": 794,
+          "w": 256,
+          "h": 128,
+          "atMs": 731,
+          "durationMs": 28
+        },
+        {
+          "index": 27,
+          "x": 782,
+          "y": 794,
+          "w": 256,
+          "h": 128,
+          "atMs": 759,
+          "durationMs": 29
+        },
+        {
+          "index": 28,
+          "x": 2,
+          "y": 926,
+          "w": 256,
+          "h": 128,
+          "atMs": 788,
+          "durationMs": 28
+        },
+        {
+          "index": 29,
+          "x": 262,
+          "y": 926,
+          "w": 256,
+          "h": 128,
+          "atMs": 816,
+          "durationMs": 28
+        },
+        {
+          "index": 30,
+          "x": 522,
+          "y": 926,
+          "w": 256,
+          "h": 128,
+          "atMs": 844,
+          "durationMs": 28
+        },
+        {
+          "index": 31,
+          "x": 782,
+          "y": 926,
+          "w": 256,
+          "h": 128,
+          "atMs": 872,
+          "durationMs": 28
+        }
+      ]
+    },
+    "score-fanfare": {
+      "atlas": "assets/mobile/score-fanfare.png",
+      "frameWidth": 256,
+      "frameHeight": 128,
+      "columns": 4,
+      "rows": 8,
+      "durationMs": 900,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "transparentFirstAndLast": true,
+      "role": "Earned-star celebration light, behind actual star",
+      "frames": [
+        {
+          "index": 0,
+          "x": 2,
+          "y": 2,
+          "w": 256,
+          "h": 128,
+          "atMs": 0,
+          "durationMs": 28
+        },
+        {
+          "index": 1,
+          "x": 262,
+          "y": 2,
+          "w": 256,
+          "h": 128,
+          "atMs": 28,
+          "durationMs": 28
+        },
+        {
+          "index": 2,
+          "x": 522,
+          "y": 2,
+          "w": 256,
+          "h": 128,
+          "atMs": 56,
+          "durationMs": 28
+        },
+        {
+          "index": 3,
+          "x": 782,
+          "y": 2,
+          "w": 256,
+          "h": 128,
+          "atMs": 84,
+          "durationMs": 29
+        },
+        {
+          "index": 4,
+          "x": 2,
+          "y": 134,
+          "w": 256,
+          "h": 128,
+          "atMs": 113,
+          "durationMs": 28
+        },
+        {
+          "index": 5,
+          "x": 262,
+          "y": 134,
+          "w": 256,
+          "h": 128,
+          "atMs": 141,
+          "durationMs": 28
+        },
+        {
+          "index": 6,
+          "x": 522,
+          "y": 134,
+          "w": 256,
+          "h": 128,
+          "atMs": 169,
+          "durationMs": 28
+        },
+        {
+          "index": 7,
+          "x": 782,
+          "y": 134,
+          "w": 256,
+          "h": 128,
+          "atMs": 197,
+          "durationMs": 28
+        },
+        {
+          "index": 8,
+          "x": 2,
+          "y": 266,
+          "w": 256,
+          "h": 128,
+          "atMs": 225,
+          "durationMs": 28
+        },
+        {
+          "index": 9,
+          "x": 262,
+          "y": 266,
+          "w": 256,
+          "h": 128,
+          "atMs": 253,
+          "durationMs": 28
+        },
+        {
+          "index": 10,
+          "x": 522,
+          "y": 266,
+          "w": 256,
+          "h": 128,
+          "atMs": 281,
+          "durationMs": 28
+        },
+        {
+          "index": 11,
+          "x": 782,
+          "y": 266,
+          "w": 256,
+          "h": 128,
+          "atMs": 309,
+          "durationMs": 29
+        },
+        {
+          "index": 12,
+          "x": 2,
+          "y": 398,
+          "w": 256,
+          "h": 128,
+          "atMs": 338,
+          "durationMs": 28
+        },
+        {
+          "index": 13,
+          "x": 262,
+          "y": 398,
+          "w": 256,
+          "h": 128,
+          "atMs": 366,
+          "durationMs": 28
+        },
+        {
+          "index": 14,
+          "x": 522,
+          "y": 398,
+          "w": 256,
+          "h": 128,
+          "atMs": 394,
+          "durationMs": 28
+        },
+        {
+          "index": 15,
+          "x": 782,
+          "y": 398,
+          "w": 256,
+          "h": 128,
+          "atMs": 422,
+          "durationMs": 28
+        },
+        {
+          "index": 16,
+          "x": 2,
+          "y": 530,
+          "w": 256,
+          "h": 128,
+          "atMs": 450,
+          "durationMs": 28
+        },
+        {
+          "index": 17,
+          "x": 262,
+          "y": 530,
+          "w": 256,
+          "h": 128,
+          "atMs": 478,
+          "durationMs": 28
+        },
+        {
+          "index": 18,
+          "x": 522,
+          "y": 530,
+          "w": 256,
+          "h": 128,
+          "atMs": 506,
+          "durationMs": 28
+        },
+        {
+          "index": 19,
+          "x": 782,
+          "y": 530,
+          "w": 256,
+          "h": 128,
+          "atMs": 534,
+          "durationMs": 29
+        },
+        {
+          "index": 20,
+          "x": 2,
+          "y": 662,
+          "w": 256,
+          "h": 128,
+          "atMs": 563,
+          "durationMs": 28
+        },
+        {
+          "index": 21,
+          "x": 262,
+          "y": 662,
+          "w": 256,
+          "h": 128,
+          "atMs": 591,
+          "durationMs": 28
+        },
+        {
+          "index": 22,
+          "x": 522,
+          "y": 662,
+          "w": 256,
+          "h": 128,
+          "atMs": 619,
+          "durationMs": 28
+        },
+        {
+          "index": 23,
+          "x": 782,
+          "y": 662,
+          "w": 256,
+          "h": 128,
+          "atMs": 647,
+          "durationMs": 28
+        },
+        {
+          "index": 24,
+          "x": 2,
+          "y": 794,
+          "w": 256,
+          "h": 128,
+          "atMs": 675,
+          "durationMs": 28
+        },
+        {
+          "index": 25,
+          "x": 262,
+          "y": 794,
+          "w": 256,
+          "h": 128,
+          "atMs": 703,
+          "durationMs": 28
+        },
+        {
+          "index": 26,
+          "x": 522,
+          "y": 794,
+          "w": 256,
+          "h": 128,
+          "atMs": 731,
+          "durationMs": 28
+        },
+        {
+          "index": 27,
+          "x": 782,
+          "y": 794,
+          "w": 256,
+          "h": 128,
+          "atMs": 759,
+          "durationMs": 29
+        },
+        {
+          "index": 28,
+          "x": 2,
+          "y": 926,
+          "w": 256,
+          "h": 128,
+          "atMs": 788,
+          "durationMs": 28
+        },
+        {
+          "index": 29,
+          "x": 262,
+          "y": 926,
+          "w": 256,
+          "h": 128,
+          "atMs": 816,
+          "durationMs": 28
+        },
+        {
+          "index": 30,
+          "x": 522,
+          "y": 926,
+          "w": 256,
+          "h": 128,
+          "atMs": 844,
+          "durationMs": 28
+        },
+        {
+          "index": 31,
+          "x": 782,
+          "y": 926,
+          "w": 256,
+          "h": 128,
+          "atMs": 872,
+          "durationMs": 28
+        }
+      ]
+    }
+  }
+}

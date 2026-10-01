@@ -49,13 +49,13 @@
     const compact=root.innerWidth<=340;hud.dataset.compact=String(compact);
     for(const row of [$('goals'),document.querySelector('.gmCards')]){
       if(!row?.clientWidth||!row.children.length)continue;
-      const gap=6,items=[...row.children],count=items.length;
-      const stacked=count>=5||(compact&&count>=4);
+      const gap=8,items=[...row.children],count=items.length;
+      const stacked=count>=5||(root.innerWidth<600&&count>=4);
       row.dataset.stacked=String(stacked);
       // Measure with the final font/layout, including the largest goal value.
       const needed=Math.ceil(Math.max(stacked?34:58,...items.map(el=>{
         const value=el.querySelector('.hudCount'),maximum=el.querySelector('.goalMeasure');
-        return Math.max(value?.scrollWidth||0,maximum?.scrollWidth||0)+(stacked?8:30);
+        return Math.max(value?.scrollWidth||0,maximum?.scrollWidth||0)+(stacked?16:46);
       })));
       const available=(row.clientWidth-gap*(count-1))/count,scroll=needed>available;
       const slot=scroll?needed:count<=3?Math.min(110,available):available;
@@ -85,8 +85,8 @@
     app.style.maxWidth=width+'px';$('board').style.zoom=width/704;
     for(let pass=0;pass<3;pass++){
       layoutGoals();
-      const extra=Math.max(0,scoreLine.offsetHeight-22),counter=scorePanel.querySelector('.gmTools:not([hidden])');
-      scorePanel.style.height=((counter?64:60)+extra)+'px';scorePanel.style.flexBasis='auto';
+      const extra=Math.max(0,scoreLine.offsetHeight-23);
+      scorePanel.style.height=(84+extra)+'px';scorePanel.style.flexBasis='auto';
       scorePanel.style.setProperty('--score-line-extra',extra+'px');
       const reserved=app.offsetHeight-$('board').getBoundingClientRect().height;
       const available=height-reserved-parseFloat(padding.paddingTop)-parseFloat(padding.paddingBottom)-1;
